@@ -1,0 +1,331 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MemberService } from '../../services/member.service';
+import { Member, MemberAttachment } from '../../models/member.model';
+
+@Component({
+  selector: 'app-members',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <h1 class="text-2xl font-bold text-text">Annuaire des Membres</h1>
+        <div class="flex space-x-4 w-full sm:w-auto">
+          <div class="relative flex-1 sm:w-64">
+            <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input 
+              type="text" 
+              placeholder="Rechercher..." 
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              [(ngModel)]="searchQuery"
+            >
+          </div>
+          <button (click)="openAddModal()" class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            <span>Nouveau</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider text-xs">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left font-medium">Nom & Prénom</th>
+              <th scope="col" class="px-6 py-3 text-left font-medium">Email</th>
+              <th scope="col" class="px-6 py-3 text-center font-medium">Certificat</th>
+              <th scope="col" class="px-6 py-3 text-center font-medium">Décharge</th>
+              <th scope="col" class="px-6 py-3 text-center font-medium">Droit d'Image</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let member of filteredMembers()" 
+                (click)="openModal(member)"
+                class="hover:bg-gray-50 cursor-pointer transition">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="font-medium text-text">{{ member.first_name }} {{ member.last_name }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                {{ member.email }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                <span [class.bg-green-100]="member.is_certificate_ok" [class.text-green-800]="member.is_certificate_ok" 
+                      [class.bg-red-100]="!member.is_certificate_ok" [class.text-red-800]="!member.is_certificate_ok" 
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                  {{ member.is_certificate_ok ? 'OK' : 'Manquant' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                 <span [class.bg-green-100]="member.is_waiver_ok" [class.text-green-800]="member.is_waiver_ok" 
+                      [class.bg-red-100]="!member.is_waiver_ok" [class.text-red-800]="!member.is_waiver_ok" 
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                  {{ member.is_waiver_ok ? 'OK' : 'Manquant' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                 <span [class.bg-green-100]="member.is_image_rights_ok" [class.text-green-800]="member.is_image_rights_ok" 
+                      [class.bg-red-100]="!member.is_image_rights_ok" [class.text-red-800]="!member.is_image_rights_ok" 
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                  {{ member.is_image_rights_ok ? 'OK' : 'Manquant' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal Focus : Editer les informations d'un membre -->
+    <div *ngIf="selectedMember" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeModal()"></div>
+      
+      <!-- Modal Panel -->
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden text-left flex flex-col max-h-[90vh]">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+          <h3 class="text-lg font-medium text-text">{{ isNewMember ? 'Nouveau Membre' : 'Détail du Membre' }}</h3>
+          <button type="button" class="text-gray-400 hover:text-gray-500 transition" (click)="closeModal()">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto flex-1">
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Prénom</label>
+              <input type="text" [(ngModel)]="editedMember.first_name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Nom</label>
+              <input type="text" [(ngModel)]="editedMember.last_name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-gray-700">Email</label>
+              <input type="email" [(ngModel)]="editedMember.email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Taille de T-Shirt</label>
+              <select [(ngModel)]="editedMember.t_shirt_size" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+                 <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option>
+              </select>
+            </div>
+            
+            <!-- Gestion Dynamique des Allergies -->
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+              <div class="space-y-2 mb-2">
+                <div *ngFor="let allergy of parsedAllergies; let i = index; trackBy: trackByIndex" class="flex items-center space-x-2">
+                  <input type="text" [(ngModel)]="parsedAllergies[i]" class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="Ex: Arachides">
+                  <button (click)="removeAllergy(i)" class="text-red-500 hover:text-red-700 p-2" title="Retirer">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              </div>
+              <button (click)="addAllergy()" type="button" class="text-sm text-primary hover:text-opacity-80 font-medium flex items-center">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Ajouter une allergie
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 border-t border-gray-200 pt-6">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-base font-medium text-text">Documents (Statuts)</h4>
+              <button (click)="triggerUpload()" type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm font-medium flex items-center transition shadow-sm">
+                <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                Joindre une pièce jointe
+              </button>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input type="checkbox" [(ngModel)]="editedMember.is_certificate_ok" class="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700">Certificat Médical valide</label>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input type="checkbox" [(ngModel)]="editedMember.is_waiver_ok" class="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700">Décharge de responsabilité signée</label>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input type="checkbox" [(ngModel)]="editedMember.is_image_rights_ok" class="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700">Droit à l'image accordé</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fichiers Uploadés -->
+            <div *ngIf="editedMember.attachments && editedMember.attachments.length > 0">
+              <h5 class="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wide">Fichiers rattachés</h5>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let att of editedMember.attachments" class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 cursor-pointer hover:bg-blue-100 shadow-sm transition" (click)="viewAttachment(att)">
+                  <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                  {{ att.file_name }}
+                  <span class="ml-2 text-xs opacity-75">({{ att.document_type }})</span>
+                </span>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 shrink-0">
+          <button type="button" class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition" (click)="closeModal()">
+            Annuler
+          </button>
+          <button type="button" class="bg-primary text-white border border-transparent rounded-md shadow-sm py-2 px-6 inline-flex justify-center text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition" (click)="saveMember()">
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class MembersComponent implements OnInit {
+  private memberService = inject(MemberService);
+  
+  members: Member[] = [];
+  searchQuery = '';
+  
+  selectedMember: Member | null = null;
+  editedMember!: Member;
+  isNewMember = false;
+  
+  // Tableau de gestion dynamique des inputs d'allergies
+  parsedAllergies: string[] = [];
+
+  ngOnInit() {
+    this.memberService.getMembers().subscribe(data => {
+      this.members = data;
+    });
+  }
+
+  filteredMembers() {
+    if (!this.searchQuery) return this.members;
+    const q = this.searchQuery.toLowerCase();
+    return this.members.filter(m => 
+      m.first_name.toLowerCase().includes(q) || 
+      m.last_name.toLowerCase().includes(q) || 
+      m.email.toLowerCase().includes(q)
+    );
+  }
+
+  trackByIndex(index: number, item: any) {
+    return index;
+  }
+
+  openAddModal() {
+    this.isNewMember = true;
+    const newMemberTemplate: Partial<Member> = {
+      first_name: '', last_name: '', email: '',
+      t_shirt_size: 'M', allergies: '',
+      is_certificate_ok: false, is_waiver_ok: false, is_image_rights_ok: false,
+      attachments: []
+    };
+    this.selectedMember = newMemberTemplate as Member; // Trick display
+    this.editedMember = JSON.parse(JSON.stringify(newMemberTemplate));
+    this.parsedAllergies = [];
+  }
+
+  openModal(member: Member) {
+    this.isNewMember = false;
+    this.selectedMember = member;
+    this.editedMember = JSON.parse(JSON.stringify(member));
+    if (!this.editedMember.attachments) this.editedMember.attachments = [];
+    
+    // Parse les allergies ou set un array vide
+    if (this.editedMember.allergies) {
+      this.parsedAllergies = this.editedMember.allergies.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    } else {
+      this.parsedAllergies = [];
+    }
+  }
+
+  closeModal() {
+    this.selectedMember = null;
+    this.isNewMember = false;
+  }
+
+  addAllergy() {
+    this.parsedAllergies.push('');
+  }
+
+  removeAllergy(index: number) {
+    this.parsedAllergies.splice(index, 1);
+  }
+
+  saveMember() {
+    if (!this.editedMember.first_name || !this.editedMember.last_name) return;
+
+    // Reconstruire la string depuis les inputs dynamiques
+    const filtered = this.parsedAllergies.map(s => s.trim()).filter(s => s.length > 0);
+    this.editedMember.allergies = filtered.length > 0 ? filtered.join(', ') : '';
+
+    if (this.isNewMember) {
+      this.memberService.createMember(this.editedMember as Omit<Member, 'id' | 'created_at' | 'updated_at'>).subscribe({
+        next: (created) => {
+          this.members = [...this.members, created];
+          this.closeModal();
+        },
+        error: () => alert("Erreur lors de la création")
+      });
+    } else {
+      this.memberService.updateMember(this.editedMember.id, this.editedMember).subscribe({
+        next: (updated) => {
+          const index = this.members.findIndex(m => m.id === updated.id);
+          if (index > -1) {
+            this.members[index] = updated;
+          }
+          this.closeModal();
+        },
+        error: () => alert("Erreur lors de la mise a jour")
+      });
+    }
+  }
+
+  triggerUpload() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*, application/pdf';
+    
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        // Demander le type de document pour être propre (Mock simple)
+        const docType = prompt("Type de document ? (Ex: CERTIFICAT, DECHARGE, AUTRE)", "AUTRE");
+        
+        const fileUrl = URL.createObjectURL(file);
+        const mockAttachment: MemberAttachment = {
+          id: Math.floor(Math.random() * 1000),
+          member_id: this.editedMember.id,
+          document_type: docType || 'AUTRE',
+          file_name: file.name,
+          file_path: fileUrl,
+          uploaded_at: new Date().toISOString()
+        };
+        
+        this.editedMember.attachments?.push(mockAttachment);
+      }
+    };
+    
+    input.click();
+  }
+
+  viewAttachment(att: MemberAttachment) {
+    window.open(att.file_path, '_blank');
+  }
+}
