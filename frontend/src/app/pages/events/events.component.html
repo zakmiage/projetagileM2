@@ -1,0 +1,136 @@
+<div class="space-y-6">
+      <!-- Header Actions -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <h1 class="text-2xl font-bold text-text">Événements</h1>
+        <div class="flex space-x-4 w-full sm:w-auto">
+          <div class="relative flex-1 sm:w-64">
+            <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input 
+              type="text" 
+              placeholder="Rechercher un événement..." 
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              [(ngModel)]="searchQuery"
+            >
+          </div>
+          <button (click)="openAddModal()" class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            <span>Nouveau</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div *ngFor="let event of filteredEvents()" 
+             [routerLink]="['/events', event.id]"
+             class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-md hover:border-primary transition group flex flex-col h-full relative overflow-hidden">
+          
+          <!-- Period / Fixed date styling -->
+          <div *ngIf="!event.end_date" class="absolute top-0 right-0 border-t-[30px] border-r-[30px] border-t-blue-100 border-r-transparent"></div>
+          <div *ngIf="event.end_date" class="absolute top-0 right-0 border-t-[30px] border-r-[30px] border-t-purple-100 border-r-transparent"></div>
+
+          <div class="flex justify-between items-start mb-4 relative z-10">
+            <div class="bg-gray-50 text-gray-600 text-xs font-semibold px-2 py-1 rounded inline-flex flex-col border border-gray-100">
+              <span class="flex items-center text-[10px] uppercase text-gray-400 mb-0.5">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                {{ event.end_date ? 'Période' : 'Date fixe' }}
+              </span>
+              <span>
+                {{ event.start_date | date:'dd MMM yyyy':'UTC':'fr' }} 
+                <span *ngIf="event.end_date" class="text-gray-400 font-normal mx-0.5">- {{ event.end_date | date:'dd MMM yyyy':'UTC':'fr' }}</span>
+              </span>
+            </div>
+            <div class="text-gray-400 group-hover:text-primary transition bg-white rounded-full p-1">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+          </div>
+          
+          <h3 class="text-lg font-semibold text-text mb-2 line-clamp-1 truncate relative z-10">{{ event.name }}</h3>
+          <p class="text-sm text-gray-500 mb-6 flex-1 line-clamp-2 relative z-10">{{ event.description || 'Aucune description fournie.' }}</p>
+          
+          <div class="flex justify-between items-center text-sm font-medium pt-4 border-t border-gray-50 relative z-10">
+            <div class="flex items-center text-primary/80 bg-primary/5 px-2 py-1 rounded">
+              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              <span>{{ event.capacity }} participants max</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="filteredEvents().length === 0" class="col-span-full py-12 text-center text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+          <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+          <p>Aucun événement trouvé.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Focus : Créer un événement -->
+    <div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeModal()"></div>
+      
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden text-left flex flex-col max-h-[90vh]">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+          <h3 class="text-lg font-medium text-text flex items-center">
+            <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Créer un nouvel événement
+          </h3>
+          <button type="button" class="text-gray-400 hover:text-gray-500 transition" (click)="closeModal()">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <form (ngSubmit)="saveEvent()" #eventForm="ngForm" class="flex flex-col flex-1 overflow-hidden">
+          <div class="p-6 overflow-y-auto flex-1 space-y-6">
+            
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Nom de l'événement <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="newEvent.name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea [(ngModel)]="newEvent.description" name="description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Date de début <span class="text-red-500">*</span></label>
+                <input type="date" [(ngModel)]="start_date_input" name="start_date" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Date de fin 
+                  <span class="font-normal text-xs text-gray-400 ml-1">(Laissez vide pour une date fixe)</span>
+                </label>
+                <input type="date" [(ngModel)]="end_date_input" name="end_date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Capacité Maximale</label>
+                <input type="number" [(ngModel)]="newEvent.capacity" name="capacity" min="1" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+            </div>
+
+            <!-- Aide contextuelle visualisant Période vs Date Fixe -->
+            <div class="bg-blue-50 border border-blue-100 p-4 rounded-md flex items-start">
+              <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="text-sm text-blue-800">
+                <span class="font-bold">Mode Actuel : </span>
+                <span *ngIf="!end_date_input">Date fixe (l'événement se déroule sur une seule journée).</span>
+                <span *ngIf="end_date_input">Période (l'événement s'étale sur plusieurs jours).</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 shrink-0">
+            <button type="button" class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-primary transition" (click)="closeModal()">
+              Annuler
+            </button>
+            <button type="submit" [disabled]="!eventForm.valid || !start_date_input" [class.opacity-50]="!eventForm.valid || !start_date_input" class="bg-primary text-white border border-transparent rounded-md shadow-sm py-2 px-6 text-sm font-medium hover:bg-opacity-90 focus:ring-2 focus:ring-primary transition">
+              Créer l'événement
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
