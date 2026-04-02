@@ -1,7 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Charger les variables d'environnement AVANT d'importer les modules qui les utilisent
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const db = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,28 +17,18 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'gestion_assos'
-};
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
 
-app.get('/api/hello', async (req, res) => {
+app.get('/api/health', async (req, res) => {
   try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT message FROM hello_world LIMIT 1');
-    await connection.end();
-
-    res.json({
-      success: true,
-      message: rows.length ? rows[0].message : 'Aucun message trouvé'
-    });
+    await db.execute('SELECT 1');
+    return res.status(200).json({ success: true, message: 'API operationnelle.' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Erreur serveur / base de données'
+      message: 'Erreur serveur / base de donnees'
     });
   }
 });
