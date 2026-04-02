@@ -1,4 +1,5 @@
 -- Création et sélection de la base de données
+-- Création et sélection de la base de données
 CREATE DATABASE IF NOT EXISTS gestion_assos;
 USE gestion_assos;
 
