@@ -117,4 +117,23 @@ export class BudgetTabComponent implements OnInit {
     // Ouvrir directement le fichier dans un nouvel onglet
     window.open(att.file_path, '_blank');
   }
+
+  export(fsdieOnly: boolean) {
+    this.budgetService.exportBudgetExcel(this.eventId, this.lines, fsdieOnly).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `budget${fsdieOnly ? '_fsdie' : ''}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      },
+      error: (err) => {
+        console.error('Export failed', err);
+        alert('Erreur lors de l\'export.');
+      }
+    });
+  }
 }
