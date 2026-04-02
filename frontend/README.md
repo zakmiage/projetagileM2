@@ -1,4 +1,8 @@
 # Frontend
+# IMPORTANT :
+For connection in front-end in development ONLY, use this default login and passoword 
+Login : toto@mail.com
+Password : toto
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.3.
 
