@@ -8,9 +8,11 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const db = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const eventRoutes = require('./routes/eventRoutes');
-const exportRoutes = require('./routes/exportRoutes');
+const authRoutes = require('./routes/auth.routes');
+const eventRoutes = require('./routes/event.routes');
+const exportRoutes = require('./routes/export.routes');
+const budgetRoutes = require('./routes/budget.routes');
+const memberRoutes = require('./routes/member.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +23,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/budget-lines', budgetRoutes);
+app.use('/api/members', memberRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {
