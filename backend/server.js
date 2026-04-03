@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const db = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const exportRoutes = require('./routes/exportRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/export', exportRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {
