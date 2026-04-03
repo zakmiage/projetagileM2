@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { Event } from '../models/event.model';
 
 @Injectable({
@@ -10,79 +10,40 @@ import { Event } from '../models/event.model';
 export class EventService {
   private http = inject(HttpClient);
 
-  // Mock data fallback
-  private mockEvents: Event[] = [
-    {
-      id: 1,
-      name: 'Gala KUBIK 2024',
-      description: 'Gala annuel de fin d\'année',
-      start_date: '2024-12-15T19:00:00Z',
-      end_date: '2024-12-16T04:00:00Z',
-      capacity: 500,
-      created_at: new Date().toISOString()
-    },
-    {
-      id: 2,
-      name: 'Week-end d\'intégration (WEI)',
-      description: 'Événement d\'accueil des nouveaux',
-      start_date: '2024-09-20T08:00:00Z',
-      end_date: '2024-09-22T18:00:00Z',
-      capacity: 150,
-      created_at: new Date().toISOString()
-    }
-  ];
+  private apiUrl = 'http://localhost:3000/api/events';
 
   getEvents(): Observable<Event[]> {
-    // Note: Dé-commentez le code HTTP lorsque le backend sera fait
-    // return this.http.get<Event[]>('/events').pipe(catchError(...));
-    return of(this.mockEvents);
+    return this.http.get<{success: boolean, data: Event[]}>(this.apiUrl).pipe(
+      map(res => res.data),
+      catchError(err => throwError(() => err))
+    );
   }
 
   getEvent(id: number): Observable<Event> {
-    const event = this.mockEvents.find(e => e.id === id);
-    if (event) {
-      return of(event);
-    }
-    return throwError(() => new Error('Event not found'));
+    return this.http.get<{success: boolean, data: Event}>(`${this.apiUrl}/${id}`).pipe(
+      map(res => res.data),
+      catchError(err => throwError(() => err))
+    );
   }
 
   createEvent(event: Omit<Event, 'id' | 'created_at'>): Observable<Event> {
-    const newEvent: Event = {
-      ...event,
-      id: this.mockEvents.length + 1,
-      created_at: new Date().toISOString(),
-      registrations: []
-    };
-    this.mockEvents.push(newEvent);
-    return of(newEvent);
+    return this.http.post<{success: boolean, data: Event}>(this.apiUrl, event).pipe(
+      map(res => res.data),
+      catchError(err => throwError(() => err))
+    );
   }
 
   addParticipant(eventId: number, member: any): Observable<boolean> {
-    const event = this.mockEvents.find(e => e.id === eventId);
-    if (event) {
-      if (!event.registrations) event.registrations = [];
-      const exists = event.registrations.find(r => r.member_id === member.id);
-      if (exists) return throwError(() => new Error('Déjà inscrit'));
-      
-      event.registrations.push({
-        id: Math.floor(Math.random() * 10000),
-        event_id: eventId,
-        member_id: member.id,
-        has_deposit: false,
-        registered_at: new Date().toISOString(),
-        member: member
-      });
-      return of(true);
-    }
-    return throwError(() => new Error('Event not found'));
+    return this.http.post<{success: boolean}>(`${this.apiUrl}/${eventId}/participants`, { memberId: member.id }).pipe(
+      map(res => res.success),
+      catchError(err => throwError(() => new Error(err.error?.message || "Erreur lors de l'inscription")))
+    );
   }
 
   removeParticipant(eventId: number, memberId: number): Observable<boolean> {
-    const event = this.mockEvents.find(e => e.id === eventId);
-    if (event && event.registrations) {
-      event.registrations = event.registrations.filter(r => r.member_id !== memberId);
-      return of(true);
-    }
-    return throwError(() => new Error('Event or Registration not found'));
+    return this.http.delete<{success: boolean}>(`${this.apiUrl}/${eventId}/participants/${memberId}`).pipe(
+      map(res => res.success),
+      catchError(err => throwError(() => new Error('Erreur lors de la désinscription')))
+    );
   }
 }

@@ -87,71 +87,47 @@ cd projetagileM2
 
 ## 2. Initialiser la base de données
 
-### Emplacement du fichier SQL
+### Emplacement des fichiers SQL
 
-Le fichier SQL doit être placé ici :
+Dans le dossier `database/`, vous trouverez deux fichiers cruciaux :
+1. `init.sql` : Crée la structure (les tables) vierge.
+2. `seed-data.sql` : Ajoute l'ensemble des données de test (Événements, Membres, Budget, Participants) pour que vous puissiez tester directement sur une base remplie !
 
-text
-projetagileM2/database/init.sql
-
-
-### Contenu attendu de init.sql
-
-sql
-CREATE DATABASE IF NOT EXISTS gestion_assos;
-USE gestion_assos;
-
-CREATE TABLE IF NOT EXISTS hello_world (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    message VARCHAR(255) NOT NULL
-);
-
-INSERT INTO hello_world (message)
-VALUES ('Hello World depuis MySQL');
-
-
-### Exécuter le script SQL
+### Exécuter les scripts SQL
 
 #### Option A — avec MySQL en ligne de commande
 
 Ouvrir un terminal et taper :
 
-bash
+```bash
 mysql -u root -p
-
+```
 
 Puis, une fois connecté à MySQL :
 
-sql
+```sql
 source C:/chemin/vers/projetagileM2/database/init.sql;
+source C:/chemin/vers/projetagileM2/database/seed-data.sql;
+```
 
-
-Exemple :
-
-sql
-source C:/Users/mon_nom/Documents/projetagileM2/database/init.sql;
-
+*(Remplacez `C:/chemin/vers/` par votre vrai chemin absolu)*
 
 #### Option B — avec MySQL Workbench
 
-* ouvrir MySQL Workbench
-* ouvrir le fichier database/init.sql
-* cliquer sur *Execute*
+1. Ouvrir MySQL Workbench.
+2. Ouvrir le fichier `database/init.sql` puis cliquer sur l'éclair jaune (Execute).
+3. Ouvrir le fichier `database/seed-data.sql` puis cliquer sur l'éclair jaune (Execute).
 
 ### Vérification
 
 Dans MySQL :
 
-sql
+```sql
 USE gestion_assos;
-SELECT * FROM hello_world;
+SELECT * FROM events;
+```
 
-
-Vous devez voir une ligne contenant :
-
-text
-Hello World depuis MySQL
-
+Vous devez voir apparaître deux événements : le 'Gala' et le 'WEI'.
 
 ---
 
