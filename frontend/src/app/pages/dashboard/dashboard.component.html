@@ -1,0 +1,96 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+  <!-- En-tête -->
+  <div class="sm:flex sm:justify-between sm:items-center mb-8">
+    <div class="mb-4 sm:mb-0">
+      <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">Tableau de bord ✨</h1>
+      <p class="text-slate-500 text-sm mt-1">Bienvenue sur votre espace de gestion d'association.</p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+  </div>
+
+  <div *ngIf="errorMsg" class="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
+    {{ errorMsg }}
+  </div>
+
+  <div *ngIf="!isLoading && stats">
+    <!-- Section Chiffres Clés (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      
+      <!-- Carte : Total des membres -->
+      <div class="flex flex-col col-span-1 bg-white shadow-lg rounded-xl border border-slate-200 p-5">
+        <header class="flex justify-between items-start mb-2">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          </div>
+        </header>
+        <h2 class="text-lg font-semibold text-slate-800 mb-2">Membres</h2>
+        <div class="text-3xl font-bold text-slate-800">{{ stats.totalMembers }}</div>
+        <div class="text-sm text-slate-500 mt-2">Membres inscrits</div>
+      </div>
+
+      <!-- Carte : Événements à venir -->
+      <div class="flex flex-col col-span-1 bg-white shadow-lg rounded-xl border border-slate-200 p-5">
+        <header class="flex justify-between items-start mb-2">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+        </header>
+        <h2 class="text-lg font-semibold text-slate-800 mb-2">Événements Actifs</h2>
+        <div class="text-3xl font-bold text-slate-800">{{ stats.upcomingEventsCount }}</div>
+        <div class="text-sm text-slate-500 mt-2">Prévus prochainement</div>
+      </div>
+
+      <!-- Carte : Bilan financier -->
+      <div class="flex flex-col col-span-1 bg-white shadow-lg rounded-xl border border-slate-200 p-5">
+        <header class="flex justify-between items-start mb-2">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full" 
+               [ngClass]="{'bg-emerald-100 text-emerald-500': stats.financialBalance >= 0, 'bg-rose-100 text-rose-500': stats.financialBalance < 0}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </header>
+        <h2 class="text-lg font-semibold text-slate-800 mb-2">Trésorerie</h2>
+        <div class="text-3xl font-bold" 
+             [ngClass]="{'text-emerald-500': stats.financialBalance > 0, 'text-rose-500': stats.financialBalance < 0, 'text-slate-800': stats.financialBalance === 0}">
+          {{ stats.financialBalance > 0 ? '+' : '' }}{{ stats.financialBalance | number:'1.2-2' }} €
+        </div>
+        <div class="text-sm text-slate-500 mt-2">Bilan global (Revenus - Dépenses)</div>
+      </div>
+
+    </div>
+
+    <!-- Section : Prochains Événements -->
+    <div class="bg-white shadow-lg rounded-xl border border-slate-200">
+      <header class="px-5 py-4 border-b border-slate-100">
+        <h2 class="font-semibold text-slate-800">Prochains Événements</h2>
+      </header>
+      <div class="p-3">
+        <div *ngIf="stats.upcomingEvents.length === 0" class="p-6 text-center text-slate-500">
+          Aucun événement de prévu pour le moment.
+        </div>
+        <ul *ngIf="stats.upcomingEvents.length > 0" class="my-1">
+          <!-- Item -->
+          <li *ngFor="let ev of stats.upcomingEvents" class="flex px-2">
+            <div class="w-9 h-9 rounded-full shrink-0 bg-indigo-100 text-indigo-500 my-2 mr-3 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <div class="grow flex items-center border-b border-slate-100 text-sm py-2">
+              <div class="grow flex justify-between">
+                <div class="self-center">
+                  <a [routerLink]="['/events', ev.id]" class="font-medium text-slate-800 hover:text-slate-900">{{ ev.name }}</a>
+                  <div class="text-slate-500 text-xs">Capacité maximale : {{ ev.capacity || 'Illimitée' }} participants</div>
+                </div>
+                <div class="shrink-0 self-start ml-2">
+                  <span class="font-medium text-indigo-500">{{ ev.start_date | date:'short' }}</span>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+  </div>
+</div>

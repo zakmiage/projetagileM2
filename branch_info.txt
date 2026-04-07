@@ -1,0 +1,11 @@
+﻿  dev_upload_files                                                                            e8f715e [behind 8] backend upload et get des fichiers termin├⌐
+  main                                                                                        aacc3fd fix: correction post-merge Arno - import fileRoutes manquant + suppression double montage /api
+* zac                                                                                         aacc3fd [ahead 1] fix: correction post-merge Arno - import fileRoutes manquant + suppression double montage /api
+  remotes/origin/HEAD                                                                         -> origin/main
+  remotes/origin/ajout_front                                                                  1fdd749 feat: setup initial frontend layout and budget module
+  remotes/origin/ajouter_event                                                                3ac6057 ajout evenement creation
+  remotes/origin/dev_authentification                                                         fb9f7eb Backend : Login / Register Utilisateur.
+  remotes/origin/dev_upload_files                                                             864622b Merge branch 'main' into dev_upload_files
+  remotes/origin/feat/fix---front---fichiers-s├⌐par├⌐-+-ajout-page-de-connexion-+-bouton-import 1f33248 feat: implement core frontend modules including authentication, member management, and event tracking features
+  remotes/origin/main                                                                         aacc3fd fix: correction post-merge Arno - import fileRoutes manquant + suppression double montage /api
+  remotes/origin/zac                                                                          5d92850 Merge pull request #9 from zakmiage/dev_upload_files

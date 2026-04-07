@@ -1,0 +1,15 @@
+﻿aacc3fd | 2026-04-07 | Zacharie Rousselon | fix: correction post-merge Arno - import fileRoutes manquant + suppression double montage /api (HEAD -> zac, origin/main, origin/HEAD, main)
+5d92850 | 2026-04-07 | atomesk | Merge pull request #9 from zakmiage/dev_upload_files (origin/zac)
+864622b | 2026-04-07 | atomesk | Merge branch 'main' into dev_upload_files (origin/dev_upload_files)
+01300ae | 2026-04-07 | Zacharie Rousselon | fix: detectChanges sur events et members pour affichage au premier chargement
+016926d | 2026-04-07 | Zacharie Rousselon | fix: event detail spinner infini (detectChanges + desactivation SSR + withFetch)
+29d61e8 | 2026-04-07 | Zacharie Rousselon | fix: conversion ISO->MySQL datetime pour creation evenement + fallback end_date
+2d191ad | 2026-04-03 | ZacharieRousselon | Merge pull request #8 from zakmiage/zac
+06664b4 | 2026-04-03 | Zacharie Rousselon | feat: connect Angular to full Node.js API with MySQL (Budget, Members, Events, Participants MVC)
+bc41582 | 2026-04-03 | ZacharieRousselon | Merge pull request #7 from zakmiage/zac
+e8f715e | 2026-04-02 | atomesk | backend upload et get des fichiers termin├⌐ (dev_upload_files)
+1ed0e5d | 2026-04-02 | Zacharie Rousselon | feat: Export Excel avanc├⌐ du budget (fusions, couleurs, sous-totaux, filtres FSDIE)
+9d7ab8e | 2026-04-02 | Zacharie Rousselon | Merge branch 'zac' of https://github.com/zakmiage/projetagileM2 into zac
+7d87e2a | 2026-04-02 | Zacharie Rousselon | modif script bdd
+5a028d0 | 2026-04-02 | Zacharie Rousselon | Merge branch 'main' into zac
+ba6a7db | 2026-04-02 | Huzaifah Panchbhaya | Update README.md
