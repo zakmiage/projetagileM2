@@ -17,3 +17,10 @@ coverage/
 # OS
 .DS_Store
 Thumbs.db
+
+# --- Backend & Storage (GED) ---
+# On ignore tout le contenu du dossier uploads mais on garde le dossier lui-même
+backend/uploads/**/*
+# Si tes dossiers sont à la racine du backend sans le préfixe backend/
+uploads/members/*
+uploads/budget/*
