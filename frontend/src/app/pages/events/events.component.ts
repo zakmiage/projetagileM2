@@ -54,11 +54,11 @@ export class EventsComponent implements OnInit {
     // Convert input YYYY-MM-DD to full ISO format
     this.newEvent.start_date = new Date(this.start_date_input).toISOString();
     
-    // Logique de Date : si end_date est spécifié on le valide, sinon on efface pr avoir un événement FIXE
+    // Si pas de date de fin, on utilise la date de début (événement sur une seule journée)
     if (this.end_date_input) {
       this.newEvent.end_date = new Date(this.end_date_input).toISOString();
     } else {
-      this.newEvent.end_date = undefined;
+      this.newEvent.end_date = this.newEvent.start_date;
     }
 
     this.eventService.createEvent(this.newEvent as Omit<Event, 'id' | 'created_at'>).subscribe({

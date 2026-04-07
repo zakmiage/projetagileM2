@@ -44,9 +44,19 @@ class Event {
   }
 
   static async create(data) {
+    // MySQL DATETIME ne supporte pas le format ISO 8601 (ex: 2027-02-02T00:00:00.000Z)
+    // On convertit en format YYYY-MM-DD HH:MM:SS
+    const toMysql = (isoStr) => {
+      if (!isoStr) return null;
+      return isoStr.replace('T', ' ').substring(0, 19);
+    };
+
     const sql = `INSERT INTO events (name, description, start_date, end_date, capacity) VALUES (?, ?, ?, ?, ?)`;
     const [result] = await db.execute(sql, [
-      data.name, data.description || null, data.start_date, data.end_date, data.capacity
+      data.name, data.description || null,
+      toMysql(data.start_date),
+      toMysql(data.end_date),
+      data.capacity
     ]);
     return { id: result.insertId, ...data };
   }
