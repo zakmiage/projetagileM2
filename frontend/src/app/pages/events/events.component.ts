@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,8 +13,11 @@ import { Event } from '../../models/event.model';
 })
 export class EventsComponent implements OnInit {
   private eventService = inject(EventService);
+  private cdr = inject(ChangeDetectorRef);
   events: Event[] = [];
   searchQuery = '';
+  isLoading = true;
+  loadError = '';
 
   isModalOpen = false;
   newEvent: Partial<Event> = {};
@@ -22,8 +25,18 @@ export class EventsComponent implements OnInit {
   end_date_input = '';
 
   ngOnInit() {
-    this.eventService.getEvents().subscribe(data => {
-      this.events = data;
+    this.isLoading = true;
+    this.eventService.getEvents().subscribe({
+      next: (data) => {
+        this.events = data;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadError = 'Impossible de charger les événements. Vérifiez que le backend est démarré.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -54,11 +67,11 @@ export class EventsComponent implements OnInit {
     // Convert input YYYY-MM-DD to full ISO format
     this.newEvent.start_date = new Date(this.start_date_input).toISOString();
     
-    // Logique de Date : si end_date est spécifié on le valide, sinon on efface pr avoir un événement FIXE
+    // Si pas de date de fin, on utilise la date de début (événement sur une seule journée)
     if (this.end_date_input) {
       this.newEvent.end_date = new Date(this.end_date_input).toISOString();
     } else {
-      this.newEvent.end_date = undefined;
+      this.newEvent.end_date = this.newEvent.start_date;
     }
 
     this.eventService.createEvent(this.newEvent as Omit<Event, 'id' | 'created_at'>).subscribe({

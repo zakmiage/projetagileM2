@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../../services/budget.service';
@@ -10,19 +10,39 @@ import { BudgetLine, BudgetAttachment } from '../../../models/budget.model';
   imports: [CommonModule, FormsModule],
   templateUrl: './budget-tab.component.html'
 })
-export class BudgetTabComponent implements OnInit {
-  @Input() eventId!: number;
+export class BudgetTabComponent {
+  private _eventId!: number;
+
+  @Input() 
+  set eventId(value: number) {
+    this._eventId = value;
+    if (value) {
+      console.log('Setter triggered with eventId:', value);
+      this.loadBudget();
+    }
+  }
+  get eventId(): number {
+    return this._eventId;
+  }
+
   private budgetService = inject(BudgetService);
+  private cdr = inject(ChangeDetectorRef);
 
   lines: BudgetLine[] = [];
   viewMode: 'forecast' | 'actual' = 'forecast';
 
-  ngOnInit() {
-    if (this.eventId) {
-      this.budgetService.getBudgetLines(this.eventId).subscribe(data => {
-        this.lines = data;
-      });
-    }
+  loadBudget() {
+    console.log('loadBudget called for event:', this.eventId);
+    this.budgetService.getBudgetLines(this.eventId).subscribe({
+      next: (data) => {
+        console.log('Received data from backend:', data);
+        this.lines = data ? [...data] : [];
+        this.cdr.detectChanges(); // Force DOM update
+      },
+      error: (err) => {
+        console.error('API Error in getBudgetLines:', err);
+      }
+    });
   }
 
   getExpenses() {
@@ -62,13 +82,19 @@ export class BudgetTabComponent implements OnInit {
     this.budgetService.createBudgetLine({
       event_id: this.eventId,
       type: type,
-      category: '',
-      label: '',
+      category: 'Nouvelle catégorie',
+      label: 'Nouveau libellé',
       forecast_amount: 0,
       is_fsdie_eligible: false,
       created_by: 1
-    }).subscribe(newLine => {
-      this.lines.push(newLine);
+    }).subscribe({
+      next: (newLine) => {
+        this.lines.push(newLine);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la création:', err);
+        alert('Impossible de créer la ligne');
+      }
     });
   }
 
@@ -116,5 +142,24 @@ export class BudgetTabComponent implements OnInit {
   viewAttachment(att: BudgetAttachment) {
     // Ouvrir directement le fichier dans un nouvel onglet
     window.open(att.file_path, '_blank');
+  }
+
+  export(fsdieOnly: boolean) {
+    this.budgetService.exportBudgetExcel(this.eventId, this.lines, fsdieOnly).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `budget${fsdieOnly ? '_fsdie' : ''}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      },
+      error: (err) => {
+        console.error('Export failed', err);
+        alert('Erreur lors de l\'export.');
+      }
+    });
   }
 }

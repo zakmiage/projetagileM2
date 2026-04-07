@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MemberService } from '../../services/member.service';
@@ -12,6 +12,7 @@ import { Member, MemberAttachment } from '../../models/member.model';
 })
 export class MembersComponent implements OnInit {
   private memberService = inject(MemberService);
+  private cdr = inject(ChangeDetectorRef);
   
   members: Member[] = [];
   searchQuery = '';
@@ -24,8 +25,12 @@ export class MembersComponent implements OnInit {
   parsedAllergies: string[] = [];
 
   ngOnInit() {
-    this.memberService.getMembers().subscribe(data => {
-      this.members = data;
+    this.memberService.getMembers().subscribe({
+      next: (data) => {
+        this.members = data;
+        this.cdr.detectChanges();
+      },
+      error: () => this.cdr.detectChanges()
     });
   }
 
@@ -95,6 +100,7 @@ export class MembersComponent implements OnInit {
         next: (created) => {
           this.members = [...this.members, created];
           this.closeModal();
+          this.cdr.detectChanges();
         },
         error: () => alert("Erreur lors de la création")
       });
@@ -106,6 +112,7 @@ export class MembersComponent implements OnInit {
             this.members[index] = updated;
           }
           this.closeModal();
+          this.cdr.detectChanges();
         },
         error: () => alert("Erreur lors de la mise a jour")
       });
