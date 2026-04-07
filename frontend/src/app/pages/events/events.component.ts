@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import { Event } from '../../models/event.model';
 })
 export class EventsComponent implements OnInit {
   private eventService = inject(EventService);
+  private cdr = inject(ChangeDetectorRef);
   events: Event[] = [];
   searchQuery = '';
   isLoading = true;
@@ -29,10 +30,12 @@ export class EventsComponent implements OnInit {
       next: (data) => {
         this.events = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadError = 'Impossible de charger les événements. Vérifiez que le backend est démarré.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
