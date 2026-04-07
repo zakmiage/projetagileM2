@@ -13,6 +13,7 @@ const eventRoutes = require('./routes/event.routes');
 const exportRoutes = require('./routes/export.routes');
 const budgetRoutes = require('./routes/budget.routes');
 const memberRoutes = require('./routes/member.routes');
+const fileRoutes = require('./routes/fileRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +24,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
-app.use('/api', fileRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/budget-lines', budgetRoutes);
