@@ -15,6 +15,8 @@ export class EventsComponent implements OnInit {
   private eventService = inject(EventService);
   events: Event[] = [];
   searchQuery = '';
+  isLoading = true;
+  loadError = '';
 
   isModalOpen = false;
   newEvent: Partial<Event> = {};
@@ -22,8 +24,16 @@ export class EventsComponent implements OnInit {
   end_date_input = '';
 
   ngOnInit() {
-    this.eventService.getEvents().subscribe(data => {
-      this.events = data;
+    this.isLoading = true;
+    this.eventService.getEvents().subscribe({
+      next: (data) => {
+        this.events = data;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.loadError = 'Impossible de charger les événements. Vérifiez que le backend est démarré.';
+        this.isLoading = false;
+      }
     });
   }
 
