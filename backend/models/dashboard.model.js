@@ -107,6 +107,20 @@ class Dashboard {
     );
     return parseInt(rows[0].total, 10);
   }
+
+  /**
+   * Compte le total des lignes FSDIE éligibles pour un événement.
+   * Utilisé en combinaison avec getFsdieUnjustifiedCount pour afficher X/Y.
+   */
+  static async getFsdieTotalCount(eventId) {
+    const [rows] = await db.execute(
+      `SELECT COUNT(*) as total
+       FROM budget_lines
+       WHERE event_id = ? AND is_fsdie_eligible = 1`,
+      [eventId]
+    );
+    return parseInt(rows[0].total, 10);
+  }
 }
 
 module.exports = Dashboard;

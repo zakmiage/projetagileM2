@@ -24,6 +24,8 @@ export interface NextEventKpis {
   fsdieTotal: number;
   /** Nombre de lignes FSDIE sans justificatif joint. Null si l'event n'est pas terminé. */
   fsdieUnjustifiedCount: number | null;
+  /** Total de lignes FSDIE éligibles. Null si l'event n'est pas terminé. */
+  fsdieTotalCount: number | null;
 }
 
 export interface NextEventStats {

@@ -227,41 +227,49 @@
         </p>
       </div>
 
-      <!-- KPI 5 : Justificatifs FSDIE manquants (events passés uniquement) -->
-      <div *ngIf="stats.kpis.fsdieUnjustifiedCount !== null"
+      <!-- KPI 5 : Justificatifs FSDIE (events passés uniquement) -->
+      <div *ngIf="stats.kpis.fsdieUnjustifiedCount !== null && stats.kpis.fsdieTotalCount !== null"
         class="flex flex-col bg-white shadow-sm rounded-2xl border p-5 hover:shadow-md transition-shadow"
-        [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'border-orange-200' : 'border-slate-100'">
+        [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'border-rose-200' : 'border-slate-100'">
         <div class="flex items-center justify-between mb-4">
           <div class="w-11 h-11 rounded-xl flex items-center justify-center"
-            [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'bg-orange-50 text-orange-600' : 'bg-emerald-50 text-emerald-600'">
+            [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <span *ngIf="stats.kpis.fsdieUnjustifiedCount > 0"
-            class="flex items-center gap-1 text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full">
-            <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-            À justifier
+            class="flex items-center gap-1 text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+            Incomplet
           </span>
           <span *ngIf="stats.kpis.fsdieUnjustifiedCount === 0"
             class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-            Complet
+            ✓ Complet
           </span>
         </div>
         <h2 class="text-sm font-medium text-slate-500 mb-1">Justificatifs FSDIE</h2>
-        <div class="text-3xl font-bold mb-1"
-          [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'text-orange-600' : 'text-emerald-600'">
-          {{ stats.kpis.fsdieUnjustifiedCount }}
+        <!-- Ratio : lignes justifiées / total -->
+        <div class="text-3xl font-bold mb-3"
+          [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'text-rose-600' : 'text-emerald-600'">
+          {{ stats.kpis.fsdieTotalCount! - stats.kpis.fsdieUnjustifiedCount! }}
+          <span class="text-lg font-normal text-slate-400">
+            / {{ stats.kpis.fsdieTotalCount }}
+          </span>
         </div>
-        <p class="text-xs text-slate-400 mt-auto">
-          <ng-container *ngIf="stats.kpis.fsdieUnjustifiedCount === 0">
-            ✅ Toutes les dépenses FSDIE ont un justificatif.
-          </ng-container>
-          <ng-container *ngIf="stats.kpis.fsdieUnjustifiedCount > 0">
-            dépense(s) FSDIE sans justificatif joint
-          </ng-container>
-        </p>
+        <!-- Barre de progression (lignes justifiées) -->
+        <div class="mt-auto">
+          <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-2 rounded-full transition-all duration-700"
+              [style.width.%]="stats.kpis.fsdieTotalCount! > 0 ? ((stats.kpis.fsdieTotalCount! - stats.kpis.fsdieUnjustifiedCount!) / stats.kpis.fsdieTotalCount! * 100) : 0"
+              [ngClass]="stats.kpis.fsdieUnjustifiedCount! > 0 ? 'bg-rose-500' : 'bg-emerald-500'">
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mt-1.5">
+            dépenses FSDIE avec justificatif joint
+          </p>
+        </div>
       </div>
 
     </div>

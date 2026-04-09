@@ -19,12 +19,13 @@ class DashboardService {
 
     const isPast = new Date(event.end_date) < new Date();
 
-    const [registrationsCount, missingDepositsCount, tShirtSizes, fsdieTotal, fsdieUnjustifiedCount] = await Promise.all([
+    const [registrationsCount, missingDepositsCount, tShirtSizes, fsdieTotal, fsdieUnjustifiedCount, fsdieTotalCount] = await Promise.all([
       Dashboard.getRegistrationsCount(event.id),
       Dashboard.getMissingDepositsCount(event.id),
       Dashboard.getTShirtSizes(event.id),
       Dashboard.getFsdieTotal(event.id),
-      isPast ? Dashboard.getFsdieUnjustifiedCount(event.id) : Promise.resolve(null)
+      isPast ? Dashboard.getFsdieUnjustifiedCount(event.id) : Promise.resolve(null),
+      isPast ? Dashboard.getFsdieTotalCount(event.id)      : Promise.resolve(null)
     ]);
 
     return {
@@ -47,7 +48,8 @@ class DashboardService {
         tShirtSizes,
         fsdieTotal,
         // null si l'événement n'est pas encore terminé
-        fsdieUnjustifiedCount: isPast ? fsdieUnjustifiedCount : null
+        fsdieUnjustifiedCount: isPast ? fsdieUnjustifiedCount : null,
+        fsdieTotalCount:       isPast ? fsdieTotalCount       : null
       }
     };
   }
