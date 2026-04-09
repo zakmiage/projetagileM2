@@ -8,7 +8,7 @@ USE gestion_assos;
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE budget_attachments;
 TRUNCATE TABLE budget_lines;
-TRUNCATE TABLE event_registrations;
+TRUNCATE TABLE event_participants;
 TRUNCATE TABLE member_attachments;
 TRUNCATE TABLE events;
 TRUNCATE TABLE members;
@@ -92,45 +92,108 @@ INSERT INTO events (id, name, description, start_date, end_date, capacity) VALUE
     '2027-02-05 07:00:00', '2027-02-08 20:00:00', 40);
 
 -- =============================================================================
--- 4. INSCRIPTIONS (cas variés : cautions ok / manquantes)
+-- 4. INSCRITS AUX ÉVÉNEMENTS (event_participants)
+--    Les inscrits NE SONT PAS forcément des adhérents.
+--    Seule la décharge droit à l'image est trackée ici.
 -- =============================================================================
 
--- Gala KUBIK 2024 (id=1) — 8 inscrits / 500, 2 cautions manquantes
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(1, 1, 1), (1, 2, 0), (1, 4, 1), (1, 5, 1),
-(1, 6, 1), (1, 8, 0), (1, 9, 1), (1, 11, 1);
+-- Gala KUBIK 2024 (id=1) — 10 inscrits / 500
+-- dont 6 adhérents (même email) et 4 externes
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(1, 'Alice',    'Martin',   'alice.martin@etu.univ.fr',      1, 1),
+(1, 'Baptiste', 'Moreau',   'baptiste.moreau@etu.univ.fr',   1, 0),
+(1, 'David',    'Thomas',   'david.thomas@etu.univ.fr',      1, 1),
+(1, 'Emma',     'Laurent',  'emma.laurent@etu.univ.fr',      1, 1),
+(1, 'Florian',  'Robert',   'florian.robert@etu.univ.fr',    0, 1),
+(1, 'Hugo',     'Michel',   'hugo.michel@etu.univ.fr',       0, 0),
+-- Externes non-adhérents
+(1, 'Thomas',   'Leblanc',  'thomas.leblanc@gmail.com',      1, 1),
+(1, 'Mathilde', 'Durand',   'mathilde.durand@gmail.com',     1, 1),
+(1, 'Arthur',   'Faure',    'arthur.faure@yahoo.fr',         0, 0),
+(1, 'Léa',      'Garnier',  'lea.garnier@outlook.com',       1, 1);
 
--- WEI 2024 (id=2) — 6 inscrits / 150, 3 cautions manquantes
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(2, 1, 1), (2, 2, 0), (2, 3, 1), (2, 5, 0),
-(2, 7, 1), (2, 10, 0);
+-- WEI 2024 (id=2) — 9 inscrits / 150
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(2, 'Alice',    'Martin',   'alice.martin@etu.univ.fr',      1, 1),
+(2, 'Baptiste', 'Moreau',   'baptiste.moreau@etu.univ.fr',   1, 0),
+(2, 'Camille',  'Bernard',  'camille.bernard@etu.univ.fr',   0, 1),
+(2, 'Emma',     'Laurent',  'emma.laurent@etu.univ.fr',      1, 0),
+(2, 'Gaëlle',   'Simon',    'gaelle.simon@etu.univ.fr',      1, 1),
+(2, 'Julien',   'Martinez', 'julien.martinez@etu.univ.fr',   1, 0),
+-- Externes
+(2, 'Clément',  'Marchand', 'clement.marchand@gmail.com',    1, 1),
+(2, 'Noémie',   'Renard',   'noemie.renard@gmail.com',       0, 0),
+(2, 'Romain',   'Brun',     'romain.brun@hotmail.fr',        1, 1);
 
--- WES 2024 (id=3) — 4 inscrits / 80, toutes cautions OK
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(3, 2, 1), (3, 4, 1), (3, 7, 1), (3, 12, 1);
+-- WES 2024 (id=3) — 6 inscrits / 80
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(3, 'Baptiste', 'Moreau',   'baptiste.moreau@etu.univ.fr',   1, 1),
+(3, 'David',    'Thomas',   'david.thomas@etu.univ.fr',      1, 1),
+(3, 'Gaëlle',   'Simon',    'gaelle.simon@etu.univ.fr',      1, 1),
+(3, 'Lucie',    'Petit',    'lucie.petit@etu.univ.fr',       1, 1),
+-- Externes
+(3, 'Paul',     'Bernard',  'paul.bernard@gmail.com',        1, 1),
+(3, 'Chloé',    'Vincent',  'chloe.vincent@gmail.com',       0, 0);
 
--- Soirée Saint-Valentin 2025 (id=4) — 3 inscrits / 100, 1 caution manquante
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(4, 3, 1), (4, 6, 0), (4, 9, 1);
+-- Soirée Saint-Valentin 2025 (id=4) — 5 inscrits / 100
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(4, 'Camille',  'Bernard',  'camille.bernard@etu.univ.fr',   1, 1),
+(4, 'Florian',  'Robert',   'florian.robert@etu.univ.fr',    0, 0),
+(4, 'Inès',     'Garcia',   'ines.garcia@etu.univ.fr',       1, 1),
+-- Externes
+(4, 'Sophie',   'Morel',    'sophie.morel@gmail.com',        1, 1),
+(4, 'Nicolas',  'Petit',    'nicolas.petit@icloud.com',      1, 1);
 
--- Tournoi sportif 2025 (id=5) — 5 inscrits / 30, toutes cautions OK
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(5, 1, 1), (5, 5, 1), (5, 8, 1), (5, 11, 1), (5, 12, 1);
+-- Tournoi sportif 2025 (id=5) — 7 inscrits / 30
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(5, 'Alice',    'Martin',   'alice.martin@etu.univ.fr',      1, 1),
+(5, 'Emma',     'Laurent',  'emma.laurent@etu.univ.fr',      1, 1),
+(5, 'Hugo',     'Michel',   'hugo.michel@etu.univ.fr',       1, 1),
+(5, 'Kevin',    'Dupuis',   'kevin.dupuis@etu.univ.fr',      1, 1),
+(5, 'Lucie',    'Petit',    'lucie.petit@etu.univ.fr',       1, 1),
+-- Externes
+(5, 'Alexis',   'Fontaine', 'alexis.fontaine@gmail.com',     1, 1),
+(5, 'Camille',  'Aubert',   'camille.aubert@yahoo.fr',       0, 0);
 
--- WEI 2026 (id=6) — 9 inscrits / 120, inscriptions ouvertes, 4 cautions manquantes
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(6, 1, 1), (6, 2, 0), (6, 3, 0), (6, 4, 1),
-(6, 5, 1), (6, 6, 0), (6, 9, 1), (6, 10, 0), (6, 12, 1);
+-- WEI 2026 (id=6) — 11 inscrits / 120, inscriptions ouvertes
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(6, 'Alice',    'Martin',   'alice.martin@etu.univ.fr',      1, 1),
+(6, 'Baptiste', 'Moreau',   'baptiste.moreau@etu.univ.fr',   0, 0),
+(6, 'Camille',  'Bernard',  'camille.bernard@etu.univ.fr',   0, 0),
+(6, 'David',    'Thomas',   'david.thomas@etu.univ.fr',      1, 1),
+(6, 'Emma',     'Laurent',  'emma.laurent@etu.univ.fr',      1, 1),
+(6, 'Florian',  'Robert',   'florian.robert@etu.univ.fr',    0, 0),
+(6, 'Inès',     'Garcia',   'ines.garcia@etu.univ.fr',       1, 1),
+(6, 'Julien',   'Martinez', 'julien.martinez@etu.univ.fr',   0, 0),
+(6, 'Lucie',    'Petit',    'lucie.petit@etu.univ.fr',       1, 1),
+-- Externes encore en phase d'inscription
+(6, 'Yasmine',  'Chaoui',   'yasmine.chaoui@gmail.com',      0, 0),
+(6, 'Ethan',    'Roux',     'ethan.roux@gmail.com',          1, 0);
 
--- Gala 2026 (id=7) — 12 inscrits / 15 = 80 %, plusieurs cautions manquantes
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(7, 1, 1), (7, 2, 1), (7, 3, 0), (7, 4, 1),
-(7, 5, 0), (7, 6, 1), (7, 7, 0), (7, 8, 0),
-(7, 9, 1), (7, 10, 1), (7, 11, 1), (7, 12, 1);
+-- Gala KUBIK 2026 (id=7) — 14 inscrits / 15
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(7, 'Alice',    'Martin',   'alice.martin@etu.univ.fr',      1, 1),
+(7, 'Baptiste', 'Moreau',   'baptiste.moreau@etu.univ.fr',   1, 1),
+(7, 'Camille',  'Bernard',  'camille.bernard@etu.univ.fr',   0, 0),
+(7, 'David',    'Thomas',   'david.thomas@etu.univ.fr',      1, 1),
+(7, 'Emma',     'Laurent',  'emma.laurent@etu.univ.fr',      0, 0),
+(7, 'Florian',  'Robert',   'florian.robert@etu.univ.fr',    1, 1),
+(7, 'Gaëlle',   'Simon',    'gaelle.simon@etu.univ.fr',      0, 0),
+(7, 'Hugo',     'Michel',   'hugo.michel@etu.univ.fr',       0, 0),
+(7, 'Inès',     'Garcia',   'ines.garcia@etu.univ.fr',       1, 1),
+(7, 'Julien',   'Martinez', 'julien.martinez@etu.univ.fr',   1, 1),
+(7, 'Kevin',    'Dupuis',   'kevin.dupuis@etu.univ.fr',      1, 1),
+(7, 'Lucie',    'Petit',    'lucie.petit@etu.univ.fr',       1, 1),
+-- Externes
+(7, 'Jade',     'Bonnet',   'jade.bonnet@gmail.com',         1, 1),
+(7, 'Louis',    'Girard',   'louis.girard@outlook.com',      0, 0);
 
--- Week-end ski 2027 (id=8) — 2 inscrits / 40, inscriptions très tôt
-INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES
-(8, 4, 1), (8, 9, 0);
+-- Week-end ski 2027 (id=8) — 3 inscrits / 40
+INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit) VALUES
+(8, 'David',    'Thomas',   'david.thomas@etu.univ.fr',      1, 1),
+(8, 'Inès',     'Garcia',   'ines.garcia@etu.univ.fr',       1, 0),
+-- Externe enthousiaste
+(8, 'Maxime',   'Perrin',   'maxime.perrin@gmail.com',       1, 1);
 
 -- =============================================================================
 -- 5. BUDGET

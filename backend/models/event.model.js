@@ -2,50 +2,47 @@ const db = require('../config/db');
 
 class Event {
   static async findAll() {
-    const [rows] = await db.execute('SELECT * FROM events ORDER BY start_date DESC');
+    // Prochains événements d'abord (ASC), puis les passés du plus récent (DESC)
+    const [rows] = await db.execute(`
+      SELECT * FROM events
+      ORDER BY
+        CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC,
+        CASE WHEN start_date >= NOW() THEN start_date END ASC,
+        CASE WHEN start_date < NOW() THEN start_date END DESC
+    `);
     return rows;
   }
 
   static async findById(id) {
     const [rows] = await db.execute('SELECT * FROM events WHERE id = ?', [id]);
     if (rows.length === 0) return null;
-    
-    // Fetch participants as well
-    const [registrations] = await db.execute(`
-      SELECT er.id as registration_id, er.event_id, er.member_id, er.has_deposit, er.registered_at,
-             m.id as member_id, m.first_name, m.last_name, m.email, m.t_shirt_size, m.allergies,
-             m.is_certificate_ok, m.is_waiver_ok, m.is_image_rights_ok
-      FROM event_registrations er
-      JOIN members m ON er.member_id = m.id
-      WHERE er.event_id = ?
+
+    // Récupération des inscrits (event_participants — entité indépendante des membres)
+    const [participants] = await db.execute(`
+      SELECT id, event_id, first_name, last_name, email,
+             is_image_rights_ok, has_deposit, registered_at
+      FROM event_participants
+      WHERE event_id = ?
+      ORDER BY last_name ASC, first_name ASC
     `, [id]);
 
     const event = rows[0];
-    event.registrations = registrations.map(r => ({
-      id: r.registration_id,
-      event_id: r.event_id,
-      member_id: r.member_id,
-      has_deposit: r.has_deposit === 1,
-      registered_at: r.registered_at,
-      member: {
-        id: r.member_id,
-        first_name: r.first_name,
-        last_name: r.last_name,
-        email: r.email,
-        t_shirt_size: r.t_shirt_size,
-        allergies: r.allergies,
-        is_certificate_ok: r.is_certificate_ok === 1,
-        is_waiver_ok: r.is_waiver_ok === 1,
-        is_image_rights_ok: r.is_image_rights_ok === 1
-      }
+    event.participants = participants.map(p => ({
+      id: p.id,
+      event_id: p.event_id,
+      first_name: p.first_name,
+      last_name: p.last_name,
+      email: p.email,
+      is_image_rights_ok: p.is_image_rights_ok === 1,
+      has_deposit: p.has_deposit === 1,
+      registered_at: p.registered_at
     }));
-    
+
     return event;
   }
 
   static async create(data) {
-    // MySQL DATETIME ne supporte pas le format ISO 8601 (ex: 2027-02-02T00:00:00.000Z)
-    // On convertit en format YYYY-MM-DD HH:MM:SS
+    // MySQL DATETIME ne supporte pas le format ISO 8601
     const toMysql = (isoStr) => {
       if (!isoStr) return null;
       return isoStr.replace('T', ' ').substring(0, 19);
@@ -61,17 +58,47 @@ class Event {
     return { id: result.insertId, ...data };
   }
 
-  static async addParticipant(eventId, memberId) {
-    // Check if already registered
-    const [existing] = await db.execute('SELECT id FROM event_registrations WHERE event_id = ? AND member_id = ?', [eventId, memberId]);
-    if (existing.length > 0) throw new Error('Membre déjà inscrit à cet événement');
+  /**
+   * Ajoute un inscrit à un événement.
+   * Le participant n'a pas besoin d'être un adhérent (members).
+   * @param {number} eventId
+   * @param {{ first_name, last_name, email, is_image_rights_ok }} data
+   */
+  static async addParticipant(eventId, data) {
+    const { first_name, last_name, email, is_image_rights_ok } = data;
 
-    const [result] = await db.execute(`INSERT INTO event_registrations (event_id, member_id, has_deposit) VALUES (?, ?, 0)`, [eventId, memberId]);
-    return { id: result.insertId, event_id: eventId, member_id: memberId, has_deposit: false };
+    // Vérifier que l'email n'est pas déjà inscrit à cet event
+    const [existing] = await db.execute(
+      'SELECT id FROM event_participants WHERE event_id = ? AND email = ?',
+      [eventId, email]
+    );
+    if (existing.length > 0) throw new Error('Cette personne est déjà inscrite à cet événement');
+
+    const [result] = await db.execute(
+      `INSERT INTO event_participants (event_id, first_name, last_name, email, is_image_rights_ok, has_deposit)
+       VALUES (?, ?, ?, ?, ?, 0)`,
+      [eventId, first_name, last_name, email, is_image_rights_ok ? 1 : 0]
+    );
+
+    return {
+      id: result.insertId,
+      event_id: parseInt(eventId),
+      first_name,
+      last_name,
+      email,
+      is_image_rights_ok: !!is_image_rights_ok,
+      has_deposit: false
+    };
   }
 
-  static async removeParticipant(eventId, memberId) {
-    await db.execute('DELETE FROM event_registrations WHERE event_id = ? AND member_id = ?', [eventId, memberId]);
+  /**
+   * Désinscrire un participant par son ID (event_participants.id)
+   */
+  static async removeParticipant(eventId, participantId) {
+    await db.execute(
+      'DELETE FROM event_participants WHERE id = ? AND event_id = ?',
+      [participantId, eventId]
+    );
     return true;
   }
 }

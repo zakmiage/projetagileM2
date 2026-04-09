@@ -55,16 +55,20 @@ CREATE TABLE IF NOT EXISTS events (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Table de liaison : Un Membre participe à un Événement
-CREATE TABLE IF NOT EXISTS event_registrations (
+-- Inscrits à un événement : entité indépendante des adhérents (members)
+-- Un inscrit n'est pas nécessairement adhérent de l'asso.
+-- Seule la décharge droit à l'image est requise pour participer à un event.
+CREATE TABLE IF NOT EXISTS event_participants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     event_id INT NOT NULL,
-    member_id INT NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    is_image_rights_ok BOOLEAN NOT NULL DEFAULT FALSE,
     has_deposit BOOLEAN NOT NULL DEFAULT FALSE,
     registered_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
-    CONSTRAINT fk_registration_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-    CONSTRAINT fk_registration_member FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
-    UNIQUE(event_id, member_id)
+    CONSTRAINT fk_participant_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    UNIQUE(event_id, email)
 );
 
 -- ==========================================

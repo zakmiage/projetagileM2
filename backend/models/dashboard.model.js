@@ -6,7 +6,11 @@ class Dashboard {
    */
   static async getAllEvents() {
     const [rows] = await db.execute(
-      'SELECT id, name, start_date, end_date, capacity FROM events ORDER BY start_date DESC'
+      `SELECT id, name, start_date, end_date, capacity FROM events
+       ORDER BY
+         CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC,
+         CASE WHEN start_date >= NOW() THEN start_date END ASC,
+         CASE WHEN start_date < NOW() THEN start_date END DESC`
     );
     return rows;
   }
@@ -38,7 +42,7 @@ class Dashboard {
    */
   static async getRegistrationsCount(eventId) {
     const [rows] = await db.execute(
-      'SELECT COUNT(*) as total FROM event_registrations WHERE event_id = ?',
+      'SELECT COUNT(*) as total FROM event_participants WHERE event_id = ?',
       [eventId]
     );
     return parseInt(rows[0].total, 10);
@@ -49,7 +53,7 @@ class Dashboard {
    */
   static async getMissingDepositsCount(eventId) {
     const [rows] = await db.execute(
-      'SELECT COUNT(*) as total FROM event_registrations WHERE event_id = ? AND has_deposit = 0',
+      'SELECT COUNT(*) as total FROM event_participants WHERE event_id = ? AND has_deposit = 0',
       [eventId]
     );
     return parseInt(rows[0].total, 10);
@@ -58,22 +62,12 @@ class Dashboard {
   /**
    * Résumé des tailles de t-shirt pour les inscrits à un événement
    */
-  static async getTShirtSizes(eventId) {
-    const [rows] = await db.execute(
-      `SELECT m.t_shirt_size, COUNT(*) as count
-       FROM event_registrations er
-       JOIN members m ON er.member_id = m.id
-       WHERE er.event_id = ?
-       GROUP BY m.t_shirt_size
-       ORDER BY m.t_shirt_size ASC`,
-      [eventId]
-    );
-    const sizes = {};
-    for (const row of rows) {
-      const key = row.t_shirt_size || 'Non renseignée';
-      sizes[key] = parseInt(row.count, 10);
-    }
-    return sizes;
+  /**
+   * T-shirts : non applicable pour les inscrits à un event (entité séparée des adhérents).
+   * Retourne un objet vide pour compatibilité avec le dashboard.
+   */
+  static async getTShirtSizes(_eventId) {
+    return {};
   }
 
   /**
