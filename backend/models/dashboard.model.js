@@ -88,6 +88,25 @@ class Dashboard {
     );
     return parseFloat(rows[0].total) || 0;
   }
+
+  /**
+   * Compte les lignes FSDIE éligibles sans justificatif joint (budget_attachments).
+   * Une ligne est non justifiée si aucun fichier n'est attaché dans budget_attachments.
+   * Pertinent uniquement pour les événements passés (end_date < NOW()).
+   */
+  static async getFsdieUnjustifiedCount(eventId) {
+    const [rows] = await db.execute(
+      `SELECT COUNT(*) as total
+       FROM budget_lines bl
+       WHERE bl.event_id = ?
+         AND bl.is_fsdie_eligible = 1
+         AND NOT EXISTS (
+           SELECT 1 FROM budget_attachments ba WHERE ba.budget_line_id = bl.id
+         )`,
+      [eventId]
+    );
+    return parseInt(rows[0].total, 10);
+  }
 }
 
 module.exports = Dashboard;

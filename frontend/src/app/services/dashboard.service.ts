@@ -22,6 +22,8 @@ export interface NextEventKpis {
   missingDepositsCount: number;
   tShirtSizes: TShirtSizes;
   fsdieTotal: number;
+  /** Nombre de lignes FSDIE sans justificatif joint. Null si l'event n'est pas terminé. */
+  fsdieUnjustifiedCount: number | null;
 }
 
 export interface NextEventStats {

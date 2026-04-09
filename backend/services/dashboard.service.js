@@ -17,11 +17,14 @@ class DashboardService {
       return { hasEvent: false };
     }
 
-    const [registrationsCount, missingDepositsCount, tShirtSizes, fsdieTotal] = await Promise.all([
+    const isPast = new Date(event.end_date) < new Date();
+
+    const [registrationsCount, missingDepositsCount, tShirtSizes, fsdieTotal, fsdieUnjustifiedCount] = await Promise.all([
       Dashboard.getRegistrationsCount(event.id),
       Dashboard.getMissingDepositsCount(event.id),
       Dashboard.getTShirtSizes(event.id),
-      Dashboard.getFsdieTotal(event.id)
+      Dashboard.getFsdieTotal(event.id),
+      isPast ? Dashboard.getFsdieUnjustifiedCount(event.id) : Promise.resolve(null)
     ]);
 
     return {
@@ -42,7 +45,9 @@ class DashboardService {
           : null,
         missingDepositsCount,
         tShirtSizes,
-        fsdieTotal
+        fsdieTotal,
+        // null si l'événement n'est pas encore terminé
+        fsdieUnjustifiedCount: isPast ? fsdieUnjustifiedCount : null
       }
     };
   }
