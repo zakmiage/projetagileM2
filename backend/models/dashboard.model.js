@@ -2,7 +2,18 @@ const db = require('../config/db');
 
 class Dashboard {
   /**
-   * Étape 1 : Trouve le prochain événement à venir (start_date > NOW())
+   * Retourne tous les événements triés par date décroissante (le plus récent en premier)
+   */
+  static async getAllEvents() {
+    const [rows] = await db.execute(
+      'SELECT id, name, start_date, end_date, capacity FROM events ORDER BY start_date DESC'
+    );
+    return rows;
+  }
+
+  /**
+   * Retourne le prochain événement à venir (start_date > NOW()).
+   * Utilisé pour initialiser le dashboard sur l'event le plus récent à venir.
    */
   static async getNextEvent() {
     const [rows] = await db.execute(
@@ -12,7 +23,18 @@ class Dashboard {
   }
 
   /**
-   * Étape 2 : Compte les inscrits à un événement (remplissage)
+   * Retourne un événement par son ID
+   */
+  static async getEventById(eventId) {
+    const [rows] = await db.execute(
+      'SELECT * FROM events WHERE id = ?',
+      [eventId]
+    );
+    return rows.length > 0 ? rows[0] : null;
+  }
+
+  /**
+   * Compte les inscrits à un événement (remplissage)
    */
   static async getRegistrationsCount(eventId) {
     const [rows] = await db.execute(
@@ -23,7 +45,7 @@ class Dashboard {
   }
 
   /**
-   * Étape 3 : Compte les inscrits sans caution (has_deposit = false)
+   * Compte les inscrits sans caution (has_deposit = false)
    */
   static async getMissingDepositsCount(eventId) {
     const [rows] = await db.execute(
@@ -34,7 +56,7 @@ class Dashboard {
   }
 
   /**
-   * Étape 4 : Résumé des tailles de t-shirt pour les inscrits à un événement
+   * Résumé des tailles de t-shirt pour les inscrits à un événement
    */
   static async getTShirtSizes(eventId) {
     const [rows] = await db.execute(
@@ -46,7 +68,6 @@ class Dashboard {
        ORDER BY m.t_shirt_size ASC`,
       [eventId]
     );
-    // Retourne un objet { XS: 2, S: 10, M: 25, L: 5, XL: 1 }
     const sizes = {};
     for (const row of rows) {
       const key = row.t_shirt_size || 'Non renseignée';
@@ -56,7 +77,7 @@ class Dashboard {
   }
 
   /**
-   * Étape 5 : Total FSDIE (forecast_amount, is_fsdie_eligible = true) pour un événement
+   * Total FSDIE (forecast_amount, is_fsdie_eligible = true) pour un événement
    */
   static async getFsdieTotal(eventId) {
     const [rows] = await db.execute(

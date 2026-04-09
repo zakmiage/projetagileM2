@@ -1,6 +1,6 @@
 <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
 
-  <!-- ==================== LOADING ==================== -->
+  <!-- ==================== LOADING INITIAL ==================== -->
   <div *ngIf="isLoading" class="flex justify-center items-center py-32">
     <div class="flex flex-col items-center gap-4">
       <div class="animate-spin rounded-full h-14 w-14 border-4 border-indigo-100 border-t-indigo-500"></div>
@@ -18,55 +18,95 @@
     {{ errorMsg }}
   </div>
 
-  <!-- ==================== PAS D'ÉVÉNEMENT ==================== -->
-  <div *ngIf="!isLoading && stats && !stats.hasEvent"
-    class="flex flex-col items-center justify-center py-24 gap-4 text-center">
-    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    </div>
-    <h2 class="text-xl font-semibold text-slate-700">Aucun événement à venir</h2>
-    <p class="text-slate-500 max-w-sm">Créez un nouvel événement pour commencer à suivre vos KPIs ici.</p>
-    <a routerLink="/events"
-      class="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-      Voir les événements
-    </a>
-  </div>
-
   <!-- ==================== CONTENU PRINCIPAL ==================== -->
-  <div *ngIf="!isLoading && stats && stats.hasEvent && stats.event && stats.kpis">
+  <div *ngIf="!isLoading && !errorMsg">
 
-    <!-- En-tête : nom du prochain événement -->
-    <div class="mb-8">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wide">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-          Prochain événement
-        </span>
+    <!-- ===== EN-TÊTE + SÉLECTEUR D'ÉVÉNEMENT ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+
+      <!-- Titre & badge -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wide">
+            <span *ngIf="isUpcomingEvent" class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+            <span *ngIf="!isUpcomingEvent" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            {{ isUpcomingEvent ? 'Prochain événement' : 'Événement passé' }}
+          </span>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-800 truncate">
+          {{ stats?.event?.name ?? '—' }}
+        </h1>
+        <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500">
+          <span *ngIf="stats?.event?.start_date" class="flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {{ stats!.event!.start_date | date:'fullDate':'':'fr-FR' }}
+          </span>
+          <a *ngIf="stats?.event?.id" [routerLink]="['/events', stats!.event!.id]"
+            class="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+            Voir le détail
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
       </div>
-      <h1 class="text-3xl font-bold text-slate-800">{{ stats.event.name }}</h1>
-      <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500">
-        <span class="flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          {{ stats.event.start_date | date:'fullDate':'':'fr-FR' }}
-        </span>
-        <a [routerLink]="['/events', stats.event.id]"
-          class="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
-          Voir le détail
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
+
+      <!-- Sélecteur d'événement -->
+      <div class="shrink-0 w-full sm:w-72">
+        <label for="event-selector" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">
+          Changer d'événement
+        </label>
+        <div class="relative">
+          <select
+            id="event-selector"
+            [ngModel]="selectedEventId"
+            (ngModelChange)="onEventChange($event)"
+            class="w-full appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-800 font-medium shadow-sm hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer">
+            <option *ngFor="let event of events" [ngValue]="event.id">
+              {{ event.name }} — {{ event.start_date | date:'dd/MM/yyyy' }}
+            </option>
+          </select>
+          <!-- Icône chevron -->
+          <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <!-- ==================== STATS LOADING (changement d'event) ==================== -->
+    <div *ngIf="isStatsLoading" class="flex justify-center items-center py-20">
+      <div class="flex flex-col items-center gap-3">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-100 border-t-indigo-500"></div>
+        <p class="text-slate-400 text-sm">Chargement des statistiques…</p>
+      </div>
+    </div>
+
+    <!-- ==================== PAS D'ÉVÉNEMENT ==================== -->
+    <div *ngIf="!isStatsLoading && stats && !stats.hasEvent"
+      class="flex flex-col items-center justify-center py-24 gap-4 text-center">
+      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-slate-700">Aucune donnée pour cet événement</h2>
+      <p class="text-slate-500 max-w-sm">Créez un nouvel événement pour commencer à suivre vos KPIs ici.</p>
+      <a routerLink="/events"
+        class="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+        Voir les événements
+      </a>
     </div>
 
     <!-- ==================== 4 CARTES KPI ==================== -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
+    <div *ngIf="!isStatsLoading && stats && stats.hasEvent && stats.event && stats.kpis"
+      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
 
       <!-- KPI 1 : Remplissage -->
       <div class="flex flex-col bg-white shadow-sm rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
@@ -93,7 +133,6 @@
             / {{ stats.kpis.capacity ?? '∞' }}
           </span>
         </div>
-        <!-- Jauge de progression -->
         <div class="mt-auto">
           <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
             <div class="h-2 rounded-full transition-all duration-700"

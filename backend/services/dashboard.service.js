@@ -2,54 +2,70 @@ const Dashboard = require('../models/dashboard.model');
 
 class DashboardService {
   /**
-   * Récupère toutes les stats du prochain événement en un seul appel.
-   * Retourne un objet avec un flag `hasEvent: false` si aucun événement à venir.
+   * Retourne la liste de tous les événements (pour le sélecteur).
    */
-  static async getNextEventStats() {
-    const nextEvent = await Dashboard.getNextEvent();
+  static async getAllEvents() {
+    return Dashboard.getAllEvents();
+  }
 
-    if (!nextEvent) {
+  /**
+   * Retourne les stats complètes d'un événement donné par son ID.
+   */
+  static async getEventStats(eventId) {
+    const event = await Dashboard.getEventById(eventId);
+    if (!event) {
       return { hasEvent: false };
     }
 
-    const eventId = nextEvent.id;
-
-    // Lancer les 4 requêtes KPI en parallèle pour optimiser les performances
     const [registrationsCount, missingDepositsCount, tShirtSizes, fsdieTotal] = await Promise.all([
-      Dashboard.getRegistrationsCount(eventId),
-      Dashboard.getMissingDepositsCount(eventId),
-      Dashboard.getTShirtSizes(eventId),
-      Dashboard.getFsdieTotal(eventId)
+      Dashboard.getRegistrationsCount(event.id),
+      Dashboard.getMissingDepositsCount(event.id),
+      Dashboard.getTShirtSizes(event.id),
+      Dashboard.getFsdieTotal(event.id)
     ]);
 
     return {
       hasEvent: true,
       event: {
-        id: nextEvent.id,
-        name: nextEvent.name,
-        description: nextEvent.description,
-        start_date: nextEvent.start_date,
-        end_date: nextEvent.end_date,
-        capacity: nextEvent.capacity
+        id: event.id,
+        name: event.name,
+        description: event.description,
+        start_date: event.start_date,
+        end_date: event.end_date,
+        capacity: event.capacity
       },
       kpis: {
-        // Remplissage : inscrits / capacité
         registrationsCount,
-        capacity: nextEvent.capacity,
-        fillRate: nextEvent.capacity > 0
-          ? Math.round((registrationsCount / nextEvent.capacity) * 100)
+        capacity: event.capacity,
+        fillRate: event.capacity > 0
+          ? Math.round((registrationsCount / event.capacity) * 100)
           : null,
-
-        // Cautions manquantes
         missingDepositsCount,
-
-        // Tailles T-Shirts
         tShirtSizes,
-
-        // Potentiel FSDIE
         fsdieTotal
       }
     };
+  }
+
+  /**
+   * Récupère les stats du prochain événement à venir.
+   * Si aucun événement futur, prend le dernier événement passé.
+   * @deprecated Préférer getEventStats(eventId) avec le sélecteur frontend.
+   */
+  static async getNextEventStats() {
+    let event = await Dashboard.getNextEvent();
+
+    // Fallback : si aucun événement futur, récupérer le dernier événement passé
+    if (!event) {
+      const allEvents = await Dashboard.getAllEvents();
+      event = allEvents.length > 0 ? allEvents[0] : null;
+    }
+
+    if (!event) {
+      return { hasEvent: false };
+    }
+
+    return DashboardService.getEventStats(event.id);
   }
 }
 
