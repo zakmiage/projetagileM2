@@ -1,105 +1,194 @@
 <div class="space-y-8">
-      <!-- Top Action Bar for Adding Participants -->
-      <div class="bg-primary/5 rounded-xl p-6 border border-primary/20 shadow-sm flex flex-col md:flex-row gap-4 items-end">
-        <div class="flex-1 w-full relative">
-          <label class="block text-sm font-semibold text-primary mb-2">Rechercher dans l'Annuaire</label>
-          <div class="relative">
-            <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input 
-              type="text" 
-              placeholder="Saisissez un nom, prénom ou email..." 
-              class="w-full pl-10 pr-4 py-2 border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
-              [(ngModel)]="searchQuery"
-              (focus)="showResults = true"
-            >
-            <!-- Dropdown Results -->
-            <div *ngIf="showResults && searchQuery.length > 0" class="absolute z-10 w-full mt-1 bg-white shadow-lg border border-gray-100 rounded-lg max-h-60 overflow-y-auto">
-              <div *ngFor="let member of filteredDirectory()" 
-                   (click)="selectMember(member)"
-                   class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 flex justify-between items-center transition">
-                <div>
-                  <div class="font-medium text-text">{{ member.first_name }} {{ member.last_name }}</div>
-                  <div class="text-xs text-gray-500">{{ member.email }}</div>
-                </div>
-                <!-- Status Badges Preview -->
-                <div class="flex space-x-1">
-                  <span [title]="'Certificat: ' + (member.is_certificate_ok ? 'OK' : 'Manquant')" [class]="member.is_certificate_ok ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'" class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold">C</span>
-                  <span [title]="'Décharge: ' + (member.is_waiver_ok ? 'OK' : 'Manquant')" [class]="member.is_waiver_ok ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'" class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold">D</span>
-                </div>
-              </div>
-              <div *ngIf="filteredDirectory().length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
-                Aucun membre trouvé.
-              </div>
+
+  <!-- ====================================================
+       FORMULAIRE D'AJOUT D'UN INSCRIT
+       Un inscrit peut être adhérent OU externe.
+       Seule la décharge droit à l'image est requise.
+       ==================================================== -->
+  <div class="bg-primary/5 rounded-xl p-6 border border-primary/20 shadow-sm">
+    <h3 class="text-sm font-semibold text-primary mb-4">Inscrire une personne à cet événement</h3>
+
+    <!-- Pré-remplissage depuis l'annuaire des adhérents -->
+    <div class="mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1">
+        Rechercher un adhérent pour pré-remplir
+        <span class="text-gray-400 font-normal">(optionnel — vous pouvez aussi saisir manuellement)</span>
+      </label>
+      <div class="relative">
+        <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Nom, prénom ou email d'un adhérent..."
+          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+          [(ngModel)]="searchQuery"
+          (focus)="showResults = true"
+        >
+        <!-- Dropdown adhérents -->
+        <div *ngIf="showResults && searchQuery.length >= 2" class="absolute z-20 w-full mt-1 bg-white shadow-lg border border-gray-100 rounded-lg max-h-56 overflow-y-auto">
+          <div *ngFor="let m of filteredDirectory()"
+               (click)="prefillFromMember(m)"
+               class="px-4 py-3 hover:bg-primary/5 cursor-pointer border-b border-gray-50 last:border-0 flex justify-between items-center transition">
+            <div>
+              <div class="text-sm font-medium text-text">{{ m.first_name }} {{ m.last_name }}</div>
+              <div class="text-xs text-gray-500">{{ m.email }}</div>
             </div>
+            <span class="text-xs text-primary font-medium">Pré-remplir →</span>
           </div>
-        </div>
-        
-        <button [disabled]="!selectedMemberToRegister" [class.opacity-50]="!selectedMemberToRegister" (click)="addParticipant()" class="bg-primary hover:bg-opacity-90 text-white px-6 py-2.5 rounded-lg font-medium flex items-center space-x-2 transition shadow-sm whitespace-nowrap">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-          <span>Ajouter à l'événement</span>
-        </button>
-      </div>
-
-      <!-- Currently Selected Member Banner -->
-      <div *ngIf="selectedMemberToRegister" class="bg-blue-50 border border-blue-100 rounded-lg p-3 flex justify-between items-center text-sm animate-fade-in">
-        <div><span class="font-medium text-blue-800">Sélectionné :</span> {{ selectedMemberToRegister.first_name }} {{ selectedMemberToRegister.last_name }}</div>
-        <button (click)="selectedMemberToRegister = null" class="text-blue-500 hover:text-blue-700 font-medium">Annuler selection</button>
-      </div>
-
-      <!-- Participants Table -->
-      <div>
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-text">Liste des Inscrits <span class="text-gray-400 font-normal text-sm ml-2">({{ registrations.length }} inscrits)</span></h2>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-          <table class="w-full text-left border-collapse text-sm">
-            <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider text-xs border-b border-gray-200">
-              <tr>
-                <th class="px-6 py-3 font-medium">Nom, Prénom & Contact</th>
-                <th class="px-6 py-3 font-medium text-center">T-Shirt</th>
-                <th class="px-6 py-3 font-medium text-center">Statuts Dossier</th>
-                <th class="px-6 py-3 font-medium text-center">Caution ?</th>
-                <th class="px-6 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr *ngFor="let reg of registrations" class="hover:bg-gray-50 transition group">
-                <td class="px-6 py-4">
-                  <div class="font-semibold text-text">{{ reg.member?.first_name }} {{ reg.member?.last_name }}</div>
-                  <div class="text-xs text-gray-500">{{ reg.member?.email }}</div>
-                  <div *ngIf="reg.member?.allergies" class="mt-1 text-xs text-orange-600 font-medium bg-orange-50 inline-block px-1.5 py-0.5 rounded">⚠️ {{ reg.member?.allergies }}</div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-bold">{{ reg.member?.t_shirt_size || '-' }}</span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-col space-y-1 items-center">
-                    <span [class.bg-green-100]="reg.member?.is_certificate_ok" [class.text-green-800]="reg.member?.is_certificate_ok" [class.bg-red-100]="!reg.member?.is_certificate_ok" [class.text-red-800]="!reg.member?.is_certificate_ok" class="px-2 py-0.5 text-[10px] leading-4 font-semibold rounded-full w-24 text-center">
-                      Certificat
-                    </span>
-                    <span [class.bg-green-100]="reg.member?.is_waiver_ok" [class.text-green-800]="reg.member?.is_waiver_ok" [class.bg-red-100]="!reg.member?.is_waiver_ok" [class.text-red-800]="!reg.member?.is_waiver_ok" class="px-2 py-0.5 text-[10px] leading-4 font-semibold rounded-full w-24 text-center">
-                      Décharge
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                   <input type="checkbox" [(ngModel)]="reg.has_deposit" class="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer">
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button (click)="removeParticipant(reg)" class="text-gray-300 hover:text-red-600 transition p-1 hover:bg-red-50 rounded" title="Désinscrire">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  </button>
-                </td>
-              </tr>
-              <tr *ngIf="registrations.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                  <svg class="w-12 h-12 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                  Aucun participant pour le moment.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div *ngIf="filteredDirectory().length === 0" class="px-4 py-3 text-sm text-gray-400 text-center italic">
+            Aucun adhérent disponible correspondant.
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Séparateur -->
+    <div class="border-t border-primary/10 mb-4"></div>
+
+    <!-- Champs du formulaire -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Prénom <span class="text-red-500">*</span></label>
+        <input
+          type="text"
+          placeholder="Prénom"
+          [(ngModel)]="form.first_name"
+          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+        >
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Nom <span class="text-red-500">*</span></label>
+        <input
+          type="text"
+          placeholder="Nom"
+          [(ngModel)]="form.last_name"
+          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+        >
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Email <span class="text-red-500">*</span></label>
+        <input
+          type="email"
+          placeholder="email@exemple.fr"
+          [(ngModel)]="form.email"
+          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+        >
+      </div>
+    </div>
+
+    <!-- Droit à l'image + bouton -->
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <!-- Checkbox droit à l'image -->
+      <label class="flex items-center gap-2.5 cursor-pointer select-none group">
+        <div class="relative">
+          <input type="checkbox" [(ngModel)]="form.is_image_rights_ok" class="sr-only peer">
+          <div class="w-5 h-5 rounded border-2 border-gray-300 peer-checked:border-primary peer-checked:bg-primary transition flex items-center justify-center">
+            <svg *ngIf="form.is_image_rights_ok" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </div>
+        <span class="text-sm font-medium text-gray-700">Décharge droit à l'image signée</span>
+      </label>
+
+      <div class="flex gap-2 sm:ml-auto">
+        <button
+          *ngIf="form.first_name || form.last_name || form.email"
+          (click)="clearForm()"
+          class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+        >
+          Effacer
+        </button>
+        <button
+          [disabled]="!isFormValid()"
+          [class.opacity-40]="!isFormValid()"
+          [class.cursor-not-allowed]="!isFormValid()"
+          (click)="addParticipant()"
+          class="bg-primary hover:bg-opacity-90 text-white px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition shadow-sm"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Inscrire
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       TABLEAU DES INSCRITS
+       ==================================================== -->
+  <div>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold text-text">
+        Inscrits à l'événement
+        <span class="text-gray-400 font-normal text-sm ml-2">({{ participants.length }} inscrits)</span>
+      </h2>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+      <table class="w-full text-left border-collapse text-sm">
+        <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider text-xs border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-3 font-medium">Nom & Contact</th>
+            <th class="px-6 py-3 font-medium text-center">Droit à l'image</th>
+            <th class="px-6 py-3 font-medium text-center">Caution versée</th>
+            <th class="px-6 py-3 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let p of participants" class="hover:bg-gray-50 transition group">
+            <!-- Nom & Email -->
+            <td class="px-6 py-4">
+              <div class="font-semibold text-text">{{ p.first_name }} {{ p.last_name }}</div>
+              <div class="text-xs text-gray-500">{{ p.email }}</div>
+            </td>
+
+            <!-- Droit à l'image -->
+            <td class="px-6 py-4 text-center">
+              <span
+                [class]="p.is_image_rights_ok
+                  ? 'bg-green-100 text-green-800 border border-green-200'
+                  : 'bg-red-100 text-red-700 border border-red-200'"
+                class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full"
+              >
+                <svg *ngIf="p.is_image_rights_ok" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <svg *ngIf="!p.is_image_rights_ok" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+                {{ p.is_image_rights_ok ? 'Signée' : 'Manquante' }}
+              </span>
+            </td>
+
+            <!-- Caution -->
+            <td class="px-6 py-4 text-center">
+              <input type="checkbox" [(ngModel)]="p.has_deposit" class="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer">
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 text-right">
+              <button (click)="removeParticipant(p)" class="text-gray-300 hover:text-red-600 transition p-1 hover:bg-red-50 rounded" title="Désinscrire">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          <!-- État vide -->
+          <tr *ngIf="participants.length === 0">
+            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+              <svg class="w-12 h-12 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+              Aucun inscrit pour le moment.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

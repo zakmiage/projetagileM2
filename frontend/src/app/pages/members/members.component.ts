@@ -97,10 +97,13 @@ export class MembersComponent implements OnInit {
 
     if (this.isNewMember) {
       this.memberService.createMember(this.editedMember as Omit<Member, 'id' | 'created_at' | 'updated_at'>).subscribe({
-        next: (created) => {
-          this.members = [...this.members, created];
+        next: () => {
+          // Recharger depuis l'API pour respecter le tri alphabétique
+          this.memberService.getMembers().subscribe(members => {
+            this.members = members;
+            this.cdr.detectChanges();
+          });
           this.closeModal();
-          this.cdr.detectChanges();
         },
         error: () => alert("Erreur lors de la création")
       });
