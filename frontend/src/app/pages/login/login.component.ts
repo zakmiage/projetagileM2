@@ -46,7 +46,7 @@ export class LoginComponent {
 
     if (this.authService.login(this.email, this.password)) {
       // Connecté avec succès
-      this.router.navigate(['/events']);
+      this.router.navigate(['/dashboard']);
     } else {
       this.errorMsg = 'Identifiants incorrects.';
     }
