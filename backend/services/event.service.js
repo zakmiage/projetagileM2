@@ -18,6 +18,22 @@ class EventService {
     return await Event.create(data);
   }
 
+  static async updateEvent(id, data) {
+    if (!data.name || !data.start_date || !data.end_date || data.capacity === undefined) {
+      throw new Error('Les champs name, start_date, end_date et capacity sont requis.');
+    }
+
+    const updatedEvent = await Event.update(id, data);
+    if (!updatedEvent) throw new Error('Événement introuvable');
+    return updatedEvent;
+  }
+
+  static async deleteEvent(id) {
+    const deleted = await Event.delete(id);
+    if (!deleted) throw new Error('Événement introuvable');
+    return true;
+  }
+
   /**
    * @param {number} eventId
    * @param {{ first_name, last_name, email, is_image_rights_ok }} data

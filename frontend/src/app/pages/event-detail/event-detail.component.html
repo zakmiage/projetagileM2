@@ -1,12 +1,29 @@
 <div class="space-y-6" *ngIf="event">
       <!-- Header -->
-      <div class="flex items-center space-x-4">
-        <a routerLink="/events" class="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-500 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </a>
-        <div>
-          <h1 class="text-2xl font-bold text-text">{{ event.name }}</h1>
-          <p class="text-sm text-gray-500">{{ event.start_date | date:'longDate' }} - {{ event.capacity }} places max</p>
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center space-x-4">
+          <a routerLink="/events" class="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-500 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          </a>
+          <div>
+            <h1 class="text-2xl font-bold text-text">{{ event.name }}</h1>
+            <p class="text-sm text-gray-500">{{ event.start_date | date:'longDate' }} - {{ event.capacity }} places max</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            (click)="openEditModal()"
+            class="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition text-sm font-medium"
+          >
+            Modifier
+          </button>
+          <button
+            (click)="deleteEvent()"
+            class="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition text-sm font-medium"
+          >
+            Supprimer
+          </button>
         </div>
       </div>
 
@@ -55,4 +72,58 @@
     <!-- Error state -->
     <div *ngIf="error" class="p-4 bg-red-50 text-red-600 rounded-lg">
       {{ error }}
+    </div>
+
+    <!-- Edit modal -->
+    <div *ngIf="isEditModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeEditModal()"></div>
+
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden text-left flex flex-col max-h-[90vh]">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+          <h3 class="text-lg font-medium text-text">Modifier l'événement</h3>
+          <button type="button" class="text-gray-400 hover:text-gray-500 transition" (click)="closeEditModal()">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <form (ngSubmit)="saveEventChanges()" #editEventForm="ngForm" class="flex flex-col flex-1 overflow-hidden">
+          <div class="p-6 overflow-y-auto flex-1 space-y-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Nom de l'événement <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="editForm.name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea [(ngModel)]="editForm.description" name="description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Date de début <span class="text-red-500">*</span></label>
+                <input type="date" [(ngModel)]="editForm.start_date" name="start_date" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Date de fin</label>
+                <input type="date" [(ngModel)]="editForm.end_date" name="end_date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Capacité Maximale <span class="text-red-500">*</span></label>
+                <input type="number" [(ngModel)]="editForm.capacity" name="capacity" min="1" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 shrink-0">
+            <button type="button" class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-primary transition" (click)="closeEditModal()">
+              Annuler
+            </button>
+            <button type="submit" [disabled]="!editEventForm.valid || isSaving" [class.opacity-50]="!editEventForm.valid || isSaving" class="bg-primary text-white border border-transparent rounded-md shadow-sm py-2 px-6 text-sm font-medium hover:bg-opacity-90 focus:ring-2 focus:ring-primary transition">
+              {{ isSaving ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>

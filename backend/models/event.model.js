@@ -58,6 +58,35 @@ class Event {
     return { id: result.insertId, ...data };
   }
 
+  static async update(id, data) {
+    const toMysql = (isoStr) => {
+      if (!isoStr) return null;
+      return isoStr.replace('T', ' ').substring(0, 19);
+    };
+
+    const [result] = await db.execute(
+      `UPDATE events
+       SET name = ?, description = ?, start_date = ?, end_date = ?, capacity = ?
+       WHERE id = ?`,
+      [
+        data.name,
+        data.description || null,
+        toMysql(data.start_date),
+        toMysql(data.end_date),
+        data.capacity,
+        id
+      ]
+    );
+
+    if (result.affectedRows === 0) return null;
+    return this.findById(id);
+  }
+
+  static async delete(id) {
+    const [result] = await db.execute('DELETE FROM events WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+
   /**
    * Ajoute un inscrit à un événement.
    * Le participant n'a pas besoin d'être un adhérent (members).
