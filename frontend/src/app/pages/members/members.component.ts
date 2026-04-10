@@ -1,8 +1,11 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MemberService } from '../../services/member.service';
+import { FileService } from '../../services/file.service';
 import { Member, MemberAttachment } from '../../models/member.model';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-members',
@@ -12,6 +15,7 @@ import { Member, MemberAttachment } from '../../models/member.model';
 })
 export class MembersComponent implements OnInit {
   private memberService = inject(MemberService);
+  private fileService = inject(FileService);
   private cdr = inject(ChangeDetectorRef);
   
   members: Member[] = [];
@@ -23,6 +27,9 @@ export class MembersComponent implements OnInit {
   
   // Tableau de gestion dynamique des inputs d'allergies
   parsedAllergies: string[] = [];
+  selectedFile: File | null = null;
+  selectedDocumentType: string = 'CERTIFICATE';
+  isUploading = false;
 
   ngOnInit() {
     this.memberService.getMembers().subscribe({
@@ -59,6 +66,7 @@ export class MembersComponent implements OnInit {
     this.selectedMember = newMemberTemplate as Member; // Trick display
     this.editedMember = JSON.parse(JSON.stringify(newMemberTemplate));
     this.parsedAllergies = [];
+    this.selectedDocumentType = 'CERTIFICATE';
   }
 
   openModal(member: Member) {
@@ -73,11 +81,17 @@ export class MembersComponent implements OnInit {
     } else {
       this.parsedAllergies = [];
     }
+
+    this.selectedDocumentType = 'CERTIFICATE';
+
+    this.loadAttachments(member.id);
   }
 
   closeModal() {
     this.selectedMember = null;
     this.isNewMember = false;
+    this.selectedFile = null;
+    this.isUploading = false;
   }
 
   addAllergy() {
@@ -123,34 +137,104 @@ export class MembersComponent implements OnInit {
   }
 
   triggerUpload() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*, application/pdf';
-    
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        // Demander le type de document pour être propre (Mock simple)
-        const docType = prompt("Type de document ? (Ex: CERTIFICAT, DECHARGE, AUTRE)", "AUTRE");
-        
-        const fileUrl = URL.createObjectURL(file);
-        const mockAttachment: MemberAttachment = {
-          id: Math.floor(Math.random() * 1000),
-          member_id: this.editedMember.id,
-          document_type: docType || 'AUTRE',
-          file_name: file.name,
-          file_path: fileUrl,
-          uploaded_at: new Date().toISOString()
-        };
-        
-        this.editedMember.attachments?.push(mockAttachment);
+    const inputElement = document.getElementById('member-file-input') as HTMLInputElement | null;
+    inputElement?.click();
+  }
+
+  onFileSelected(event: any) {
+    const file = event?.target?.files?.[0] ?? null;
+    this.selectedFile = file;
+  }
+
+  upload() {
+    if (!this.canUpload()) {
+      return;
+    }
+
+    const memberId = this.editedMember.id;
+    const selectedFile = this.selectedFile;
+    if (!selectedFile) {
+      return;
+    }
+
+    this.isUploading = true;
+
+    this.fileService
+      .uploadMemberAttachment(memberId, selectedFile, this.selectedDocumentType)
+      .pipe(
+        finalize(() => {
+          this.isUploading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+      next: () => {
+        this.selectedFile = null;
+
+        const inputElement = document.getElementById('member-file-input') as HTMLInputElement | null;
+        if (inputElement) {
+          inputElement.value = '';
+        }
+
+        this.loadAttachments(memberId);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.selectedFile = null;
+        const backendMessage = error?.error?.message;
+        if (error.status === 0) {
+          alert('Upload impossible: le backend ne repond pas. Verifie que le serveur Node tourne sur http://localhost:3000.');
+          return;
+        }
+
+        alert(`Erreur upload (${error.status}): ${backendMessage || 'erreur inconnue'}`);
       }
-    };
-    
-    input.click();
+    });
   }
 
   viewAttachment(att: MemberAttachment) {
-    window.open(att.file_path, '_blank');
+    window.open(this.fileService.getFileUrl(att.file_path), '_blank');
+  }
+
+  removeAttachment(att: MemberAttachment, event: MouseEvent) {
+    event.stopPropagation();
+
+    if (!this.editedMember?.id) {
+      return;
+    }
+
+    if (!confirm(`Supprimer le fichier "${att.file_name}" ?`)) {
+      return;
+    }
+
+    this.fileService.deleteMemberAttachment(this.editedMember.id, att.id).subscribe({
+      next: () => {
+        this.editedMember.attachments = (this.editedMember.attachments ?? []).filter((item) => item.id !== att.id);
+        this.cdr.detectChanges();
+      },
+      error: (error: HttpErrorResponse) => {
+        const backendMessage = error?.error?.message;
+        alert(`Erreur suppression (${error.status}): ${backendMessage || 'erreur inconnue'}`);
+      }
+    });
+  }
+
+  canUpload(): boolean {
+    return !!this.selectedFile && !!this.editedMember?.id && !this.isUploading;
+  }
+
+  private loadAttachments(memberId: number) {
+    this.fileService.getMemberAttachments(memberId).subscribe({
+      next: (attachments) => {
+        this.editedMember.attachments = attachments.map((attachment) => ({
+          ...attachment,
+          file_path: this.fileService.getFileUrl(attachment.file_path)
+        }));
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.editedMember.attachments = [];
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

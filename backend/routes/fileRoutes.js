@@ -29,7 +29,9 @@ const uploadBudget = multer({ storage: buildStorage('budget') });
 
 router.get('/members/:id/attachments', fileController.getMemberAttachments);
 router.post('/members/:id/attachments', uploadMember.single('file'), fileController.uploadMemberAttachment);
+router.delete('/members/:id/attachments/:attachment_id', fileController.deleteMemberAttachment);
 router.post('/budget/upload', uploadBudget.single('file'), fileController.uploadBudgetAttachment);
 router.get('/budget/:budget_line_id/attachments', fileController.getBudgetAttachments);
+router.delete('/budget/:budget_line_id/attachments/:attachment_id', fileController.deleteBudgetAttachment);
 
 module.exports = router;

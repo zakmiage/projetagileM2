@@ -124,11 +124,39 @@
           <div class="mt-6 border-t border-gray-200 pt-6">
             <div class="flex justify-between items-center mb-4">
               <h4 class="text-base font-medium text-text">Documents (Statuts)</h4>
-              <button (click)="triggerUpload()" type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm font-medium flex items-center transition shadow-sm">
-                <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                Joindre une pièce jointe
-              </button>
+              <div class="flex items-center gap-2">
+                <select [(ngModel)]="selectedDocumentType" class="bg-white border border-gray-300 rounded-md shadow-sm py-1.5 px-2 text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                  <option value="CERTIFICATE">CERTIFICATE</option>
+                  <option value="WAIVER">WAIVER</option>
+                  <option value="PARENTAL_CONSENT">PARENTAL_CONSENT</option>
+                  <option value="IDENTITY_CARD">IDENTITY_CARD</option>
+                  <option value="CV">CV</option>
+                  <option value="AUTRE">AUTRE</option>
+                </select>
+                <button (click)="triggerUpload()" type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm font-medium flex items-center transition shadow-sm">
+                  <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                  Choisir un fichier
+                </button>
+                <button
+                  (click)="upload()"
+                  type="button"
+                  [disabled]="!canUpload()"
+                  class="bg-primary text-white px-3 py-1.5 rounded text-sm font-medium transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {{ isUploading ? 'Envoi...' : 'OK' }}
+                </button>
+              </div>
             </div>
+            <input
+              id="member-file-input"
+              type="file"
+              accept="image/*,application/pdf"
+              (change)="onFileSelected($event)"
+              class="hidden"
+            >
+            <p *ngIf="selectedFile" class="text-xs text-gray-500 mb-4">
+              Fichier sélectionné : {{ selectedFile.name }}
+            </p>
             
             <div class="space-y-4 mb-6">
               <div class="flex items-start">
@@ -161,11 +189,16 @@
             <div *ngIf="editedMember.attachments && editedMember.attachments.length > 0">
               <h5 class="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wide">Fichiers rattachés</h5>
               <div class="flex flex-wrap gap-2">
-                <span *ngFor="let att of editedMember.attachments" class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 cursor-pointer hover:bg-blue-100 shadow-sm transition" (click)="viewAttachment(att)">
-                  <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                  {{ att.file_name }}
-                  <span class="ml-2 text-xs opacity-75">({{ att.document_type }})</span>
-                </span>
+                <div *ngFor="let att of editedMember.attachments" class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm transition">
+                  <button type="button" class="inline-flex items-center hover:text-blue-900" (click)="viewAttachment(att)">
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                    {{ att.file_name }}
+                    <span class="ml-2 text-xs opacity-75">({{ att.document_type }})</span>
+                  </button>
+                  <button type="button" class="ml-2 text-red-500 hover:text-red-700" title="Supprimer" (click)="removeAttachment(att, $event)">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
               </div>
             </div>
             

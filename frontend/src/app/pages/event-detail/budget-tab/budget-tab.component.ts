@@ -1,8 +1,12 @@
 import { Component, Input, OnChanges, SimpleChanges, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { BudgetService } from '../../../services/budget.service';
+import { FileService } from '../../../services/file.service';
 import { BudgetLine, BudgetAttachment } from '../../../models/budget.model';
+import { finalize } from 'rxjs/operators';
+import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-budget-tab',
@@ -26,10 +30,14 @@ export class BudgetTabComponent {
   }
 
   private budgetService = inject(BudgetService);
+  private fileService = inject(FileService);
   private cdr = inject(ChangeDetectorRef);
 
   lines: BudgetLine[] = [];
   viewMode: 'forecast' | 'actual' = 'forecast';
+  selectedFile: File | null = null;
+  selectedBudgetLine: BudgetLine | null = null;
+  isUploading = false;
 
   loadBudget() {
     console.log('loadBudget called for event:', this.eventId);
@@ -37,6 +45,7 @@ export class BudgetTabComponent {
       next: (data) => {
         console.log('Received data from backend:', data);
         this.lines = data ? [...data] : [];
+        this.lines.forEach((line) => this.loadAttachments(line.id));
         this.cdr.detectChanges(); // Force DOM update
       },
       error: (err) => {
@@ -110,38 +119,112 @@ export class BudgetTabComponent {
   }
 
   triggerUpload(line: BudgetLine) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*, application/pdf';
+    this.selectedBudgetLine = line;
+    this.selectedFile = null;
+    const inputElement = document.getElementById('budget-file-input') as HTMLInputElement | null;
+    if (inputElement) {
+      inputElement.value = '';
+      inputElement.click();
+    }
+  }
 
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        // Create an ObjectURL to simulate the uploaded file being accessible
-        const fileUrl = URL.createObjectURL(file);
+  onFileSelected(event: any) {
+    const file = event?.target?.files?.[0] ?? null;
+    this.selectedFile = file;
+  }
 
-        const mockAttachment: BudgetAttachment = {
-          id: Math.floor(Math.random() * 1000),
-          budget_line_id: line.id,
-          file_name: file.name,
-          file_path: fileUrl, // Real local URL for viewing
-          uploaded_at: new Date().toISOString()
-        };
+  upload() {
+    if (!this.canUpload()) {
+      return;
+    }
 
-        if (!line.attachments) {
-          line.attachments = [];
+    const selectedFile = this.selectedFile;
+    const currentLine = this.selectedBudgetLine;
+
+    if (!selectedFile || !currentLine) {
+      return;
+    }
+
+    this.isUploading = true;
+
+    this.fileService
+      .uploadBudgetAttachment(currentLine.id, selectedFile)
+      .pipe(
+        timeout(20000),
+        finalize(() => {
+          this.isUploading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+      next: () => {
+        this.selectedFile = null;
+        this.selectedBudgetLine = null;
+
+        const inputElement = document.getElementById('budget-file-input') as HTMLInputElement | null;
+        if (inputElement) {
+          inputElement.value = '';
         }
-        line.attachments.push(mockAttachment);
-        this.save(line);
-      }
-    };
 
-    input.click();
+        this.loadAttachments(currentLine.id);
+      },
+      error: (error: HttpErrorResponse | any) => {
+        this.selectedFile = null;
+        if (error?.name === 'TimeoutError') {
+          alert('Upload trop long: verifie la connexion ou reduis la taille du fichier.');
+          return;
+        }
+
+        const backendMessage = error?.error?.message;
+        alert(`Erreur upload justificatif (${error.status}): ${backendMessage || 'erreur inconnue'}`);
+      }
+    });
   }
 
   viewAttachment(att: BudgetAttachment) {
     // Ouvrir directement le fichier dans un nouvel onglet
-    window.open(att.file_path, '_blank');
+    window.open(this.fileService.getFileUrl(att.file_path), '_blank');
+  }
+
+  removeAttachment(line: BudgetLine, att: BudgetAttachment, event: MouseEvent) {
+    event.stopPropagation();
+
+    if (!confirm(`Supprimer le justificatif "${att.file_name}" ?`)) {
+      return;
+    }
+
+    this.fileService.deleteBudgetAttachment(line.id, att.id).subscribe({
+      next: () => {
+        line.attachments = (line.attachments ?? []).filter((item) => item.id !== att.id);
+        this.cdr.detectChanges();
+      },
+      error: (error: HttpErrorResponse) => {
+        const backendMessage = error?.error?.message;
+        alert(`Erreur suppression (${error.status}): ${backendMessage || 'erreur inconnue'}`);
+      }
+    });
+  }
+
+  canUploadLine(line: BudgetLine): boolean {
+    return !!this.selectedFile && !!this.selectedBudgetLine && this.selectedBudgetLine.id === line.id && !this.isUploading;
+  }
+
+  isLineSelected(line: BudgetLine): boolean {
+    return !!this.selectedBudgetLine && this.selectedBudgetLine.id === line.id;
+  }
+
+  clearSelectedUpload() {
+    this.selectedFile = null;
+    this.selectedBudgetLine = null;
+
+    const inputElement = document.getElementById('budget-file-input') as HTMLInputElement | null;
+    if (inputElement) {
+      inputElement.value = '';
+    }
+  }
+
+  private canUpload(): boolean {
+    return !!this.selectedFile && !!this.selectedBudgetLine?.id && !this.isUploading;
   }
 
   export(fsdieOnly: boolean) {
@@ -159,6 +242,32 @@ export class BudgetTabComponent {
       error: (err) => {
         console.error('Export failed', err);
         alert('Erreur lors de l\'export.');
+      }
+    });
+  }
+
+  private loadAttachments(lineId: number) {
+    this.fileService.getBudgetAttachments(lineId).subscribe({
+      next: (attachments) => {
+        const normalized = attachments.map((attachment) => ({
+          ...attachment,
+          file_path: this.fileService.getFileUrl(attachment.file_path)
+        }));
+
+        const targetLine = this.lines.find((line) => line.id === lineId);
+        if (targetLine) {
+          targetLine.attachments = normalized;
+        }
+
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        const targetLine = this.lines.find((line) => line.id === lineId);
+        if (targetLine) {
+          targetLine.attachments = [];
+        }
+
+        this.cdr.detectChanges();
       }
     });
   }
