@@ -1,11 +1,9 @@
 import { User } from './user.model';
+import { Attachment } from './attachment.model';
 
-export interface BudgetAttachment {
+export interface BudgetAttachment extends Attachment {
   id: number;
   budget_line_id: number;
-  file_name: string;
-  file_path: string;
-  uploaded_at: string;
 }
 
 export interface BudgetLine {

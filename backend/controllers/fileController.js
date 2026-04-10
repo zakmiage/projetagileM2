@@ -1,4 +1,6 @@
 const db = require('../config/db');
+const fs = require('fs');
+const path = require('path');
 
 const normalizeAttachment = (row) => ({
     id: row.id,
@@ -23,6 +25,17 @@ const parsePositiveInt = (value) => {
 };
 
 const getStoredFilePath = (folder, fileName) => `uploads/${folder}/${fileName}`;
+
+const removeStoredFile = (storedFilePath) => {
+    if (!storedFilePath) {
+        return;
+    }
+
+    const absolutePath = path.resolve(__dirname, '..', storedFilePath);
+    if (fs.existsSync(absolutePath)) {
+        fs.unlinkSync(absolutePath);
+    }
+};
 
 const insertMemberAttachment = async ({ memberId, documentType, fileName, filePath }) => {
     const sql = `
@@ -184,6 +197,109 @@ exports.getBudgetAttachments = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             message: 'Erreur serveur lors de la récupération des documents budgétaires.',
+            error: error.message
+        });
+    }
+};
+
+exports.deleteMemberAttachment = async (req, res) => {
+    try {
+        const memberId = parsePositiveInt(req.params.id);
+        const attachmentId = parsePositiveInt(req.params.attachment_id);
+
+        if (!memberId || !attachmentId) {
+            return res.status(400).json({
+                message: 'Identifiants de membre ou de pièce jointe invalides.'
+            });
+        }
+
+        const [rows] = await db.execute(
+            `
+                SELECT id, file_path
+                FROM member_attachments
+                WHERE id = ? AND member_id = ?
+                LIMIT 1
+            `,
+            [attachmentId, memberId]
+        );
+
+        const attachment = rows[0];
+
+        if (!attachment) {
+            return res.status(404).json({
+                message: 'Pièce jointe introuvable pour ce membre.'
+            });
+        }
+
+        await db.execute(
+            'DELETE FROM member_attachments WHERE id = ? AND member_id = ?',
+            [attachmentId, memberId]
+        );
+
+        try {
+            removeStoredFile(attachment.file_path);
+        } catch (fileError) {
+            // If DB deletion succeeded but file cleanup failed, keep API success and log.
+            console.error('Suppression du fichier physique échouée:', fileError.message);
+        }
+
+        return res.status(200).json({
+            message: 'Pièce jointe supprimée avec succès.'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Erreur serveur lors de la suppression de la pièce jointe.',
+            error: error.message
+        });
+    }
+};
+
+exports.deleteBudgetAttachment = async (req, res) => {
+    try {
+        const budgetLineId = parsePositiveInt(req.params.budget_line_id);
+        const attachmentId = parsePositiveInt(req.params.attachment_id);
+
+        if (!budgetLineId || !attachmentId) {
+            return res.status(400).json({
+                message: 'Identifiants de ligne budgétaire ou de pièce jointe invalides.'
+            });
+        }
+
+        const [rows] = await db.execute(
+            `
+                SELECT id, file_path
+                FROM budget_attachments
+                WHERE id = ? AND budget_line_id = ?
+                LIMIT 1
+            `,
+            [attachmentId, budgetLineId]
+        );
+
+        const attachment = rows[0];
+
+        if (!attachment) {
+            return res.status(404).json({
+                message: 'Pièce jointe introuvable pour cette ligne budgétaire.'
+            });
+        }
+
+        await db.execute(
+            'DELETE FROM budget_attachments WHERE id = ? AND budget_line_id = ?',
+            [attachmentId, budgetLineId]
+        );
+
+        try {
+            removeStoredFile(attachment.file_path);
+        } catch (fileError) {
+            console.error('Suppression du fichier budget échouée:', fileError.message);
+        }
+
+        return res.status(200).json({
+            message: 'Justificatif budgétaire supprimé avec succès.'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Erreur serveur lors de la suppression du justificatif budgétaire.',
             error: error.message
         });
     }

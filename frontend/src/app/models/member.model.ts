@@ -1,10 +1,9 @@
-export interface MemberAttachment {
+import { Attachment } from './attachment.model';
+
+export interface MemberAttachment extends Attachment {
   id: number;
   member_id: number;
   document_type: 'CERTIFICATE' | 'WAIVER' | 'PARENTAL_CONSENT' | string;
-  file_name: string;
-  file_path: string;
-  uploaded_at: string;
 }
 
 export interface Member {
