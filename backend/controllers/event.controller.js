@@ -27,6 +27,30 @@ exports.createEvent = async (req, res) => {
     }
 };
 
+exports.updateEvent = async (req, res) => {
+    try {
+        const updatedEvent = await EventService.updateEvent(req.params.id, req.body);
+        res.status(200).json({ success: true, data: updatedEvent });
+    } catch (error) {
+        if (error.message === 'Événement introuvable') {
+            return res.status(404).json({ success: false, message: error.message });
+        }
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+exports.deleteEvent = async (req, res) => {
+    try {
+        await EventService.deleteEvent(req.params.id);
+        res.status(200).json({ success: true, message: 'Événement supprimé avec succès' });
+    } catch (error) {
+        if (error.message === 'Événement introuvable') {
+            return res.status(404).json({ success: false, message: error.message });
+        }
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
 exports.addParticipant = async (req, res) => {
     try {
         const { first_name, last_name, email, is_image_rights_ok } = req.body;

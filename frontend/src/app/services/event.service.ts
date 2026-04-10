@@ -33,6 +33,20 @@ export class EventService {
     );
   }
 
+  updateEvent(id: number, event: Omit<Event, 'id' | 'created_at' | 'participants' | 'budget_lines'>): Observable<Event> {
+    return this.http.put<{success: boolean, data: Event}>(`${this.apiUrl}/${id}`, event).pipe(
+      map(res => res.data),
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  deleteEvent(id: number): Observable<boolean> {
+    return this.http.delete<{success: boolean}>(`${this.apiUrl}/${id}`).pipe(
+      map(res => res.success),
+      catchError(err => throwError(() => err))
+    );
+  }
+
   /**
    * Ajouter un inscrit à un événement.
    * Le participant n'a pas besoin d'être un adhérent.
