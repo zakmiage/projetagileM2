@@ -29,8 +29,15 @@ exports.createEvent = async (req, res) => {
 
 exports.addParticipant = async (req, res) => {
     try {
-        const newReg = await EventService.addParticipant(req.params.id, req.body.memberId);
-        res.status(201).json({ success: true, data: newReg });
+        const { first_name, last_name, email, is_image_rights_ok } = req.body;
+        if (!first_name || !last_name || !email) {
+            return res.status(400).json({ success: false, message: 'Prénom, nom et email sont requis.' });
+        }
+        const participant = await EventService.addParticipant(
+            req.params.id,
+            { first_name, last_name, email, is_image_rights_ok: !!is_image_rights_ok }
+        );
+        res.status(201).json({ success: true, data: participant });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
@@ -38,7 +45,7 @@ exports.addParticipant = async (req, res) => {
 
 exports.removeParticipant = async (req, res) => {
     try {
-        await EventService.removeParticipant(req.params.id, req.params.memberId);
+        await EventService.removeParticipant(req.params.id, req.params.participantId);
         res.status(200).json({ success: true, message: 'Désinscription réussie' });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });

@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 class Member {
   static async findAll() {
-    const [rows] = await db.execute('SELECT * FROM members ORDER BY id DESC');
+    const [rows] = await db.execute('SELECT * FROM members ORDER BY last_name ASC, first_name ASC');
     return rows;
   }
 

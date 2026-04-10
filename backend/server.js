@@ -14,6 +14,7 @@ const exportRoutes = require('./routes/export.routes');
 const budgetRoutes = require('./routes/budget.routes');
 const memberRoutes = require('./routes/member.routes');
 const fileRoutes = require('./routes/fileRoutes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,9 +29,11 @@ app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/files', fileRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/budget-lines', budgetRoutes);
 app.use('/api/members', memberRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/api/health', async (req, res) => {
   try {

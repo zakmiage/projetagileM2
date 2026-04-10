@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Event } from '../models/event.model';
+import { Event, EventParticipant } from '../models/event.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,15 +33,27 @@ export class EventService {
     );
   }
 
-  addParticipant(eventId: number, member: any): Observable<boolean> {
-    return this.http.post<{success: boolean}>(`${this.apiUrl}/${eventId}/participants`, { memberId: member.id }).pipe(
-      map(res => res.success),
+  /**
+   * Ajouter un inscrit à un événement.
+   * Le participant n'a pas besoin d'être un adhérent.
+   */
+  addParticipant(
+    eventId: number,
+    data: { first_name: string; last_name: string; email: string; is_image_rights_ok: boolean }
+  ): Observable<EventParticipant> {
+    return this.http.post<{success: boolean, data: EventParticipant}>(
+      `${this.apiUrl}/${eventId}/participants`, data
+    ).pipe(
+      map(res => res.data),
       catchError(err => throwError(() => new Error(err.error?.message || "Erreur lors de l'inscription")))
     );
   }
 
-  removeParticipant(eventId: number, memberId: number): Observable<boolean> {
-    return this.http.delete<{success: boolean}>(`${this.apiUrl}/${eventId}/participants/${memberId}`).pipe(
+  /**
+   * Désinscrire un participant par son ID (event_participants.id).
+   */
+  removeParticipant(eventId: number, participantId: number): Observable<boolean> {
+    return this.http.delete<{success: boolean}>(`${this.apiUrl}/${eventId}/participants/${participantId}`).pipe(
       map(res => res.success),
       catchError(err => throwError(() => new Error('Erreur lors de la désinscription')))
     );

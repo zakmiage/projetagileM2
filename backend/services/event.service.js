@@ -18,12 +18,16 @@ class EventService {
     return await Event.create(data);
   }
 
-  static async addParticipant(eventId, memberId) {
-    return await Event.addParticipant(eventId, memberId);
+  /**
+   * @param {number} eventId
+   * @param {{ first_name, last_name, email, is_image_rights_ok }} data
+   */
+  static async addParticipant(eventId, data) {
+    return await Event.addParticipant(eventId, data);
   }
 
-  static async removeParticipant(eventId, memberId) {
-    return await Event.removeParticipant(eventId, memberId);
+  static async removeParticipant(eventId, participantId) {
+    return await Event.removeParticipant(eventId, participantId);
   }
 }
 

@@ -1,0 +1,281 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+
+  <!-- ==================== LOADING INITIAL ==================== -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-32">
+    <div class="flex flex-col items-center gap-4">
+      <div class="animate-spin rounded-full h-14 w-14 border-4 border-indigo-100 border-t-indigo-500"></div>
+      <p class="text-slate-400 text-sm">Chargement du tableau de bord…</p>
+    </div>
+  </div>
+
+  <!-- ==================== ERREUR ==================== -->
+  <div *ngIf="!isLoading && errorMsg"
+    class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl p-5 mb-6">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    </svg>
+    {{ errorMsg }}
+  </div>
+
+  <!-- ==================== CONTENU PRINCIPAL ==================== -->
+  <div *ngIf="!isLoading && !errorMsg">
+
+    <!-- ===== EN-TÊTE + SÉLECTEUR D'ÉVÉNEMENT ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+
+      <!-- Titre & badge -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wide">
+            <span *ngIf="isUpcomingEvent" class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+            <span *ngIf="!isUpcomingEvent" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            {{ isUpcomingEvent ? 'Prochain événement' : 'Événement passé' }}
+          </span>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-800 truncate">
+          {{ stats?.event?.name ?? '—' }}
+        </h1>
+        <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500">
+          <span *ngIf="stats?.event?.start_date" class="flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {{ stats!.event!.start_date | date:'fullDate':'':'fr-FR' }}
+          </span>
+          <a *ngIf="stats?.event?.id" [routerLink]="['/events', stats!.event!.id]"
+            class="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+            Voir le détail
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Sélecteur d'événement -->
+      <div class="shrink-0 w-full sm:w-72">
+        <label for="event-selector" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">
+          Changer d'événement
+        </label>
+        <div class="relative">
+          <select
+            id="event-selector"
+            [ngModel]="selectedEventId"
+            (ngModelChange)="onEventChange($event)"
+            class="w-full appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm text-slate-800 font-medium shadow-sm hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer">
+            <option *ngFor="let event of events" [ngValue]="event.id">
+              {{ event.name }} — {{ event.start_date | date:'dd/MM/yyyy' }}
+            </option>
+          </select>
+          <!-- Icône chevron -->
+          <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== STATS LOADING (changement d'event) ==================== -->
+    <div *ngIf="isStatsLoading" class="flex justify-center items-center py-20">
+      <div class="flex flex-col items-center gap-3">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-100 border-t-indigo-500"></div>
+        <p class="text-slate-400 text-sm">Chargement des statistiques…</p>
+      </div>
+    </div>
+
+    <!-- ==================== PAS D'ÉVÉNEMENT ==================== -->
+    <div *ngIf="!isStatsLoading && stats && !stats.hasEvent"
+      class="flex flex-col items-center justify-center py-24 gap-4 text-center">
+      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-slate-700">Aucune donnée pour cet événement</h2>
+      <p class="text-slate-500 max-w-sm">Créez un nouvel événement pour commencer à suivre vos KPIs ici.</p>
+      <a routerLink="/events"
+        class="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+        Voir les événements
+      </a>
+    </div>
+
+    <!-- ==================== 4 CARTES KPI ==================== -->
+    <div *ngIf="!isStatsLoading && stats && stats.hasEvent && stats.event && stats.kpis"
+      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
+
+      <!-- KPI 1 : Remplissage -->
+      <div class="flex flex-col bg-white shadow-sm rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
+            [ngClass]="{
+              'bg-emerald-50 text-emerald-700': (stats.kpis.fillRate ?? 0) < 80,
+              'bg-amber-50 text-amber-700':  (stats.kpis.fillRate ?? 0) >= 80 && (stats.kpis.fillRate ?? 0) < 100,
+              'bg-rose-50 text-rose-700':    (stats.kpis.fillRate ?? 0) >= 100
+            }">
+            {{ stats.kpis.fillRate !== null ? (stats.kpis.fillRate + '%') : '∞' }}
+          </span>
+        </div>
+        <h2 class="text-sm font-medium text-slate-500 mb-1">Remplissage</h2>
+        <div class="text-3xl font-bold text-slate-800 mb-3">
+          {{ stats.kpis.registrationsCount }}
+          <span class="text-lg font-normal text-slate-400">
+            / {{ stats.kpis.capacity ?? '∞' }}
+          </span>
+        </div>
+        <div class="mt-auto">
+          <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-2 rounded-full transition-all duration-700"
+              [style.width.%]="stats.kpis.fillRate !== null ? (stats.kpis.fillRate > 100 ? 100 : stats.kpis.fillRate) : 0"
+              [ngClass]="{
+                'bg-indigo-500': (stats.kpis.fillRate ?? 0) < 80,
+                'bg-amber-500':  (stats.kpis.fillRate ?? 0) >= 80 && (stats.kpis.fillRate ?? 0) < 100,
+                'bg-rose-500':   (stats.kpis.fillRate ?? 0) >= 100
+              }">
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mt-1.5">inscrits / capacité max</p>
+        </div>
+      </div>
+
+      <!-- KPI 2 : Cautions manquantes -->
+      <div class="flex flex-col bg-white shadow-sm rounded-2xl border p-5 hover:shadow-md transition-shadow"
+        [ngClass]="stats.kpis.missingDepositsCount > 0 ? 'border-rose-200' : 'border-slate-100'">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center"
+            [ngClass]="stats.kpis.missingDepositsCount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'">
+            <svg *ngIf="stats.kpis.missingDepositsCount > 0" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <svg *ngIf="stats.kpis.missingDepositsCount === 0" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span *ngIf="stats.kpis.missingDepositsCount > 0"
+            class="flex items-center gap-1 text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+            Action requise
+          </span>
+        </div>
+        <h2 class="text-sm font-medium text-slate-500 mb-1">Alerte Cautions</h2>
+        <div class="text-3xl font-bold mb-1"
+          [ngClass]="stats.kpis.missingDepositsCount > 0 ? 'text-rose-600' : 'text-emerald-600'">
+          {{ stats.kpis.missingDepositsCount }}
+        </div>
+        <p class="text-xs text-slate-400 mt-auto">
+          <ng-container *ngIf="stats.kpis.missingDepositsCount === 0">
+            ✅ Tous les inscrits ont payé leur caution.
+          </ng-container>
+          <ng-container *ngIf="stats.kpis.missingDepositsCount > 0">
+            inscrits sans caution (has_deposit = false)
+          </ng-container>
+        </p>
+      </div>
+
+      <!-- KPI 3 : Logistique T-shirts -->
+      <div class="flex flex-col bg-white shadow-sm rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 7h.01M7 3h5l2 2h4a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2V3z" />
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-sm font-medium text-slate-500 mb-3">Logistique T-shirts</h2>
+        <div *ngIf="tShirtSizesEntries.length === 0" class="text-sm text-slate-400 italic">
+          Aucune inscription avec taille renseignée.
+        </div>
+        <div *ngIf="tShirtSizesEntries.length > 0" class="flex flex-wrap gap-2 mt-auto">
+          <span *ngFor="let entry of tShirtSizesEntries"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 text-violet-800 text-sm font-semibold border border-violet-100">
+            <span class="text-violet-400 text-xs font-normal">{{ entry.size }}</span>
+            {{ entry.count }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 mt-3">quantités à commander par taille</p>
+      </div>
+
+      <!-- KPI 4 : Potentiel FSDIE -->
+      <div class="flex flex-col bg-white shadow-sm rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">FSDIE</span>
+        </div>
+        <h2 class="text-sm font-medium text-slate-500 mb-1">Potentiel FSDIE</h2>
+        <div class="text-3xl font-bold text-slate-800 mb-1">
+          {{ stats.kpis.fsdieTotal | number:'1.2-2' }}&nbsp;€
+        </div>
+        <p class="text-xs text-slate-400 mt-auto">
+          total des dépenses prévisionnelles éligibles FSDIE
+        </p>
+      </div>
+
+      <!-- KPI 5 : Justificatifs FSDIE (events passés uniquement) -->
+      <div *ngIf="stats.kpis.fsdieUnjustifiedCount !== null && stats.kpis.fsdieTotalCount !== null"
+        class="flex flex-col bg-white shadow-sm rounded-2xl border p-5 hover:shadow-md transition-shadow"
+        [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'border-rose-200' : 'border-slate-100'">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center"
+            [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <span *ngIf="stats.kpis.fsdieUnjustifiedCount > 0"
+            class="flex items-center gap-1 text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+            Incomplet
+          </span>
+          <span *ngIf="stats.kpis.fsdieUnjustifiedCount === 0"
+            class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+            ✓ Complet
+          </span>
+        </div>
+        <h2 class="text-sm font-medium text-slate-500 mb-1">Justificatifs FSDIE</h2>
+        <!-- Ratio : lignes justifiées / total -->
+        <div class="text-3xl font-bold mb-3"
+          [ngClass]="stats.kpis.fsdieUnjustifiedCount > 0 ? 'text-rose-600' : 'text-emerald-600'">
+          {{ stats.kpis.fsdieTotalCount! - stats.kpis.fsdieUnjustifiedCount! }}
+          <span class="text-lg font-normal text-slate-400">
+            / {{ stats.kpis.fsdieTotalCount }}
+          </span>
+        </div>
+        <!-- Barre de progression (lignes justifiées) -->
+        <div class="mt-auto">
+          <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-2 rounded-full transition-all duration-700"
+              [style.width.%]="stats.kpis.fsdieTotalCount! > 0 ? ((stats.kpis.fsdieTotalCount! - stats.kpis.fsdieUnjustifiedCount!) / stats.kpis.fsdieTotalCount! * 100) : 0"
+              [ngClass]="stats.kpis.fsdieUnjustifiedCount! > 0 ? 'bg-rose-500' : 'bg-emerald-500'">
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mt-1.5">
+            dépenses FSDIE avec justificatif joint
+          </p>
+        </div>
+      </div>
+
+    </div>
+    <!-- fin grille KPI -->
+
+  </div>
+  <!-- fin bloc principal -->
+
+</div>

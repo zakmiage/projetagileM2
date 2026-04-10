@@ -1,13 +1,19 @@
-import { Member } from './member.model';
 import { BudgetLine } from './budget.model';
 
-export interface EventRegistration {
+/**
+ * Inscrit à un événement — entité INDÉPENDANTE des adhérents (Member).
+ * Un participant n'est pas nécessairement adhérent de l'asso.
+ * Seule la décharge droit à l'image est requise pour un event.
+ */
+export interface EventParticipant {
   id: number;
   event_id: number;
-  member_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  is_image_rights_ok: boolean;
   has_deposit: boolean;
   registered_at: string;
-  member?: Member;
 }
 
 export interface Event {
@@ -18,6 +24,6 @@ export interface Event {
   end_date: string;
   capacity: number;
   created_at: string;
-  registrations?: EventRegistration[];
+  participants?: EventParticipant[];
   budget_lines?: BudgetLine[];
 }

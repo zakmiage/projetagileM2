@@ -75,8 +75,12 @@ export class EventsComponent implements OnInit {
     }
 
     this.eventService.createEvent(this.newEvent as Omit<Event, 'id' | 'created_at'>).subscribe({
-      next: (event) => {
-        this.events = [...this.events, event];
+      next: () => {
+        // Recharger depuis l'API pour respecter l'ordre chronologique
+        this.eventService.getEvents().subscribe(events => {
+          this.events = events;
+          this.cdr.detectChanges();
+        });
         this.closeModal();
       },
       error: () => alert("Erreur lors de la création de l'événement")
