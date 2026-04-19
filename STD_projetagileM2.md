@@ -31,6 +31,9 @@ L'application suit une architecture **3-tiers découplée** :
 | Export Excel | `exceljs` |
 | Rendu serveur | Angular SSR (`@angular/ssr`) |
 | ORM | Aucun — requêtes SQL brutes via `mysql2` |
+| **Tests API & Backend (TR)** | `vitest` + `supertest` |
+| **Tests Frontend (TUF)** | `vitest` + injecteurs `@angular/core` |
+| **Tests E2E (TUT)**| `playwright` (Chromium, Webkit, Firefox) |
 
 ---
 
@@ -462,7 +465,32 @@ source database/seed-data.sql;    -- Données de test
 
 ---
 
-## 9. Points de fragilité techniques identifiés
+## 9. Infrastructure et Exécution des Tests
+
+Le projet sépare strictement l'environnement de production de l'environnement de test pour éviter tout effet de bord.
+
+### 9.1 Base de données de Test (`gestion_assos_test`)
+* Fichier `.env.test` dans `backend/` activant la cible de test.
+* Lors de l'exécution de la commande `npm run test`, `server.js` redirige la configuration DB via l'interception de `NODE_ENV=test`.
+
+### 9.2 Lancement des Suites
+Tous les tests sont centralisés sous la logique Test Runner (TUF pour logique Frontend, TR pour Endpoints Backend, et TUT pour Playwright).
+Pour plus d'informations opérationnelles, se référer au fichier global **`TESTING.md`**.
+
+```bash
+# 1. Tests d'Intégration API (Backend)
+cd backend && npm run test
+
+# 2. Tests Fonctions TypeScript (Frontend)
+cd frontend && npx vitest run
+
+# 3. Scénarios Navigateurs (E2E) (Dépend des serveurs Front & Back tournant)
+cd e2e && npx playwright test
+```
+
+---
+
+## 10. Points de fragilité techniques identifiés
 
 | # | Point | Impact |
 |---|-------|--------|

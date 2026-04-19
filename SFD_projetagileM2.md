@@ -213,3 +213,20 @@ L'application est une plateforme web de gestion interne pour association étudia
 | Page Paramètres (`/settings`) | ⚠️ Route déclarée mais contenu non visible |
 | Gestion de rôles (admin vs membre) | ❌ Non implémentée |
 | Pagination | ❌ Absente |
+
+---
+
+## 10. Stratégie de Qualité et Tests Automatisés (TUF / TUT)
+
+Pour certifier la robustesse des fonctionnalités (notamment la gestion du Budget FSDIE et du Tableau de Bord), l'application est couverte par une suite de tests fonctionnels :
+
+### 10.1 Scénarios Utilisateurs End-to-End (TUT)
+Un automate navigue "réellement" sur l'interface pour simuler un administrateur. Le parcours validé systématiquement inclut :
+1. La connexion réussie à la plateforme
+2. La navigation vers la liste des événements et l'affichage des détails
+3. La création asynchrone d'une ligne de dépense FSDIE complète ("Logistique Playwright")
+
+### 10.2 Validation des Algorithmes Métiers (TUF / TR)
+Les règles de gestion internes sont validées sur une base de test isolée :
+- **Authentification** : Refus strict d'accès (Code HTTP 401) si les bons identifiants ne sont pas fournis à l'API.
+- **Statistiques** : Validation mathématique de l'algorithme du Dashboard Component garantissant la sélection du « prochain événement à venir » parmi tous les événements (filtrage des événements du passé).
