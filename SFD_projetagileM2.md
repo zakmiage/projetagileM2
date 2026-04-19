@@ -230,3 +230,27 @@ Un automate navigue "réellement" sur l'interface pour simuler un administrateur
 Les règles de gestion internes sont validées sur une base de test isolée :
 - **Authentification** : Refus strict d'accès (Code HTTP 401) si les bons identifiants ne sont pas fournis à l'API.
 - **Statistiques** : Validation mathématique de l'algorithme du Dashboard Component garantissant la sélection du « prochain événement à venir » parmi tous les événements (filtrage des événements du passé).
+
+---
+
+## 11. Évolutions Futures (Backlog Produit)
+
+Afin d'atteindre le statut d'un véritable ERP associatif, les fonctionnalités suivantes constituent le backlog des développements futurs :
+
+### 11.1 Organisation Interne de l'Événement
+* **Tableau Kanban (Drag & drop) par événement** : Un onglet "Tâches" divisé en colonnes (À Faire / En Cours / Fini). Permet de créer des cartes de missions et de les assigner aux membres du bureau.
+* **Planning / Créneaux de staffing** : Diviser l'événement en "Shifts" (ex: Buvette 20h-22h, Sécurité) et affecter les bénévoles. L'application vérifie automatiquement qu'un étudiant n'est pas programmé sur deux créneaux en même temps.
+
+### 11.2 Logistique et Gestion du Matériel
+* **Catalogue Matériel BVE** : Base de données du matériel disponible (Barnums, enceintes, câbles, gobelets).
+* **Réservations Anti-Conflit** : Lors d'un événement, on "coche" le matériel dont on a besoin. Si un autre événement a déjà réservé le même matériel sur la même date, l'application bloque la réservation.
+* **Suivi des pertes & Consignes** : À la clôture de l'événement, on entre le matériel perdu (ex: 20 Ecocups manquants) et l'app déduit automatiquement la consigne des revenus financiers.
+
+### 11.3 Subvention & Administratifs (Effet Wahou !)
+* **Générateur du Dossier FSDIE (PDF)** : L'application fusionne le suivi budgétaire, extrait uniquement les dépenses cochées "FSDIE" et génère un vrai document PDF paramétré (avec logo de l'université et signature) prêt à être imprimé.
+* **Concaténation des factures** : Lier les images de reçus/factures des dépenses FSDIE et les injecter à la fin du grand PDF généré pour faire une liasse unique.
+
+### 11.4 Financement et Partenaires
+* **CRM Sponsoring** : Un annuaire distinct dédié aux entreprises (Banques, Imprimeurs, Bars).
+* **Pipeline de Démarchage** : Suivi de l'état des partenaires (Contacté ➔ En négociation ➔ Contrat Signé ➔ Paiement reçu).
+* **Alertes Trésorerie** : Lien automatique entre les "Contrats Signés" du CRM et les "Revenus prévisionnels" de l'événement pour vérifier si l'argent a bien été viré sur le compte.
