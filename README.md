@@ -266,6 +266,23 @@ Hello World depuis MySQL
 
 ---
 
+## 5. Connexion à l'application
+
+> 💡 **Note importante** : Ce projet est un prototype académique. Certaines fonctionnalités comme l'authentification côté frontend sont volontairement simplifiées pour le moment.
+
+### Identifiants Frontend (Vue Utilisateur)
+L'interface Angular utilise un système de connexion factice pour faciliter les tests. Pour vous connecter sur `http://localhost:4200` :
+* **Email :** `toto@mail.com`
+* **Mot de passe :** `toto`
+
+### Identifiants Backend (Test de l'API)
+Si vous souhaitez tester directement l'API REST (`http://localhost:3000/api/auth/login`) via Postman ou Swagger, de vrais comptes admins sont initialisés en base :
+* `admin@kubik.fr` | MdP : `admin123`
+* `bureau@kubik.fr` | MdP : `admin123`
+* `tresorier@kubik.fr` | MdP : `admin123`
+
+---
+
 ## Résumé des terminaux à ouvrir
 
 ### Terminal 1 : backend
