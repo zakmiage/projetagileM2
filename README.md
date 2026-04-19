@@ -283,6 +283,14 @@ Si vous souhaitez tester directement l'API REST (`http://localhost:3000/api/auth
 
 ---
 
+## 6. Documentation des Tests
+
+Une documentation complète de la stratégie de tests automatisés (TUF / TR / TUT) a été créée pour le projet. Pour comprendre la logique derrière Vitest et Playwright et savoir exécuter tous les tests d'assurance qualité du code, référez-vous au fichier dédié :
+
+👉 **[Voir la Stratégie des Tests (TESTING.md)](TESTING.md)**
+
+---
+
 ## Résumé des terminaux à ouvrir
 
 ### Terminal 1 : backend

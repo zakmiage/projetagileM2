@@ -3,8 +3,8 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 
-// Charger les variables d'environnement AVANT d'importer les modules qui les utilisent
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
+dotenv.config({ path: path.resolve(__dirname, envFile) });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const db = require('./config/db');
@@ -48,6 +48,10 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Serveur backend lancé sur http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Serveur backend lancé sur http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
