@@ -52,6 +52,7 @@ class BudgetLine {
       forecast_amount: 'forecast_amount',
       actual_amount: 'actual_amount',
       is_fsdie_eligible: 'is_fsdie_eligible',
+      validation_status: 'validation_status',
       updated_by: 'updated_by'
     };
 
@@ -77,6 +78,25 @@ class BudgetLine {
    */
   static async delete(id) {
     await db.execute('DELETE FROM budget_lines WHERE id = ?', [id]);
+    return true;
+  }
+
+  /**
+   * Met à jour uniquement le statut de validation d'une ligne FSDIE.
+   * @param {number} id - ID de la ligne budget
+   * @param {'SOUMIS'|'APPROUVE'|'REFUSE'} status
+   * @param {object} [dbOverride] - Connexion DB injectable (tests uniquement)
+   */
+  static async updateStatus(id, status, dbOverride) {
+    const validStatuses = ['SOUMIS', 'APPROUVE', 'REFUSE'];
+    if (!validStatuses.includes(status)) {
+      throw new Error(`Statut invalide : ${status}. Valeurs acceptées : ${validStatuses.join(', ')}`);
+    }
+    const conn = dbOverride || db;
+    await conn.execute(
+      'UPDATE budget_lines SET validation_status = ? WHERE id = ?',
+      [status, id]
+    );
     return true;
   }
 }

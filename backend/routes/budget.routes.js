@@ -6,5 +6,6 @@ router.get('/', budgetController.getBudgetLines);
 router.post('/', budgetController.createBudgetLine);
 router.put('/:id', budgetController.updateBudgetLine);
 router.delete('/:id', budgetController.deleteBudgetLine);
+router.patch('/:id/status', budgetController.updateValidationStatus);
 
 module.exports = router;
