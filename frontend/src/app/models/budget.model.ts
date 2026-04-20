@@ -15,6 +15,7 @@ export interface BudgetLine {
   forecast_amount: number;
   actual_amount?: number;
   is_fsdie_eligible: boolean;
+  validation_status?: 'SOUMIS' | 'APPROUVE' | 'REFUSE';
   created_by: number;
   updated_by?: number;
   created_at: string;

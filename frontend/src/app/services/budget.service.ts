@@ -49,4 +49,10 @@ export class BudgetService {
       { responseType: 'blob' }
     );
   }
+
+  updateValidationStatus(id: number, status: 'SOUMIS' | 'APPROUVE' | 'REFUSE'): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, { status }).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
 }

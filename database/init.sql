@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS budget_lines (
     forecast_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     actual_amount DECIMAL(10, 2) NULL,
     is_fsdie_eligible BOOLEAN NOT NULL DEFAULT FALSE,
+    validation_status ENUM('SOUMIS', 'APPROUVE', 'REFUSE') NOT NULL DEFAULT 'SOUMIS',
     created_by INT NOT NULL,
     updated_by INT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),

@@ -45,3 +45,20 @@ exports.deleteBudgetLine = async (req, res) => {
     res.status(400).json({ success: false, message: error.message || 'Invalid Request' });
   }
 };
+
+exports.updateValidationStatus = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Le champ "status" est requis.' });
+    }
+
+    await BudgetService.updateStatus(id, status);
+    res.status(200).json({ success: true, message: `Statut mis à jour : ${status}` });
+  } catch (error) {
+    console.error('Error in updateValidationStatus:', error);
+    res.status(400).json({ success: false, message: error.message || 'Statut invalide' });
+  }
+};

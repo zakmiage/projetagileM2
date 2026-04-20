@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { BudgetService } from '../../../services/budget.service';
 import { FileService } from '../../../services/file.service';
+import { AuthService } from '../../../services/auth.service';
 import { BudgetLine, BudgetAttachment } from '../../../models/budget.model';
 import { finalize } from 'rxjs/operators';
 import { timeout } from 'rxjs/operators';
@@ -31,6 +32,7 @@ export class BudgetTabComponent {
 
   private budgetService = inject(BudgetService);
   private fileService = inject(FileService);
+  private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
   lines: BudgetLine[] = [];
@@ -268,6 +270,28 @@ export class BudgetTabComponent {
         }
 
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  /** Retourne true si l'utilisateur a le rôle Trésorier ou Admin. */
+  isTresorier(): boolean {
+    return this.authService.hasRole('TRESORIER', 'ADMIN');
+  }
+
+  /**
+   * Met à jour le statut de validation d'une ligne FSDIE.
+   * La mise à jour est répercutée localement sans rechargement.
+   */
+  setStatus(line: BudgetLine, status: 'SOUMIS' | 'APPROUVE' | 'REFUSE'): void {
+    this.budgetService.updateValidationStatus(line.id, status).subscribe({
+      next: () => {
+        line.validation_status = status;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erreur mise à jour statut:', err);
+        alert('Impossible de mettre à jour le statut.');
       }
     });
   }

@@ -40,6 +40,16 @@ class BudgetService {
     if (!id) throw new Error('Line ID is required');
     return await BudgetLine.delete(id);
   }
+
+  /**
+   * Met à jour le statut de validation d'une ligne FSDIE.
+   * @param {number} id
+   * @param {'SOUMIS'|'APPROUVE'|'REFUSE'} status
+   */
+  static async updateStatus(id, status) {
+    if (!id) throw new Error('Line ID is required');
+    return await BudgetLine.updateStatus(id, status);
+  }
 }
 
 module.exports = BudgetService;

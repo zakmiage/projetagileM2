@@ -17,6 +17,7 @@ export class AuthService {
       
       const sessionData = {
         email,
+        role: 'TRESORIER', // Rôle hardcodé — la vraie auth JWT est une tâche séparée
         expiresAt: expirationDate.getTime()
       };
       
@@ -67,5 +68,23 @@ export class AuthService {
         resolve(true);
       }, 800);
     });
+  }
+
+  /** Retourne le rôle de l'utilisateur connecté (hardcodé TRESORIER en attendant l'auth réelle). */
+  getRole(): string {
+    if (typeof localStorage === 'undefined') return 'BUREAU';
+    const sessionStr = localStorage.getItem(this.AUTH_KEY);
+    if (!sessionStr) return 'BUREAU';
+    try {
+      const sessionData = JSON.parse(sessionStr);
+      return sessionData.role ?? 'BUREAU';
+    } catch {
+      return 'BUREAU';
+    }
+  }
+
+  /** Retourne true si le rôle actuel fait partie de la liste fournie. */
+  hasRole(...roles: string[]): boolean {
+    return roles.includes(this.getRole());
   }
 }
