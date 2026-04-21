@@ -1,19 +1,22 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { PwaService } from '../services/pwa.service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, AsyncPipe, RouterModule],
   templateUrl: './layout.component.html'
 })
 export class LayoutComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
-  
+  pwaService = inject(PwaService);
+  readonly isOnline$ = this.pwaService.isOnline$;
+
   pageTitle = 'Tableau de bord';
 
   constructor() {

@@ -1,0 +1,38 @@
+{
+  "name": "ProjetAgile M2",
+  "short_name": "ProjetAgile",
+  "description": "Gestion des événements et budgets de l'association étudiante",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Événements",
+      "url": "/events",
+      "description": "Voir tous les événements"
+    },
+    {
+      "name": "Tableau de bord",
+      "url": "/dashboard",
+      "description": "Accéder au tableau de bord"
+    }
+  ]
+}

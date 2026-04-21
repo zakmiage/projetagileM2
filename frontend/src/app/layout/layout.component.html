@@ -1,4 +1,17 @@
-<div class="flex h-screen bg-background">
+<!-- Bannière mode hors ligne -->
+@if (!(isOnline$ | async)) {
+  <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-sm font-medium px-4 py-2 flex items-center justify-center gap-2 shadow-md"
+       role="alert"
+       aria-live="polite">
+    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M12 12h.01M3 3l18 18"/>
+    </svg>
+    <span>Mode hors ligne — les données affichées proviennent du cache local</span>
+  </div>
+}
+
+<div class="flex h-screen bg-background" [class.pt-9]="!(isOnline$ | async)">
   <!-- Sidebar -->
   <aside class="w-64 bg-primary text-white flex flex-col shadow-lg z-10">
     <div class="p-4 bg-white flex justify-center items-center rounded-br-2xl shadow-sm">
