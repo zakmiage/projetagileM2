@@ -115,6 +115,29 @@ class Dashboard {
     );
     return parseInt(rows[0].total, 10);
   }
+
+  /**
+   * Retourne les inscriptions regroupées par jour pour un événement donné.
+   * Utilisé pour alimenter le graphique Chart.js du dashboard.
+   * @param {number} eventId
+   * @returns {Promise<{ date: string, count: number }[]>} tableau trié par date ASC
+   */
+  static async getRegistrationsByDay(eventId) {
+    const [rows] = await db.execute(
+      `SELECT DATE(registered_at) AS date, COUNT(*) AS count
+       FROM event_participants
+       WHERE event_id = ?
+       GROUP BY DATE(registered_at)
+       ORDER BY date ASC`,
+      [eventId]
+    );
+    return rows.map(r => ({
+      date: r.date instanceof Date
+        ? r.date.toISOString().slice(0, 10)
+        : String(r.date),
+      count: parseInt(r.count, 10)
+    }));
+  }
 }
 
 module.exports = Dashboard;

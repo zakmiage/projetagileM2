@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DashboardService, NextEventStats, EventSummary } from '../../services/dashboard.service';
+import { ChartRegistrationsComponent } from './chart-registrations/chart-registrations.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ChartRegistrationsComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
