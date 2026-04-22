@@ -1,5 +1,46 @@
 const EventService = require('../services/event.service');
 
+exports.getIcsFeed = async (req, res) => {
+    try {
+        const events = await EventService.getAllEvents();
+        let icsContent = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Kubik ERP//Events//FR\r\nCALSCALE:GREGORIAN\r\n";
+        
+        events.forEach(event => {
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '';
+                const d = new Date(dateStr);
+                return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+            
+            const startStr = formatDate(event.start_date);
+            const endStr = formatDate(event.end_date);
+            const creationStr = formatDate(new Date());
+
+            icsContent += "BEGIN:VEVENT\r\n";
+            icsContent += `DTSTAMP:${creationStr}\r\n`;
+            icsContent += `DTSTART:${startStr}\r\n`;
+            if (endStr) {
+                icsContent += `DTEND:${endStr}\r\n`;
+            }
+            icsContent += `SUMMARY:${event.name}\r\n`;
+            if (event.description) {
+                const desc = event.description.replace(/(\r\n|\n|\r)/gm, "\\n");
+                icsContent += `DESCRIPTION:${desc}\r\n`;
+            }
+            icsContent += `UID:event-${event.id}@kubik.local\r\n`;
+            icsContent += "END:VEVENT\r\n";
+        });
+        
+        icsContent += "END:VCALENDAR\r\n";
+
+        res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="feed.ics"');
+        res.status(200).send(icsContent);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 exports.getAllEvents = async (req, res) => {
     try {
         const events = await EventService.getAllEvents();

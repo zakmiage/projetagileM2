@@ -57,6 +57,10 @@ export class EventsComponent implements OnInit {
     this.isModalOpen = true;
   }
 
+  downloadIcs() {
+    this.eventService.downloadIcsFeed();
+  }
+
   closeModal() {
     this.isModalOpen = false;
   }
