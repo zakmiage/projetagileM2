@@ -107,4 +107,11 @@ export class EventService {
       catchError(err => throwError(() => new Error('Erreur lors de la désinscription')))
     );
   }
+
+  /**
+   * Télécharger le calendrier au format ICS.
+   */
+  downloadIcsFeed(): void {
+    window.location.href = `${this.apiUrl}/feed.ics`;
+  }
 }
