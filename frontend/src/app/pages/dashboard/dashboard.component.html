@@ -275,6 +275,32 @@
     </div>
     <!-- fin grille KPI -->
 
+    <!-- ==================== GRAPHIQUE INSCRIPTIONS ==================== -->
+    <div *ngIf="!isStatsLoading && stats && stats.hasEvent && stats.kpis"
+      class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            Inscriptions par jour
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Évolution du nombre d'inscrits au fil du temps</p>
+        </div>
+        <div class="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+      </div>
+
+      <app-chart-registrations
+        [data]="stats.kpis.registrationsByDay"
+        [capacity]="stats.kpis.capacity"
+        [eventId]="stats.event!.id">
+      </app-chart-registrations>
+    </div>
+    <!-- fin graphique -->
+
   </div>
   <!-- fin bloc principal -->
 

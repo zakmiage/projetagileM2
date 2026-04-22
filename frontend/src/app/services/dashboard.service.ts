@@ -15,6 +15,11 @@ export interface TShirtSizes {
   [size: string]: number;
 }
 
+export interface RegistrationsByDay {
+  date: string;  // format 'YYYY-MM-DD'
+  count: number;
+}
+
 export interface NextEventKpis {
   registrationsCount: number;
   capacity: number | null;
@@ -26,6 +31,8 @@ export interface NextEventKpis {
   fsdieUnjustifiedCount: number | null;
   /** Total de lignes FSDIE éligibles. Null si l'event n'est pas terminé. */
   fsdieTotalCount: number | null;
+  /** Inscriptions groupées par jour pour le graphique Chart.js. */
+  registrationsByDay: RegistrationsByDay[];
 }
 
 export interface NextEventStats {

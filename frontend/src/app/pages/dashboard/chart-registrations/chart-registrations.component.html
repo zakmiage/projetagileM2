@@ -1,0 +1,33 @@
+<div class="chart-wrapper">
+  <!-- État vide : aucune inscription -->
+  <div *ngIf="!data || data.length === 0"
+    class="flex flex-col items-center justify-center h-full gap-3 text-center py-10">
+    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    </div>
+    <p class="text-sm text-slate-400">Aucune inscription enregistrée pour cet événement.</p>
+  </div>
+
+  <!-- Graphique : on utilise *ngIf sur l'eventId pour forcer la recréation
+       du <canvas> (et donc de l'instance Chart.js) à chaque changement d'événement -->
+  <ng-container *ngIf="data && data.length > 0 && eventId">
+    <div class="relative h-64">
+      <canvas baseChart
+        [data]="chartData"
+        [options]="chartOptions"
+        type="bar">
+      </canvas>
+    </div>
+  </ng-container>
+
+  <!-- Légende capacité -->
+  <div *ngIf="data && data.length > 0 && capacity" class="flex items-center gap-2 mt-3">
+    <span class="inline-block w-3 h-3 rounded-sm bg-indigo-500 opacity-75"></span>
+    <span class="text-xs text-slate-500">Inscriptions par jour</span>
+    <span class="mx-2 text-slate-300">·</span>
+    <span class="text-xs text-slate-500">Capacité max : <strong class="text-slate-700">{{ capacity }}</strong></span>
+  </div>
+</div>
