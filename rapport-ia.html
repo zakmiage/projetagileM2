@@ -28,39 +28,31 @@ tr:nth-child(even) td{background:#f7f7f7}
 <div class="meta">Équipe : Dardan, Zacharie, Arno, Huzaifah, Oumeyma, Zakaria, Youba</div>
 <hr>
 
-<div class="abstract">L'assistant IA Gemini (Google DeepMind) a été intégré comme outil de soutien au développement dans le respect d'un cadre éthique strict : supervision humaine à chaque étape, usage limité aux tâches à faible valeur ajoutée, et utilisation exclusivement via interface conversationnelle — jamais en mode autonome.</div>
+<div class="abstract">L'assistant IA Gemini (Google DeepMind) a été intégré comme outil d'assistance au développement. Ce rapport présente les conditions dans lesquelles nous l'avons utilisé, les engagements que nous avons pris collectivement, et ce que cette expérience nous a appris sur l'usage responsable de ces outils dans un contexte de projet.</div>
 
-<h2>1. Contexte et choix de l'outil</h2>
-<p>Face à un périmètre fonctionnel large et des contraintes de temps propres à un projet de Master, l'équipe a fait le choix d'intégrer un assistant IA comme outil de soutien. L'outil retenu, Gemini, a été utilisé uniquement via son interface conversationnelle : chaque réponse obtenue est un texte ou un bloc de code que le développeur doit lire, évaluer et intégrer manuellement. Ce choix exclut par construction tout mode d'exécution automatique.</p>
+<h2>1. Comment nous avons utilisé l'IA</h2>
+<p>Nous avons eu recours à l'IA sur des tâches précises, choisies parce qu'elles mobilisaient peu de réflexion propre au projet : générer des jeux de données fictifs pour alimenter nos tests, analyser des messages d'erreur et proposer des hypothèses de correction, rédiger une première version de nos spécifications à partir du code existant, et suggérer des améliorations de réactivité de l'interface. Dans tous les cas, l'IA a proposé — l'équipe a analysé, adapté et décidé.</p>
+<p>L'outil a été utilisé exclusivement via une interface conversationnelle. Aucune exécution automatique n'a eu lieu : chaque suggestion devait être lue, comprise et intégrée manuellement par le développeur concerné, ce qui imposait naturellement un temps de relecture et de vérification.</p>
 
-<h2>2. Usages dans le projet</h2>
-<ul>
-  <li><strong>Génération de données de test</strong> : création de jeux de données fictifs mais réalistes pour alimenter la base de données lors des phases de test — une tâche longue et répétitive sans apport intellectuel significatif.</li>
-  <li><strong>Assistance au débogage</strong> : analyse de comportements inattendus de l'application. L'IA a formulé des hypothèses et proposé des pistes de correction, systématiquement vérifiées et testées par l'équipe avant toute application.</li>
-  <li><strong>Rédaction documentaire</strong> : aide à la rédaction des spécifications fonctionnelles et techniques à partir du code existant. Chaque version produite a été relue et corrigée par l'équipe.</li>
-  <li><strong>Optimisation de l'interface</strong> : suggestion de mécanismes pour rendre l'application plus réactive (mises à jour en temps réel, synchronisation multi-utilisateurs). Les propositions ont été adaptées à l'architecture existante avant intégration.</li>
-</ul>
-
-<h2>3. Notre charte d’utilisation</h2>
+<h2>2. Notre charte d'utilisation</h2>
 <table>
-  <tr><th style="width:50%">Ce que nous faisons</th><th>Ce que nous ne faisons pas</th></tr>
-  <tr><td>Nous relisons et comprenons chaque suggestion avant de l’intégrer</td><td>Intégrer du code sans l’avoir analysé et testé</td></tr>
-  <tr><td>Nous approuvons explicitement chaque action avant exécution</td><td>Laisser l’IA exécuter une action de manière autonome</td></tr>
-  <tr><td>Nous testons toute modification proposée avant de la valider</td><td>Pousser du code sur le dépôt sans validation préalable</td></tr>
-  <tr><td>Nous maintenons la revue de code entre membres de l’équipe</td><td>Remplacer le jugement humain par une réponse de l’IA</td></tr>
-  <tr><td>Nous limitons l’usage aux tâches clairement identifiées</td><td>Solliciter l’IA sur les décisions fonctionnelles ou d’architecture</td></tr>
+  <tr><th style="width:50%">Ce que nous avons fait</th><th>Ce que nous avons refusé de faire</th></tr>
+  <tr><td>Relire et comprendre chaque suggestion avant de l'intégrer</td><td>Intégrer du code sans l'avoir analysé et testé</td></tr>
+  <tr><td>Approuver explicitement chaque action avant exécution</td><td>Laisser l'IA agir sans notre validation</td></tr>
+  <tr><td>Tester toute modification avant de la valider</td><td>Pousser du code sur le dépôt sans revue préalable</td></tr>
+  <tr><td>Maintenir la revue de code entre membres de l'équipe</td><td>Remplacer notre jugement par une réponse de l'IA</td></tr>
+  <tr><td>Limiter l'usage aux tâches que nous avions identifiées</td><td>Solliciter l'IA sur les choix fonctionnels ou d'architecture</td></tr>
 </table>
-<p style="margin-top:5px">Le processus suivi à chaque interaction : identification de la tâche → requête formulée par le développeur → proposition de l'IA → relecture critique → approbation explicite → test avant intégration.</p>
 
-<h2>4. Limites identifiées</h2>
+<h2>3. Ce que nous avons appris</h2>
 <ul>
-  <li><strong>Erreurs et imprécisions</strong> : l'IA a produit à plusieurs reprises des suggestions incorrectes, détectées lors des tests. Cela confirme que la validation humaine est indispensable et ne peut être raccourcie.</li>
-  <li><strong>Risque de dépendance</strong> : un usage non encadré pourrait conduire à intégrer du code sans le comprendre. L'équipe a exigé que chaque développeur soit capable d'expliquer toute modification intégrée.</li>
-  <li><strong>Valeur ajoutée limitée sur le fond</strong> : l'IA est peu pertinente sur les arbitrages métier, la dynamique d'équipe et les choix d'architecture à long terme, qui sont restés entièrement sous responsabilité humaine.</li>
+  <li><strong>L'IA se trompe régulièrement.</strong> Plusieurs suggestions étaient incorrectes et ont été détectées lors des tests. Cela nous a convaincus que la phase de validation n'est pas optionnelle — elle est au cœur d'un usage sérieux.</li>
+  <li><strong>Le risque de passivité est réel.</strong> Il est tentant de faire confiance à une réponse bien formulée sans la remettre en question. Nous avons exigé que chaque membre soit capable d'expliquer toute modification intégrée, ce qui a maintenu un niveau d'exigence collectif.</li>
+  <li><strong>L'IA ne remplace pas la compréhension du projet.</strong> Les arbitrages fonctionnels, les décisions d'architecture et la dynamique d'équipe sont restés entièrement sous notre responsabilité. Sur ces dimensions, l'IA n'a été d'aucune aide pertinente.</li>
 </ul>
 
-<h2>5. Conclusion</h2>
-<p>L'utilisation de l'IA dans ce projet a été bénéfique sur les tâches répétitives et d'analyse, et a libéré du temps pour les problèmes à plus forte valeur ajoutée. La discipline imposée par l'équipe — validation systématique, refus du mode autonome, périmètre clairement défini — démontre qu'une utilisation responsable est tout à fait compatible avec un projet académique. <strong>L'humain est resté décisionnaire à chaque étape ; l'IA a conseillé, jamais décidé.</strong> L'ensemble de l'équipe confirme que ces principes ont été respectés tout au long du sprint.</p>
+<h2>4. Conclusion</h2>
+<p>Cette expérience nous a permis de développer une posture vis-à-vis de l'IA que nous n'avions pas forcément au départ : ni méfiance systématique, ni confiance aveugle. L'IA est un outil utile sur certaines tâches, à condition que l'équipe reste active, critique et responsable de ce qui est produit. <strong>Ce rapport en est lui-même une illustration : il a été rédigé avec l'assistance de l'IA, relu, corrigé et validé par l'équipe avant d'être remis.</strong></p>
 
 <hr class="thin">
 <div style="font-size:7.5pt;color:#666;display:flex;justify-content:space-between;margin-top:3px">
