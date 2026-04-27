@@ -4,80 +4,83 @@
 <meta charset="UTF-8">
 <title>Présentation — Gestion d'événements associatifs</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600&display=swap');
 
 :root{
-  --bg:   oklch(0.09 0.010 255);
-  --surf: oklch(0.13 0.010 255);
-  --line: oklch(0.19 0.008 255);
-  --tx:   oklch(0.93 0.006 255);
-  --tx2:  oklch(0.56 0.006 255);
-  --tx3:  oklch(0.32 0.006 255);
-  --acc:  oklch(0.72 0.17  52);
+  --bg:    oklch(0.11 0.015 210);
+  --surf:  oklch(0.16 0.015 210);
+  --line:  oklch(0.22 0.010 210);
+  --tx:    oklch(0.93 0.007 210);
+  --tx2:   oklch(0.58 0.007 210);
+  --tx3:   oklch(0.35 0.006 210);
+  --acc:   oklch(0.68 0.09  195);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Manrope',sans-serif;background:oklch(0.05 0.008 255);display:flex;flex-direction:column;align-items:center;gap:4px;padding:20px}
+body{font-family:'Manrope',sans-serif;background:oklch(0.06 0.010 210);display:flex;flex-direction:column;align-items:center;gap:3px;padding:20px}
 .slide{width:297mm;height:210mm;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
-.tag{position:absolute;top:22px;left:28px;font-size:7pt;color:var(--tx3);letter-spacing:.3px}
-.pg{position:absolute;bottom:22px;right:28px;font-size:7pt;color:var(--tx3);letter-spacing:1px}
+.meta{position:absolute;top:20px;left:28px;font-size:6.5pt;color:var(--tx3);letter-spacing:.3px}
+.pg{position:absolute;bottom:20px;right:28px;font-size:7pt;color:var(--tx3);letter-spacing:.5px}
 
-/* ── SLIDE 1 ── */
-.s1{justify-content:flex-end;padding:0}
-.s1-content{padding:44px 60px 48px}
-.s1-kicker{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:22px}
-.s1-h{font-family:'Bricolage Grotesque',sans-serif;font-size:38pt;font-weight:800;color:var(--tx);line-height:1.06;margin-bottom:10px;max-width:560px}
-.s1-h mark{background:none;color:var(--acc)}
-.s1-team{font-size:8.5pt;color:var(--tx3);font-weight:300;margin-bottom:32px;line-height:1.7}
-.chips{display:flex;gap:12px;flex-wrap:wrap}
-.chip{padding:6px 14px;background:var(--surf);font-size:8pt;color:var(--tx2);border-radius:4px}
-/* déco */
-.deco-bar{position:absolute;top:0;right:0;width:3px;height:100%;background:var(--acc);opacity:.25}
-.deco-num{position:absolute;top:16px;right:24px;font-family:'Bricolage Grotesque',sans-serif;font-size:120pt;font-weight:800;color:var(--acc);opacity:.04;line-height:1;letter-spacing:-4px}
+/* ── S1 ── */
+.s1{justify-content:flex-end}
+.s1 .inner{padding:40px 56px 44px}
+.kicker{font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:18px}
+.s1-h{font-family:'Bricolage Grotesque',sans-serif;font-size:36pt;font-weight:800;color:var(--tx);line-height:1.07;margin-bottom:8px;max-width:530px}
+.s1-h em{font-style:normal;color:var(--acc)}
+.s1-team{font-size:8pt;color:var(--tx3);font-weight:300;margin-bottom:28px;line-height:1.8}
+.chips{display:flex;gap:10px}
+.chip{padding:6px 13px;background:var(--surf);font-size:8pt;color:var(--tx2);border-radius:3px}
+/* déco S1 : grand numéro fantôme + trait vertical */
+.s1-ghost{position:absolute;top:8px;right:20px;font-family:'Bricolage Grotesque',sans-serif;font-size:130pt;font-weight:800;color:var(--acc);opacity:.05;line-height:1;letter-spacing:-4px;user-select:none}
+.s1-rule{position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--acc);opacity:.2}
 
-/* ── SLIDE 2 ── */
+/* ── S2 ── */
 .s2{flex-direction:row}
-/* screenshot panel */
-.s2-img{width:54%;position:relative;overflow:hidden;background:oklch(0.95 0.005 250)}
-.s2-img img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
-.s2-img-label{position:absolute;bottom:12px;left:12px;background:oklch(0 0 0 / .55);color:#fff;font-size:7pt;padding:4px 10px;border-radius:3px;backdrop-filter:blur(4px)}
-/* content panel */
-.s2-right{flex:1;padding:36px 36px 36px 40px;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg)}
-.s2-kicker{font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:14px}
-.s2-h{font-family:'Bricolage Grotesque',sans-serif;font-size:17pt;font-weight:800;color:var(--tx);line-height:1.15;margin-bottom:28px}
-.benefits{display:flex;flex-direction:column;gap:18px}
-.benefit{}
-.b-title{font-size:9.5pt;font-weight:600;color:var(--tx);margin-bottom:3px}
+.s2-left{width:42%;padding:36px 32px 36px 48px;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg)}
+.s2-right{flex:1;background:var(--surf);display:flex;align-items:center;justify-content:center;padding:20px 24px;position:relative}
+.s2-h{font-family:'Bricolage Grotesque',sans-serif;font-size:17pt;font-weight:800;color:var(--tx);line-height:1.1;margin-bottom:24px}
+.benefits{display:flex;flex-direction:column;gap:16px}
+.b-name{font-size:9.5pt;font-weight:600;color:var(--tx);margin-bottom:3px}
 .b-desc{font-size:8pt;color:var(--tx2);font-weight:300;line-height:1.55}
-.stack-line{font-size:7.5pt;color:var(--tx3);padding-top:20px;border-top:1px solid var(--line)}
-.stack-line b{color:oklch(0.48 0.006 255)}
+.stack{font-size:7.5pt;color:var(--tx3);padding-top:18px;border-top:1px solid var(--line);line-height:1.7}
+.stack strong{color:oklch(0.52 0.007 210)}
+/* screenshot window */
+.win{width:100%;border-radius:7px;overflow:hidden;box-shadow:0 20px 60px oklch(0 0 0 / .65),0 2px 8px oklch(0 0 0 / .4)}
+.win-bar{height:22px;background:oklch(0.96 0.004 240);display:flex;align-items:center;gap:5px;padding:0 10px}
+.dot{width:8px;height:8px;border-radius:50%}
+.win-body{overflow:hidden;height:118px}
+.win-body img{width:100%;display:block;object-fit:cover;object-position:top center;height:100%}
+.win-caption{position:absolute;bottom:14px;right:26px;font-size:6.5pt;color:var(--tx3)}
 
-/* ── SLIDE 3 ── */
-.s3{background:oklch(0.06 0.008 255);justify-content:flex-end}
-.s3-body{padding:0 60px 52px}
-.s3-kicker{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:14px}
-.s3-h{font-family:'Bricolage Grotesque',sans-serif;font-size:72pt;font-weight:800;color:var(--tx);line-height:.92;letter-spacing:-2px;margin-bottom:28px}
-.s3-h mark{background:none;color:var(--acc)}
+/* ── S3 ── */
+.s3{background:oklch(0.08 0.012 210);justify-content:flex-end}
+.s3 .inner{padding:40px 56px 46px}
+.s3-h{font-family:'Bricolage Grotesque',sans-serif;font-size:76pt;font-weight:800;color:var(--tx);line-height:.9;letter-spacing:-2px;margin-bottom:28px}
+.s3-h em{font-style:normal;color:var(--acc)}
 .seq{display:flex;gap:10px}
-.seq-item{padding:8px 16px;background:oklch(0.11 0.010 255);border-radius:4px;font-size:8pt;color:var(--tx2)}
-.seq-item b{display:block;font-size:9pt;color:var(--tx);margin-bottom:2px}
+.s-item{padding:9px 16px;background:oklch(0.14 0.015 210);border-radius:3px}
+.s-item strong{display:block;font-size:9pt;color:var(--tx);font-weight:600;margin-bottom:2px}
+.s-item span{font-size:7.5pt;color:var(--tx3)}
 
-/* EXPORT */
-#eb{position:fixed;bottom:20px;right:20px;background:var(--acc);color:oklch(0.12 0.01 255);font-family:'Manrope',sans-serif;font-size:9pt;font-weight:700;padding:10px 22px;border:none;border-radius:4px;cursor:pointer;z-index:999}
+#eb{position:fixed;bottom:20px;right:20px;background:var(--acc);color:oklch(0.10 0.012 210);font-family:'Manrope',sans-serif;font-size:9pt;font-weight:700;padding:10px 22px;border:none;border-radius:3px;cursor:pointer;z-index:999}
 @media print{body{background:#000;padding:0;gap:0}#eb{display:none!important}}
 @page{size:A4 landscape;margin:0}
 </style>
 </head>
 <body>
 
-<!-- ── SLIDE 1 — Le problème ── -->
+<!-- S1 -->
 <div class="slide s1">
-  <div class="deco-bar"></div>
-  <div class="deco-num">01</div>
-  <div class="tag">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
-  <div class="s1-content">
-    <div class="s1-kicker">Projet agile · Avril 2026</div>
-    <div class="s1-h">Le dossier FSDIE remis<br>au dernier moment.<br><mark>Comme chaque année.</mark></div>
-    <div class="s1-team">Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya<br>Oumeyma Soukah · Zakaria Zemmari · Youba Tiab</div>
+  <div class="s1-ghost">01</div>
+  <div class="s1-rule"></div>
+  <div class="meta">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+  <div class="inner">
+    <div class="kicker">Projet agile · Avril 2026</div>
+    <div class="s1-h">Le dossier FSDIE remis<br>au dernier moment.<br><em>Comme chaque année.</em></div>
+    <div class="s1-team">
+      Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya<br>
+      Oumeyma Soukah · Zakaria Zemmari · Youba Tiab
+    </div>
     <div class="chips">
       <div class="chip">Budget sur Excel partagé</div>
       <div class="chip">Bénévoles gérés par DMs</div>
@@ -87,53 +90,59 @@ body{font-family:'Manrope',sans-serif;background:oklch(0.05 0.008 255);display:f
   <div class="pg">01 / 03</div>
 </div>
 
-<!-- ── SLIDE 2 — La solution ── -->
+<!-- S2 -->
 <div class="slide s2">
-  <div class="tag" style="z-index:2">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
-
-  <div class="s2-img">
-    <img src="assets/slides/budget.png" alt="Interface budget" />
-    <div class="s2-img-label">Week-end ski Alpes 2027 · Budget &amp; FSDIE</div>
-  </div>
-
-  <div class="s2-right">
+  <div class="meta" style="z-index:2">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+  <div class="s2-left">
     <div>
-      <div class="s2-kicker">Ce que ça change</div>
+      <div class="kicker">Ce que ça change</div>
       <div class="s2-h">Un outil pensé<br>pour les BDE.</div>
       <div class="benefits">
-        <div class="benefit">
-          <div class="b-title">Dossier FSDIE en un clic</div>
-          <div class="b-desc">Le PDF est généré automatiquement à partir des dépenses validées. Plus de mise en forme manuelle avant chaque dépôt.</div>
+        <div>
+          <div class="b-name">Dossier FSDIE en un clic</div>
+          <div class="b-desc">Généré automatiquement depuis les dépenses validées. Plus de mise en forme manuelle avant chaque dépôt.</div>
         </div>
-        <div class="benefit">
-          <div class="b-title">Budget qui se met à jour seul</div>
-          <div class="b-desc">La subvention FSDIE se recalcule en temps réel quand une dépense change. Zéro erreur de cohérence.</div>
+        <div>
+          <div class="b-name">Budget toujours à jour</div>
+          <div class="b-desc">La subvention FSDIE se recalcule en temps réel dès qu'une dépense change. Zéro risque d'incohérence.</div>
         </div>
-        <div class="benefit">
-          <div class="b-title">Bénévoles planifiés sans conflit</div>
-          <div class="b-desc">Vue agenda 24h, inscriptions par créneau, protection contre les chevauchements. Tout visible d'un coup d'œil.</div>
+        <div>
+          <div class="b-name">Bénévoles sans conflit</div>
+          <div class="b-desc">Vue agenda 24h, inscription par créneau, protection anti-chevauchement.</div>
         </div>
       </div>
     </div>
-    <div class="stack-line"><b>Angular · Express.js · MySQL</b> — 42 tests · Git Flow · sprints 2 semaines</div>
+    <div class="stack"><strong>Angular · Express.js · MySQL</strong><br>42 tests · Git Flow · sprints 2 semaines</div>
   </div>
-
+  <div class="s2-right">
+    <div class="win">
+      <div class="win-bar">
+        <div class="dot" style="background:#ff5f57"></div>
+        <div class="dot" style="background:#febc2e"></div>
+        <div class="dot" style="background:#28c840"></div>
+      </div>
+      <div class="win-body">
+        <img src="assets/slides/events.png" alt="Liste des événements">
+      </div>
+    </div>
+    <div class="win-caption">6 événements · Interface de gestion</div>
+  </div>
   <div class="pg" style="z-index:2">02 / 03</div>
 </div>
 
-<!-- ── SLIDE 3 — Démo ── -->
+<!-- S3 -->
 <div class="slide s3">
-  <div class="tag" style="color:oklch(0.22 0.008 255)">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
-  <div class="s3-body">
-    <div class="s3-kicker">Place à la</div>
-    <div class="s3-h">DÉ<mark>MO</mark></div>
+  <div class="meta" style="color:oklch(0.22 0.010 210)">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+  <div class="inner">
+    <div class="kicker">Place à la</div>
+    <div class="s3-h">DÉ<em>MO</em></div>
     <div class="seq">
-      <div class="seq-item"><b>Budget & FSDIE</b>~2 min 30</div>
-      <div class="seq-item"><b>Planning bénévoles</b>~2 min</div>
-      <div class="seq-item"><b>Kanban</b>~1 min 30</div>
+      <div class="s-item"><strong>Budget & FSDIE</strong><span>~2 min 30</span></div>
+      <div class="s-item"><strong>Planning bénévoles</strong><span>~2 min</span></div>
+      <div class="s-item"><strong>Kanban</strong><span>~1 min 30</span></div>
     </div>
   </div>
-  <div class="pg" style="color:oklch(0.22 0.008 255)">03 / 03</div>
+  <div class="pg" style="color:oklch(0.22 0.010 210)">03 / 03</div>
 </div>
 
 <button id="eb" onclick="exportPDF()">⬇ Exporter PDF</button>
