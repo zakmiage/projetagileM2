@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -15,15 +15,22 @@ import { timeout } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   templateUrl: './budget-tab.component.html'
 })
-export class BudgetTabComponent {
+export class BudgetTabComponent implements OnDestroy {
   private _eventId!: number;
 
   @Input()
   set eventId(value: number) {
     this._eventId = value;
-    if (value) this.loadBudget();
+    if (value) {
+      this.loadBudget();
+      this.startPolling();
+    }
   }
   get eventId(): number { return this._eventId; }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
+  }
 
   private budgetService = inject(BudgetService);
   private fileService   = inject(FileService);
@@ -35,6 +42,11 @@ export class BudgetTabComponent {
   selectedFile: File | null = null;
   selectedBudgetLine: BudgetLine | null = null;
   isUploading = false;
+
+  /** true pendant qu'un PUT est en vol — le polling attend que ce soit fini */
+  private isSaving = false;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly POLL_INTERVAL_MS = 5000;
 
   /** trackBy → Angular réutilise les DOM nodes existants, pas de flicker */
   trackById(_: number, line: BudgetLine): number { return line.id; }
@@ -71,7 +83,6 @@ export class BudgetTabComponent {
   // ─── Mutations ───────────────────────────────────────────────────────────
 
   save(line: BudgetLine) {
-    // 1. Mise à jour optimiste locale (feedback immédiat, 0ms)
     if (this.viewMode === 'forecast') {
       line.forecast_amount = Number(line.forecast_amount) || 0;
     } else {
@@ -80,9 +91,7 @@ export class BudgetTabComponent {
         ? Number(v) : undefined;
     }
 
-    // Snapshot pour rollback en cas d'erreur
     const snapshot = { ...line };
-
     const payload: Partial<BudgetLine> = {
       category:          line.category,
       label:             line.label,
@@ -92,16 +101,16 @@ export class BudgetTabComponent {
       validation_status: line.validation_status,
     };
 
+    this.isSaving = true;  // 🔒 bloquer le polling
     this.budgetService.updateBudgetLine(line.id, payload).subscribe({
-      // 2. Le backend retourne les lignes recalculées (incl. R14) → on les applique
-      //    directement sans 2ème requête GET
       next: (res: any) => {
         if (res?.lines) this.applyFreshLines(res.lines);
+        this.isSaving = false;
       },
       error: () => {
-        // Rollback optimiste si erreur serveur
         Object.assign(line, snapshot);
         this.cdr.detectChanges();
+        this.isSaving = false;
         console.error('Failed to save — rollback applied');
       }
     });
@@ -274,6 +283,41 @@ export class BudgetTabComponent {
   /**
    * Normalise les montants (mysql2 retourne des strings DECIMAL).
    */
+  // ─── Polling ─────────────────────────────────────────────────────────────
+
+  private startPolling(): void {
+    this.stopPolling();
+    this.pollTimer = setInterval(() => this.pollRefresh(), this.POLL_INTERVAL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer !== null) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  }
+
+  /**
+   * Refresh silencieux déclenché par le polling.
+   * Ignoré si : onglet caché, save en cours, ou pas d'eventId.
+   */
+  private pollRefresh(): void {
+    if (document.hidden || this.isSaving || !this.eventId) return;
+
+    // Invalider le cache pour obtenir des données fraîches
+    this.budgetService.invalidateCache(this.eventId);
+    this.budgetService.getBudgetLines(this.eventId).subscribe({
+      next: (fresh) => {
+        if (this.isSaving) return; // un save a commencé entre-temps → ignorer
+        const prevAttachments = new Map(this.lines.map(l => [l.id, l.attachments]));
+        this.lines = this.normalize(fresh).map(l => ({
+          ...l, attachments: prevAttachments.get(l.id) ?? l.attachments
+        }));
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   private normalize(lines: any[]): BudgetLine[] {
     return lines.map(l => ({
       ...l,
