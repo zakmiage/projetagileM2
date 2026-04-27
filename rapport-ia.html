@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport — Utilisation de l'IA dans le projet KUBIK ERP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Crimson Text',Georgia,serif;font-size:11.5pt;line-height:1.8;color:#1a1a1a;background:#f9f7f4;max-width:820px;margin:0 auto;padding:40px 20px}
+.page{background:#fff;padding:60px 70px;box-shadow:0 2px 20px rgba(0,0,0,.08);border-radius:4px}
+/* COUVERTURE */
+.cover{text-align:center;padding:40px 0 50px;border-bottom:2px solid #1a1a1a;margin-bottom:50px}
+.cover .univ{font-family:'Inter',sans-serif;font-size:9pt;letter-spacing:2px;text-transform:uppercase;color:#666;margin-bottom:8px}
+.cover .ue{font-family:'Inter',sans-serif;font-size:9pt;color:#888;margin-bottom:40px}
+.cover h1{font-size:22pt;font-weight:600;line-height:1.3;margin-bottom:10px;color:#111}
+.cover .subtitle{font-style:italic;font-size:13pt;color:#555;margin-bottom:40px}
+.cover .meta{font-family:'Inter',sans-serif;font-size:9pt;color:#555;line-height:2}
+.cover .authors{margin-top:20px;font-size:11pt;color:#333}
+/* TOC */
+.toc{margin-bottom:45px;padding:20px 25px;background:#f8f6f2;border-left:3px solid #1a1a1a}
+.toc h2{font-family:'Inter',sans-serif;font-size:9pt;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;color:#444}
+.toc ol{padding-left:20px}
+.toc li{font-size:10.5pt;margin-bottom:4px;color:#333}
+.toc a{color:#333;text-decoration:none}
+.toc a:hover{text-decoration:underline}
+/* SECTIONS */
+h2.section-title{font-family:'Crimson Text',serif;font-size:15pt;font-weight:600;margin:40px 0 14px;padding-bottom:6px;border-bottom:1px solid #ccc;color:#111}
+h3.sub{font-family:'Inter',sans-serif;font-size:10pt;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#444;margin:22px 0 8px}
+p{margin-bottom:12px;text-align:justify}
+/* ENCADRES */
+.encadre{border:1px solid #d0c8bc;background:#faf8f5;padding:16px 20px;margin:18px 0;border-radius:3px}
+.encadre .label{font-family:'Inter',sans-serif;font-size:8pt;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:6px}
+/* TABLE */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:10.5pt}
+th{background:#1a1a1a;color:#fff;font-family:'Inter',sans-serif;font-size:8.5pt;font-weight:500;padding:9px 12px;text-align:left}
+td{padding:8px 12px;border-bottom:1px solid #e8e4dd;vertical-align:top}
+tr:nth-child(even) td{background:#faf8f5}
+/* LISTE */
+ul.liste,ol.liste{padding-left:22px;margin:10px 0 14px}
+ul.liste li,ol.liste li{margin-bottom:6px;font-size:11pt}
+/* BADGE */
+.badge{display:inline-block;font-family:'Inter',sans-serif;font-size:7.5pt;padding:2px 8px;border-radius:12px;font-weight:600;letter-spacing:.5px}
+.badge-ok{background:#d1fae5;color:#065f46}
+.badge-no{background:#fee2e2;color:#991b1b}
+.badge-info{background:#e0e7ff;color:#3730a3}
+/* CITE */
+blockquote{margin:16px 0;padding:12px 20px;border-left:3px solid #aaa;font-style:italic;color:#555;font-size:11pt}
+/* FOOTER */
+.footer{margin-top:50px;padding-top:16px;border-top:1px solid #ccc;font-family:'Inter',sans-serif;font-size:8pt;color:#999;display:flex;justify-content:space-between}
+/* PAGE NB */
+.num{color:#999;font-family:'Inter',sans-serif;font-size:9pt;text-align:center;margin:30px 0 0}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- COUVERTURE -->
+<div class="cover">
+  <div class="univ">Université — Master 2 Ingénierie Logicielle</div>
+  <div class="ue">UE Projet Agile · Année 2025–2026</div>
+  <h1>Rapport sur l'Utilisation de l'Intelligence Artificielle</h1>
+  <div class="subtitle">Projet KUBIK ERP — Application de gestion d'événements associatifs</div>
+  <div class="authors">
+    Équipe projet : Dardan, Zacharie, Arno, Huzaifah, Oumeyma, Zakaria, Youba
+  </div>
+  <div class="meta" style="margin-top:16px">
+    Rendu : Avril 2026 &nbsp;|&nbsp; Branche : <code>main</code> &nbsp;|&nbsp; Dépôt : <code>projetagileM2</code>
+  </div>
+</div>
+
+<!-- TABLE DES MATIÈRES -->
+<div class="toc">
+  <h2>Table des matières</h2>
+  <ol>
+    <li><a href="#intro">Introduction et contexte</a></li>
+    <li><a href="#cadre">Cadre éthique adopté</a></li>
+    <li><a href="#usages">Usages concrets dans le projet</a></li>
+    <li><a href="#gardefous">Garde-fous et supervision</a></li>
+    <li><a href="#limites">Limites et réflexions critiques</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ol>
+</div>
+
+<!-- 1. INTRODUCTION -->
+<h2 class="section-title" id="intro">1. Introduction et contexte</h2>
+
+<p>Dans le cadre de notre projet agile de Master 2, l'équipe a développé une application web de gestion d'événements pour associations étudiantes — KUBIK ERP. Ce projet couvre la gestion budgétaire, la planification bénévole (shifts), un tableau Kanban intégré, ainsi que la génération automatique de dossiers FSDIE conformes aux exigences administratives.</p>
+
+<p>Face à la complexité du périmètre fonctionnel et aux contraintes de temps propres à un projet académique, l'équipe a fait le choix d'intégrer un assistant basé sur l'intelligence artificielle (Gemini, Google DeepMind) comme outil de soutien au développement. Ce rapport documente de manière transparente les modalités de cette utilisation, les garde-fous mis en place, et les réflexions éthiques qui ont guidé nos choix.</p>
+
+<blockquote>
+  « L'IA a été utilisée comme un outil au service de l'équipe, jamais comme un acteur indépendant du projet. Toute suggestion a systématiquement été soumise à une validation humaine avant intégration. »
+</blockquote>
+
+<!-- 2. CADRE ÉTHIQUE -->
+<h2 class="section-title" id="cadre">2. Cadre éthique adopté</h2>
+
+<p>Dès le démarrage du projet, l'équipe a défini un cadre d'utilisation clair pour l'IA, inspiré des principes de transparence, de responsabilité et de supervision humaine préconisés par la Commission Européenne dans ses lignes directrices sur l'IA digne de confiance (2019).</p>
+
+<h3 class="sub">2.1 Principes directeurs</h3>
+
+<table>
+  <tr>
+    <th>Principe</th>
+    <th>Application dans le projet</th>
+    <th>Statut</th>
+  </tr>
+  <tr>
+    <td><strong>Transparence</strong></td>
+    <td>L'usage de l'IA est déclaré explicitement dans ce rapport et connu de l'ensemble de l'équipe</td>
+    <td><span class="badge badge-ok">Respecté</span></td>
+  </tr>
+  <tr>
+    <td><strong>Supervision humaine</strong></td>
+    <td>Aucune action (commit, exécution, migration) sans validation explicite d'un membre de l'équipe</td>
+    <td><span class="badge badge-ok">Respecté</span></td>
+  </tr>
+  <tr>
+    <td><strong>Non-substitution</strong></td>
+    <td>L'IA ne remplace pas le jugement ou les décisions architecturales de l'équipe</td>
+    <td><span class="badge badge-ok">Respecté</span></td>
+  </tr>
+  <tr>
+    <td><strong>Périmètre délimité</strong></td>
+    <td>Restriction aux tâches à faible valeur ajoutée intellectuelle ou à la vérification</td>
+    <td><span class="badge badge-ok">Respecté</span></td>
+  </tr>
+  <tr>
+    <td><strong>Autonomie agentique</strong></td>
+    <td>L'IA n'a pas été utilisée en mode agent autonome — exclusivement en interface conversationnelle</td>
+    <td><span class="badge badge-ok">Respecté</span></td>
+  </tr>
+</table>
+
+<h3 class="sub">2.2 Outil retenu</h3>
+
+<p>L'assistant utilisé est <strong>Gemini (Google DeepMind)</strong>, accessible via une interface conversationnelle dédiée. Ce choix exclut par construction tout mode d'exécution autonome : chaque suggestion textuelle ou bloc de code proposé par l'IA doit être copié, évalué et intégré manuellement par le développeur concerné.</p>
+
+<!-- 3. USAGES CONCRETS -->
+<h2 class="section-title" id="usages">3. Usages concrets dans le projet</h2>
+
+<p>L'IA a été sollicitée de manière ciblée sur des tâches précises. Nous distinguons trois catégories d'usage.</p>
+
+<h3 class="sub">3.1 Génération de données de test</h3>
+
+<p>La constitution de jeux de données réalistes pour les tests d'intégration représente une charge de travail significative sans valeur ajoutée intellectuelle directe. L'IA a généré les seeds SQL pour les tables <code>shifts</code>, <code>kanban_columns</code>, <code>kanban_cards</code> et <code>budget_attachments</code>, en les calant sur les vrais événements et membres présents en base de données.</p>
+
+<div class="encadre">
+  <div class="label">Exemple concret</div>
+  Le script <code>generate-fake-pj.py</code> génère des factures HTML réalistes (numéros, TVA, fournisseurs) converties en PDF via <code>xhtml2pdf</code>. L'IA a proposé la structure HTML et la logique d'insertion en BDD ; un développeur a relu, corrigé les colonnes manquantes et validé avant exécution.
+</div>
+
+<h3 class="sub">3.2 Assistance au débogage et à la correction</h3>
+
+<p>Plusieurs bugs complexes ont bénéficié de l'analyse de l'IA, notamment :</p>
+
+<ul class="liste">
+  <li><strong>Bug R14 (calcul FSDIE)</strong> : La Subvention FSDIE mélangeait les montants prévisionnels et réels. L'IA a identifié que <code>syncFsdieSubvention()</code> utilisait un <code>SUM()</code> commun pour forecast et actual. La correction (deux requêtes SQL distinctes) a été proposée, relue et testée avant intégration.</li>
+  <li><strong>Bug <code>capacity || 10</code></strong> : L'opérateur <code>||</code> traitait la valeur <code>0</code> comme falsy, remplaçant une capacité nulle par 10. L'IA a suggéré <code>??</code> (nullish coalescing). Correction validée après analyse et test unitaire dédié.</li>
+  <li><strong>Erreur NG0203</strong> : Conflit de Service Worker Angular bloquant le polling. L'IA a orienté vers un redémarrage propre avec nettoyage du cache ; solution appliquée après vérification.</li>
+</ul>
+
+<h3 class="sub">3.3 Rédaction et mise à jour documentaire</h3>
+
+<p>La SFD (Spécification Fonctionnelle Détaillée) et la STD (Spécification Technique Détaillée) ont été initialement rédigées par rétro-ingénierie du code existant, avec l'assistance de l'IA pour structurer le contenu. Chaque version (v1.1 à v1.7) a été relue et corrigée par l'équipe avant commit.</p>
+
+<h3 class="sub">3.4 Optimisation de performances</h3>
+
+<p>L'IA a proposé l'architecture du mécanisme de <em>short polling</em> (rafraîchissement automatique toutes les 5 secondes) pour le module Budget, incluant la gestion du cache mémoire (<code>Map&lt;eventId, BudgetLine[]&gt;</code>), la mise à jour optimiste et le rollback automatique. Ces propositions ont été évaluées, adaptées à l'architecture Angular existante, et testées en navigateur avant intégration.</p>
+
+<!-- 4. GARDE-FOUS -->
+<h2 class="section-title" id="gardefous">4. Garde-fous et supervision</h2>
+
+<h3 class="sub">4.1 Processus de validation systématique</h3>
+
+<p>Tout au long du projet, le processus suivant a été respecté sans exception :</p>
+
+<ol class="liste">
+  <li><strong>Identification</strong> — Un développeur identifie une tâche adaptée à l'assistance IA (données, debug, doc)</li>
+  <li><strong>Requête contextuelle</strong> — La demande est formulée avec le contexte précis du projet (code existant, contraintes, erreurs observées)</li>
+  <li><strong>Proposition IA</strong> — L'assistant retourne une suggestion sans l'appliquer</li>
+  <li><strong>Revue critique</strong> — Le développeur analyse la proposition, la confronte au code réel, et l'adapte si nécessaire</li>
+  <li><strong>Approbation explicite</strong> — Toute commande (npm install, git commit, migration SQL) requiert une approbation manuelle dans l'outil</li>
+  <li><strong>Test et vérification</strong> — Le résultat est testé (suite Vitest, vérification navigateur) avant merge sur <code>main</code></li>
+</ol>
+
+<h3 class="sub">4.2 Ce que l'IA n'a pas fait</h3>
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Raison de l'exclusion</th>
+  </tr>
+  <tr>
+    <td>Définir les exigences fonctionnelles</td>
+    <td>Relève du jugement métier et de la relation avec le client fictif (BDE)</td>
+  </tr>
+  <tr>
+    <td>Valider ou fusionner du code sans accord</td>
+    <td>Toutes les actions Git requièrent une approbation humaine explicite</td>
+  </tr>
+  <tr>
+    <td>Agir en mode agent autonome</td>
+    <td>L'interface conversationnelle interdit par construction l'exécution autonome</td>
+  </tr>
+  <tr>
+    <td>Accéder à des données de production</td>
+    <td>La BDD utilisée est locale ; aucune donnée réelle d'association n'a été exposée</td>
+  </tr>
+  <tr>
+    <td>Remplacer la revue de code entre pairs</td>
+    <td>Les pull requests et revues croisées ont été maintenues indépendamment de l'IA</td>
+  </tr>
+</table>
+
+<!-- 5. LIMITES -->
+<h2 class="section-title" id="limites">5. Limites et réflexions critiques</h2>
+
+<h3 class="sub">5.1 Risques identifiés</h3>
+
+<p>L'utilisation de l'IA dans un projet de développement logiciel présente des risques qu'il convient de reconnaître honnêtement :</p>
+
+<ul class="liste">
+  <li><strong>Confiance excessive</strong> : Un développeur moins expérimenté pourrait intégrer une suggestion sans la comprendre pleinement. L'équipe a pallié ce risque en exigeant que la personne qui valide comprenne et puisse expliquer chaque modification.</li>
+  <li><strong>Hallucinations</strong> : L'IA a produit des suggestions incorrectes (colonnes SQL inexistantes, chemins de fichiers erronés). Ces erreurs ont été détectées lors des tests — elles soulignent l'importance de ne jamais sauter l'étape de validation.</li>
+  <li><strong>Dépendance progressive</strong> : Un risque de réflexe « demander à l'IA d'abord » peut émerger, réduisant l'effort de réflexion autonome. L'équipe a consciemment limité les sollicitations aux tâches clairement identifiées.</li>
+</ul>
+
+<h3 class="sub">5.2 Ce que l'IA n'apporte pas</h3>
+
+<p>L'expérience du projet a confirmé que l'IA est peu pertinente sur les dimensions à forte valeur ajoutée : compréhension du contexte associatif, arbitrages de priorité en sprint planning, qualité des interactions entre membres de l'équipe, et sens critique sur les choix d'architecture à long terme. Ces dimensions sont restées entièrement sous responsabilité humaine.</p>
+
+<!-- 6. CONCLUSION -->
+<h2 class="section-title" id="conclusion">6. Conclusion</h2>
+
+<p>L'intégration de l'intelligence artificielle dans ce projet de M2 a constitué une expérience formatrice à deux niveaux : technique et éthique. Sur le plan technique, l'IA a contribué à accélérer les tâches répétitives (données de test, documentation, débogage), libérant du temps pour les problèmes à plus forte valeur ajoutée. Sur le plan éthique, la discipline imposée — validation systématique, refus du mode agent, périmètre défini — a démontré qu'une utilisation responsable est possible et bénéfique dans un contexte académique.</p>
+
+<p>Ce rapport témoigne de la volonté de l'équipe d'adopter une posture transparente vis-à-vis de l'enseignant et de s'inscrire dans les principes d'une IA éthique : l'humain reste décisionnaire, l'IA conseille et assiste. Cette distinction n'est pas qu'une contrainte formelle — elle reflète une conviction partagée sur le rôle approprié de ces outils dans la formation d'ingénieurs logiciels.</p>
+
+<div class="encadre">
+  <div class="label">Engagement de l'équipe</div>
+  L'ensemble des membres de l'équipe confirme que les règles d'utilisation décrites dans ce rapport ont été respectées tout au long du projet. Aucun code n'a été intégré sans compréhension et validation humaine. L'IA a été un outil, pas un auteur.
+</div>
+
+<div class="footer">
+  <span>Projet projetagileM2 · KUBIK ERP · M2 Ingénierie Logicielle · 2025–2026</span>
+  <span>Rapport d'utilisation de l'IA — Avril 2026</span>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
