@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétro-ingéniéré** à partir du code source du projet `projetagileM2`  
-> Version : **1.5** — Dernière modification : **27/04/2026**
+> Version : **1.6** — Dernière modification : **27/04/2026**
 
 ---
 
@@ -15,8 +15,11 @@ L'application est une plateforme web de gestion interne pour association étudia
 - Créer et consulter des **événements**
 - Gérer les **inscriptions** de membres à ces événements
 - Suivre le **budget prévisionnel et réel** de chaque événement
-- Exporter les données financières au format **Excel**, notamment pour les dossiers de subvention **FSDIE**
+- Exporter les données financières au format **Excel** (budget complet ou FSDIE)
+- Générer un **dossier FSDIE complet en PDF** (avec PJ mergées, calcul auto de la subvention)
 - Gérer un **annuaire des membres** avec leurs informations administratives
+- Planifier les **créneaux de staffing** (planning 24h) des bénévoles
+- Organiser les tâches via un **Kanban drag & drop**
 
 ### 1.2 Acteurs
 
@@ -100,9 +103,10 @@ L'application est une plateforme web de gestion interne pour association étudia
 ### 4.1 Tableau de bord financier
 
 - Affiche deux colonnes : **Dépenses** (gauche, en rouge) et **Revenus** (droite, en vert)
-- Chaque ligne de budget affiche : **Catégorie**, **Libellé**, **Montant**
+- Chaque ligne de budget affiche : **Catégorie**, **Libellé**, **Montant**, **Statut FSDIE**
 - Le total de chaque colonne est calculé automatiquement
 - Un **bilan global** en bas de page indique le solde (Revenus – Dépenses), coloré en vert (bénéfice) ou rouge (déficit)
+- La ligne **Subvention FSDIE** (catégorie `Subvention FSDIE`, type REVENUE) est automatiquement présente : elle répercute le total éligible (R14)
 
 ### 4.2 Modes d'affichage
 
@@ -117,39 +121,57 @@ L'application est une plateforme web de gestion interne pour association étudia
 | **Ajouter** | Bouton "Ajouter une dépense" / "Ajouter un revenu" → crée une ligne vide en BDD |
 | **Modifier** | Les champs Catégorie, Libellé et Montant sont éditables inline. La sauvegarde se déclenche à la perte du focus (`blur`) |
 | **Supprimer** | Bouton corbeille avec confirmation → suppression en BDD |
-| **Éligibilité FSDIE** | Checkbox par ligne de dépense. Si coché, la ligne sera incluse dans l'export FSDIE |
+| **Éligibilité FSDIE** | Checkbox par ligne de dépense. Si coché, la ligne sera incluse dans le dossier FSDIE |
+| **Statut validation** | Sélecteur SOUMIS / APPROUVE / REFUSE (visible TRESORIER/ADMIN uniquement) |
 
 ### 4.4 Pièces jointes (justificatifs)
 
-- Chaque ligne de budget peut avoir des **pièces jointes** (factures, reçus)
-- Un bouton "Joindre une facture" / "Joindre un reçu" ouvre le sélecteur de fichier natif
-- Les fichiers sont affichés sous forme de badges cliquables (ouverture dans un nouvel onglet)
-- ⚠️ **Note** : L'upload est simulé (ObjectURL local), les fichiers ne sont pas persistés en base
+- Chaque ligne de budget peut avoir des **pièces jointes** (factures PDF)
+- Un bouton "Joindre" ouvre le sélecteur de fichier natif
+- Les fichiers sont uploadés via `multer` et **persistés dans `backend/uploads/`**
+- Les PJ apparaissent sous forme de badges cliquables (ouverture dans un nouvel onglet)
+- En tests : les PJ sont des **factures HTML→PDF réalistes** générées par `generate-fake-pj.py`
 
 ### 4.5 Export Excel
 
-| Bouton | Comportement |
-|--------|-------------|
-| **Export Global** | Exporte toutes les lignes (dépenses + revenus) |
-| **Export FSDIE** | Exporte uniquement les revenus + les dépenses marquées "Éligible FSDIE" |
+| Bouton | Comportement | Accès |
+|--------|-------------|-------|
+| **Excel** | Exporte toutes les lignes (dépenses + revenus), groupes par catégorie, style couleur | TRESORIER / ADMIN |
 
-- Le fichier généré est un `.xlsx` formaté avec couleurs, sous-totaux par catégorie et ligne TOTAL
+- Le fichier généré est un `.xlsx` formaté : 2 colonnes côte à côte (SORTIES / ENTRÉES), sous-totaux par catégorie, ligne TOTAL
 
-### 4.6 Export PDF — Concaténation des factures
+### 4.6 Dossier FSDIE PDF — Bouton "Dossier FSDIE"
 
-- Bouton **"Exporter toutes les PJ"** sur l'onglet Budget
-- Génère un PDF unique : page de garde récapitulative + liste de chaque pièce jointe
-- Téléchargement direct
-- Si aucune PJ → message d'erreur toast
+Bouton visible uniquement pour les rôles `TRESORIER` et `ADMIN`.
 
-### 4.7 Générateur PDF Dossier FSDIE
+**Structure du PDF généré :**
 
-- Bouton **"Générer dossier FSDIE"** dédié (distinct de l'export Excel)
-- **Structure du PDF :**
-  - Page 1 : En-tête FSDIE + informations générales de l'événement
-  - Page 2 : Tableau budget — lignes éligibles FSDIE uniquement, avec statuts de validation
-  - Pages suivantes : chaque pièce jointe en annexe numérotée
-- Désactivé si aucune ligne `is_fsdie_eligible = true`
+| Page | Contenu |
+|------|---------|
+| 1 | **Couverture** : bandeau KUBIK/FSDIE, nom de l'événement, montant sollicité en grand, 3 chips (dépenses FSDIE / recettes propres / montant demandé), note R14 |
+| 2 | **Budget complet style Excel** : 2 colonnes DÉPENSES(rouge) / RECETTES(vert), groupé par catégorie, ligne "Subvention FSDIE (R14)" en indigo, solde global |
+| 3 | **Tableau détaillé FSDIE** : lignes éligibles uniquement, colonnes Catégorie/Libellé/Réf./Montant/Statut/PJ, REFUSE barré rouge exclu du total, total + récap |
+| 4 | **Table des annexes** (index numéroté) |
+| 5+ | **Annexes** : page séparatrice ("ANNEXE A1 — Catégorie — Libellé") + PDF de la facture mergé physiquement |
+
+**Règles métier appliquées :**
+
+| Règle | Description |
+|-------|-------------|
+| R1 | Seules les lignes `is_fsdie_eligible = true` de type EXPENSE sont listées |
+| R2 | Lignes `REFUSE` → affichées barrées en rouge, exclues du total |
+| R3 | Montant = `actual_amount` si > 0, sinon `forecast_amount` |
+| R4 | Total demandé = Σ lignes non REFUSE |
+| R5 | Recettes propres = toutes lignes REVENUE hors Subvention FSDIE |
+| R6 | **Montant demandé au FSDIE** = totalFSDIE − recettes propres (minimum 0) |
+| R7 | Chaque ligne référence ses PJ `[A1][A2]` dans le tableau |
+| R8 | Ligne sans PJ → bandeau orange d'avertissement |
+| R9 | Blocage si aucune ligne FSDIE éligible → HTTP 400 |
+| R10 | PJ PDF réelles concaténées physiquement après chaque page séparatrice (via `pdf-lib`) |
+| R11 | Structure : Couverture → Budget complet → Tableau FSDIE → Table annexes → PJ |
+| R12 | Couverture : bandeau indigo, encart montant demandé, 3 chips chiffres clés |
+| R13 | Footer "Dossier FSDIE — [nom événement] — Page X" sur chaque page |
+| **R14** | **La subvention FSDIE attendue (Σ dépenses éligibles non refusées) est automatiquement portée en recette** dans le budget prévisionnel et réel. Elle équilibre le poste FSDIE dans le budget global. |
 
 ---
 
