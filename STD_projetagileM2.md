@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétro-ingéniéré** à partir du code source du projet `projetagileM2`  
-> Version : **1.6** — Dernière modification : **27/04/2026**
+> Version : **1.7** — Dernière modification : **27/04/2026**
 
 ---
 
@@ -470,11 +470,34 @@ Le contrôle de session inclut une vérification de l'expiration via `sessionDat
 | `getExpensesTotal()` | Somme selon `viewMode` (forecast ou actual) |
 | `getRevenuesTotal()` | Somme selon `viewMode` |
 | `getTotal()` | `revenues - expenses` |
-| `save(line)` | PUT via `BudgetService.updateBudgetLine` (déclenché au `blur`) |
+| `save(line)` | PUT via `BudgetService.updateBudgetLine` (déclenché au `blur`) — **optimistic update** : la valeur est appliquée localement avant la réponse serveur, rollback automatique sur erreur |
+| `applyFreshLines(lines)` | Remplace `this.lines` avec les données fraîches retournées par le backend (évite un second GET) |
 | `addLine(type)` | POST via `BudgetService.createBudgetLine` |
 | `deleteLine(line)` | DELETE avec confirmation |
 | `triggerUpload(line)` | Upload simulé via `input[type=file]` dynamique + ObjectURL |
 | `export(fsdieOnly)` | POST `/api/export/budget` → téléchargement du Blob `.xlsx` |
+| `startPolling()` | Lance un `setInterval` de **5 000 ms** au chargement de l'onglet |
+| `stopPolling()` | `clearInterval` appelé dans `ngOnDestroy` — pas de fuite mémoire |
+| `pollRefresh()` | GET silencieux toutes les 5s. Ignoré si `document.hidden`, `isSaving`, ou `!eventId` |
+
+**Détails du cache `BudgetService` :**
+
+| Mécanisme | Description |
+|---|---|
+| `Map<eventId, BudgetLine[]>` | Cache mémoire in-process — navigation entre onglets instantanée (0 requête) |
+| `invalidateCache(eventId)` | Appelé avant chaque poll pour forcer un GET frais |
+| Mutations (PUT/POST/DELETE) | Retournent `{ lines: [...] }` — le cache est mis à jour via `updateCache()` sans second GET |
+
+**Règle R14 — Calcul séparé forecast/actual :**
+
+```sql
+-- forecast_amount de la Subvention FSDIE
+SUM(forecast_amount) -- uniquement les forecasts
+-- actual_amount de la Subvention FSDIE
+SUM(actual_amount)   -- uniquement les actuals (NULL si aucune ligne ne l'a renseigné)
+```
+
+Les deux montants sont calculés indépendamment dans `BudgetLine.syncFsdieSubvention()`, appelé après chaque mutation.
 
 ### 5.7 Génération Excel (Backend)
 

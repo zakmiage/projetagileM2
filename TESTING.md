@@ -106,6 +106,10 @@ C'est la couche la plus exhaustive de la stratégie de tests. Elle reproduit le 
 | **Shifts — Anti-conflit** | Login → inscrire même membre sur 2 shifts chevauchants → vérifier toast erreur |
 | **Kanban — D&D** | Login → event detail → onglet "Kanban" → créer colonne → créer carte → drag vers autre colonne → vérifier persistance |
 | **Export PDF FSDIE** | Login → event detail → Budget → "Générer dossier FSDIE" → vérifier téléchargement |
+| **Budget — Optimistic UI** | Modifier un montant → vérifier mise à jour immédiate → vérifier recalcul Subvention FSDIE sans F5 |
+| **Budget — Persistance R14** | Modifier forecast → F5 → vérifier que forecast ET Subvention FSDIE affichent la bonne valeur (indépendante de actual) |
+| **Budget — Polling** | Ouvrir 2 onglets sur le même event → modifier budget dans onglet 1 → vérifier mise à jour dans onglet 2 en moins de 5s |
+
 
 ### Comment lancer ?
 

@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétro-ingéniéré** à partir du code source du projet `projetagileM2`  
-> Version : **1.6** — Dernière modification : **27/04/2026**
+> Version : **1.7** — Dernière modification : **27/04/2026**
 
 ---
 
@@ -111,8 +111,14 @@ L'application est une plateforme web de gestion interne pour association étudia
 ### 4.2 Modes d'affichage
 
 - Basculer entre vue **Prévisionnelle** et vue **Réelle** via un sélecteur
-- En mode prévisionnel : affichage et édition du champ `forecast_amount`
-- En mode réel : affichage et édition du champ `actual_amount`
+- En mode prévisionnel : affichage et édition du champ `forecast_amount` — la Subvention FSDIE affiche la **somme des forecast** des lignes éligibles
+- En mode réel : affichage et édition du champ `actual_amount` — la Subvention FSDIE affiche la **somme des actual** des lignes éligibles (ces deux valeurs sont calculées indépendamment, pas de mélange)
+
+### 4.2bis Réactivité et synchronisation
+
+- **Mise à jour optimiste** : toute modification de montant s'affiche instantanément dans l'interface sans attendre la réponse serveur. Si le serveur retourne une erreur, la valeur est automatiquement restaurée (rollback)
+- **Synchronisation R14 temps réel** : après chaque `save()`, le backend recalcule la Subvention FSDIE et renvoie l'état complet des lignes — l'interface se met à jour sans rechargement
+- **Polling automatique** : les données budget se rafraîchissent silencieusement toutes les **5 secondes** pour refléter les modifications faites par d'autres utilisateurs. Le polling est suspendu si l'onglet navigateur est caché ou si une saisie est en cours
 
 ### 4.3 Gestion des lignes de budget
 
