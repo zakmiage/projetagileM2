@@ -1,8 +1,8 @@
 # SFD — Spécification Fonctionnelle Détaillée
 ## Application de Gestion d'Événements pour Associations
 
-> **Document rétroingénéré** à partir du code source du projet `projetagileM2`  
-> Version : 1.3 — Dernière modification du dépôt : **27/04/2026**
+> **Document rétro-ingéniéré** à partir du code source du projet `projetagileM2`  
+> Version : **1.5** — Dernière modification : **27/04/2026**
 
 ---
 
@@ -279,7 +279,11 @@ L'application est une plateforme web de gestion interne pour association étudia
 | RG-11 | Un membre ne peut pas s'inscrire à deux shifts dont les horaires se chevauchent (anti-conflit) |
 | RG-12 | Un shift complet (registered_count >= capacity) refuse toute nouvelle inscription |
 | RG-13 | L'export PDF FSDIE est refusé si aucune ligne `is_fsdie_eligible = true` n'existe pour l'événement |
-| RG-14 | L'export Concaténation PJ est refusé si aucune `budget_attachment` n'existe pour l'événement |
+| RG-14 | **La subvention FSDIE attendue (Σ des dépenses éligibles non refusées) est automatiquement portée en recette prévisionnelle et réelle du budget** (principe d'équilibre FSDIE) |
+| RG-15 | Les lignes avec statut `REFUSE` sont affichées barrées en rouge dans le dossier PDF et exclues du total demandé |
+| RG-16 | Le montant demandé au FSDIE = totalFSDE − recettes propres de l'événement (minimum 0) |
+| RG-17 | Chaque pièce justificative PDF est mergée physiquement dans le dossier FSDIE après sa page séparatrice numérotée |
+| RG-18 | Le planning shifts n'impose pas de limite d'horaire : les créneaux nocturnes (00h-06h) sont autorisés |
 
 ---
 
@@ -297,11 +301,14 @@ L'application est une plateforme web de gestion interne pour association étudia
 | Workflow validation FSDIE (`SOUMIS`/`APPROUVE`/`REFUSE`) | ✅ Implémenté |
 | Mode hors-ligne PWA (IndexedDB + Service Worker) | ✅ Implémenté |
 | Pagination | ❌ Absente |
-| **Créneaux de staffing (Shifts)** | ✅ Implémenté |
-| **Tableau Kanban Drag & Drop** | ✅ Implémenté |
-| **Concaténation des factures PDF** | ✅ Implémenté |
+| Créneaux de staffing (Shifts) | ✅ Implémenté |
+| Tableau Kanban Drag & Drop | ✅ Implémenté |
+| Concaténation des factures PDF | ✅ Implémenté |
 | **Générateur dossier FSDIE PDF** | ✅ Implémenté |
 | **Notifications Toast globales** | ✅ Implémenté |
+| **Pièces jointes réalistes (factures HTML→PDF Python)** | ✅ Implémenté |
+| **R14 : Subvention FSDIE en recette automatique** | ✅ Implémenté |
+| **Script setup-test-data.js tout-en-un** | ✅ Implémenté |
 
 ---
 

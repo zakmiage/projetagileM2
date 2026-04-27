@@ -1,8 +1,8 @@
 # STD — Spécification Technique Détaillée
 ## Application de Gestion d'Événements pour Associations
 
-> **Document rétroingénéré** à partir du code source du projet `projetagileM2`  
-> Version : 1.3 — Dernière modification du dépôt : **27/04/2026**
+> **Document rétro-ingéniéré** à partir du code source du projet `projetagileM2`  
+> Version : **1.5** — Dernière modification : **27/04/2026**
 
 ---
 
@@ -517,8 +517,18 @@ JWT_EXPIRES_IN=1d
 | `bcryptjs` | Hashage des mots de passe |
 | `jsonwebtoken` | Génération et vérification de JWT |
 | `exceljs` | Génération de fichiers Excel `.xlsx` |
-| `pdfkit` *(nouveau)* | Génération de fichiers PDF |
+| `pdfkit` | Génération PDF (base du dossier FSDIE) |
+| `pdf-lib` *(nouveau)* | Merge PDF physique (concaténation des PJ réelles) |
+| `multer` | Upload de fichiers (pièces jointes) |
 | `nodemon` (dev) | Hot-reload en développement |
+
+**Scripts Python (génération de données) :**
+
+| Package Python | Usage |
+|---|---|
+| `xhtml2pdf` | Conversion HTML → PDF pour les factures fictives |
+| `pymysql` | Connexion MySQL depuis Python (insertion en BDD) |
+| `Pillow` | Dépendance xhtml2pdf |
 
 ### Frontend (`frontend/package.json`)
 
@@ -547,15 +557,25 @@ cd frontend && npm install && ng serve
 # → http://localhost:4200
 ```
 
-**Initialisation BDD :**
-```sql
-source database/init.sql;            -- Crée le schéma
-source database/migration_shifts.sql; -- Tables shifts
-source database/migration_kanban.sql; -- Tables kanban
-source database/seed-data.sql;        -- Données de test
-source database/seed-shifts.sql;      -- Shifts de test
-source database/seed-kanban.sql;      -- Kanban de test
+**Initialisation BDD (script tout-en-un) :**
+```bash
+# Option recommandée
+cd backend && node scripts/setup-test-data.js
+
+# Option manuelle (ordre obligatoire)
+mysql -u root -p < database/init.sql
+mysql -u root -p gestion_assos < database/seed-data.sql
+mysql -u root -p gestion_assos < database/seed-members.sql
+mysql -u root -p gestion_assos < database/seed-participants.sql
+mysql -u root -p gestion_assos < database/seed-budget.sql
+mysql -u root -p gestion_assos < database/seed-kanban.sql
+mysql -u root -p gestion_assos < database/seed-shifts.sql
+
+# Génération des PJ PDF réalistes (Python)
+cd backend && python scripts/generate-fake-pj.py
 ```
+
+**Données injectées :** 4 users · 47 membres · 5 événements · ~180 inscriptions · 59 lignes budget · 68 shifts · 15 colonnes kanban · 11 PJ PDF
 
 ---
 

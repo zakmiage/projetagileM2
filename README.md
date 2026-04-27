@@ -1,410 +1,418 @@
-# Application de gestion d'événements pour associations
+# Application de Gestion d'Événements Associatifs — KUBIK
 
-## Description
-
-Ce projet est une application web permettant de gérer les événements d’associations : budget, organisation, suivi, etc.
-
-Technologies utilisées :
-
-* *Frontend* : Angular
-* *Backend* : Node.js / Express
-* *Base de données* : MySQL
-
-L’objectif de cette première étape est de vérifier que les 3 briques communiquent correctement :
-
-* Angular appelle une API
-* Node.js répond à cette API
-* Node.js lit une donnée dans MySQL
-* Angular affiche cette donnée
+> **Stack** : Angular 17 • Node.js/Express • MySQL 8 · **Version docs** : 1.5 — 27/04/2026
 
 ---
 
-## Structure attendue du projet
+## Table des matières
 
-À la racine du projet, vous devez avoir cette structure :
-
-text
-projetagileM2/
-├── README.md
-├── .gitignore
-├── frontend/
-├── backend/
-└── database/
-
-
-### Détail des dossiers
-
-* frontend/ : application Angular
-* backend/ : API Node.js / Express
-* database/ : scripts SQL, par exemple init.sql
+1. [Présentation](#1-présentation)
+2. [Prérequis](#2-prérequis)
+3. [Installation rapide (5 min)](#3-installation-rapide)
+4. [Données de test complètes](#4-données-de-test-complètes)
+5. [Identifiants](#5-identifiants)
+6. [Lancer l'application](#6-lancer-lapplication)
+7. [Fonctionnalités disponibles](#7-fonctionnalités-disponibles)
+8. [Tests automatisés](#8-tests-automatisés)
+9. [Structure du projet](#9-structure-du-projet)
+10. [Problèmes fréquents](#10-problèmes-fréquents)
 
 ---
 
-## Prérequis
+## 1. Présentation
 
-Avant de commencer, installer :
+Plateforme web de gestion interne pour association étudiante (BDE KEDGE Bordeaux — KUBIK).
 
-* Git
-* Node.js (version LTS)
-* npm
-* Angular CLI
-* MySQL Server
-* éventuellement MySQL Workbench
-
----
-
-## Vérification des outils
-
-Ouvrir un terminal et taper :
-
-bash
-git --version
-node -v
-npm -v
-ng version
-
-
-Pour MySQL, vérifier que vous pouvez vous connecter :
-
-bash
-mysql -u root -p
-
-
-Si une commande n’est pas reconnue, cela signifie que l’outil n’est pas installé ou pas ajouté au PATH.
+| Fonctionnalité | Description |
+|---|---|
+| **Événements** | CRUD complet, liste paginée avec filtres |
+| **Budget** | Lignes prévisionnelles/réelles, statuts FSDIE, pièces jointes PDF |
+| **Planning (shifts)** | Grille 24h avec drag & drop, drawer de gestion |
+| **Kanban** | Tableau de tâches par événement, drag & drop CDK |
+| **Membres** | Annuaire, inscriptions aux événements |
+| **Export** | Excel budget, Dossier FSDIE PDF complet (avec PJ mergées) |
+| **Dashboard** | Analytics, graphiques de répartition |
 
 ---
 
-## 1. Cloner le projet
+## 2. Prérequis
 
-Dans un terminal, se placer dans le dossier où vous voulez récupérer le projet, puis exécuter :
-
-bash
-git clone https://github.com/zakmiage/projetagileM2.git
-cd projetagileM2
-
-
----
-
-## 2. Initialiser la base de données
-
-### Emplacement des fichiers SQL
-
-Dans le dossier `database/`, vous trouverez deux fichiers cruciaux :
-1. `init.sql` : Crée la structure (les tables) vierge.
-2. `seed-data.sql` : Ajoute l'ensemble des données de test (Événements, Membres, Budget, Participants) pour que vous puissiez tester directement sur une base remplie !
-
-### Exécuter les scripts SQL
-
-#### Option A — avec MySQL en ligne de commande
-
-Ouvrir un terminal et taper :
+| Outil | Version minimale | Vérification |
+|---|---|---|
+| Node.js | LTS (20+) | `node -v` |
+| npm | 9+ | `npm -v` |
+| Angular CLI | 17+ | `ng version` |
+| MySQL Server | 8.x | `mysql --version` |
+| Python | 3.10+ | `python --version` |
+| Git | tout | `git --version` |
 
 ```bash
-mysql -u root -p
+# Installer Angular CLI si absent
+npm install -g @angular/cli
 ```
-
-Puis, une fois connecté à MySQL :
-
-```sql
-source C:/chemin/vers/projetagileM2/database/init.sql;
-source C:/chemin/vers/projetagileM2/database/seed-data.sql;
-```
-
-*(Remplacez `C:/chemin/vers/` par votre vrai chemin absolu)*
-
-#### Option B — avec MySQL Workbench
-
-1. Ouvrir MySQL Workbench.
-2. Ouvrir le fichier `database/init.sql` puis cliquer sur l'éclair jaune (Execute).
-3. Ouvrir le fichier `database/seed-data.sql` puis cliquer sur l'éclair jaune (Execute).
-
-### Vérification
-
-Dans MySQL :
-
-```sql
-USE gestion_assos;
-SELECT * FROM events;
-```
-
-Vous devez voir apparaître deux événements : le 'Gala' et le 'WEI'.
 
 ---
 
-## 3. Installer et lancer le backend
+## 3. Installation rapide
 
-### Se placer dans le dossier backend
+### Étape 1 — Cloner le projet
 
-Depuis la racine du projet :
+```bash
+git clone https://github.com/zakmiage/projetagileM2.git
+cd projetagileM2
+```
 
-bash
-cd backend
+### Étape 2 — Initialiser la base de données
 
+```bash
+# Connexion MySQL (adapter le mot de passe)
+mysql -u root -p
+```
 
-### Installer les dépendances
+Une fois connecté :
+```sql
+source /chemin/absolu/vers/projetagileM2/database/init.sql;
+```
 
-bash
-npm install
+> Adapter `/chemin/absolu/vers/` à votre machine.  
+> Sous Windows : `source C:/Users/Zac/git hub/projetagileM2/database/init.sql;`
 
+### Étape 3 — Configurer le backend
 
-### Créer le fichier .env
+Créer le fichier `backend/.env` :
 
-Le fichier .env doit être créé *dans le dossier backend/*, donc ici :
-
-text
-projetagileM2/backend/.env
-
-
-### Comment créer ce fichier
-
-Dans VS Code :
-
-* ouvrir le dossier backend
-* créer un nouveau fichier nommé exactement :
-
-text
-.env
-
-
-Attention :
-
-* le nom doit être *.env*
-* pas .env.txt
-
-### Contenu du fichier .env
-
-env
+```env
 PORT=3000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=VOTRE_MOT_DE_PASSE
 DB_NAME=gestion_assos
+```
 
+> ⚠️ Le fichier doit s'appeler **exactement** `.env` (pas `.env.txt`)
 
-Remplacer VOTRE_MOT_DE_PASSE par le mot de passe choisi pour MySQL.
+### Étape 4 — Installer les dépendances
 
-### Lancer le backend
-
-Toujours dans le dossier backend/ :
-
-bash
-npm run dev
-
-
-Si nodemon ne fonctionne pas :
-
-bash
-node server.js
-
-
-### Résultat attendu
-
-Le terminal doit afficher un message du type :
-
-text
-Serveur backend lancé sur http://localhost:3000
-
-
-### Test direct du backend
-
-Ouvrir dans un navigateur :
-
-text
-http://localhost:3000/api/hello
-
-
-Vous devez obtenir une réponse JSON, par exemple :
-
-json
-{"success":true,"message":"Hello World depuis MySQL"}
-
-
----
-
-## 4. Installer et lancer le frontend
-
-### Ouvrir un nouveau terminal
-
-Ne pas fermer le terminal du backend.
-Ouvrir un *deuxième terminal*.
-
-### Se placer dans le dossier frontend
-
-Depuis la racine du projet :
-
-bash
-cd frontend
-
-
-### Installer les dépendances
-
-bash
-npm install
-
-
-### Lancer Angular
-
-bash
-ng serve
-
-
-### Résultat attendu
-
-Angular démarre sur :
-
-text
-http://localhost:4200
-
-
-Ouvrir cette adresse dans un navigateur.
-
-Le message affiché doit être :
-
-text
-Hello World depuis MySQL
-
-
----
-
-## 5. Connexion à l'application
-
-> 💡 **Note importante** : Ce projet est un prototype académique. Certaines fonctionnalités comme l'authentification côté frontend sont volontairement simplifiées pour le moment.
-
-### Identifiants Frontend (Vue Utilisateur)
-L'interface Angular utilise un système de connexion factice pour faciliter les tests. Pour vous connecter sur `http://localhost:4200` :
-* **Email :** `toto@mail.com`
-* **Mot de passe :** `toto`
-
-### Identifiants Backend (Test de l'API)
-Si vous souhaitez tester directement l'API REST (`http://localhost:3000/api/auth/login`) via Postman ou Swagger, de vrais comptes admins sont initialisés en base :
-* `admin@kubik.fr` | MdP : `admin123`
-* `bureau@kubik.fr` | MdP : `admin123`
-* `tresorier@kubik.fr` | MdP : `admin123`
-
----
-
-## 6. Documentation des Tests
-
-Une documentation complète de la stratégie de tests automatisés (TUF / TR / TUT) a été créée pour le projet. Pour comprendre la logique derrière Vitest et Playwright et savoir exécuter tous les tests d'assurance qualité du code, référez-vous au fichier dédié :
-
-👉 **[Voir la Stratégie des Tests (TESTING.md)](TESTING.md)**
-
----
-
-## Résumé des terminaux à ouvrir
-
-### Terminal 1 : backend
-
-Depuis la racine du projet :
-
-bash
+```bash
+# Backend
 cd backend
 npm install
-npm run dev
 
-
-ou :
-
-bash
-cd backend
-npm install
-node server.js
-
-
-### Terminal 2 : frontend
-
-Depuis la racine du projet :
-
-bash
+# Frontend (dans un autre terminal)
 cd frontend
 npm install
-ng serve
+```
 
+### Étape 5 — Charger les données de test
 
-### MySQL
-
-Le script SQL est à exécuter une seule fois, soit :
-
-* dans MySQL en ligne de commande
-* soit dans MySQL Workbench
+Voir section [§4 Données de test](#4-données-de-test-complètes) ci-dessous.
 
 ---
 
-## Arborescence minimale attendue
+## 4. Données de test complètes
 
-text
+> 🤖 **Cette section est destinée à être lue et exécutée par une IA ou un développeur voulant reproduire l'environnement complet.**
+
+Le projet dispose d'un **script tout-en-un** qui injecte l'intégralité des données de test réalistes en une seule commande.
+
+### Ce que le script injecte
+
+| Donnée | Quantité | Détail |
+|---|---|---|
+| Utilisateurs | 4 | admin, bureau, tresorier (ADMIN/MEMBER), toto (ADMIN) |
+| Membres | 47 | Membres KEDGE fictifs avec statuts cotisation variés |
+| Événements | 5 | Gala KUBIK, WEI, WES, Saint-Valentin, Tournoi sportif |
+| Inscriptions | ~180 | Réparties sur les 5 événements avec dates réalistes |
+| Lignes de budget | ~30 | EXPENSE + REVENUE, certaines éligibles FSDIE |
+| Kanban | 5 × 3 colonnes + ~15 cartes | Un tableau par événement |
+| Shifts (planning) | 68 créneaux | Répartis sur 5 événements, certains nocturnes |
+| Pièces jointes PDF | 11 | Vraies factures HTML→PDF via Python (xhtml2pdf) |
+
+### Option A — Script Node.js tout-en-un (recommandé)
+
+```bash
+cd backend
+node scripts/setup-test-data.js
+```
+
+Ce script :
+1. Remet la base à zéro (truncate dans l'ordre des FK)
+2. Insère les seeds SQL dans le bon ordre
+3. Génère les lignes de budget via seed-prod.js
+4. Applique les migrations Kanban & Shifts si besoin
+
+### Option B — Scripts SQL manuels (ordre obligatoire)
+
+```bash
+mysql -u root -p gestion_assos < database/seed-data.sql
+mysql -u root -p gestion_assos < database/seed-members.sql
+mysql -u root -p gestion_assos < database/seed-participants.sql
+mysql -u root -p gestion_assos < database/seed-budget.sql
+mysql -u root -p gestion_assos < database/seed-kanban.sql
+mysql -u root -p gestion_assos < database/seed-shifts.sql
+```
+
+### Option C — Générer les pièces jointes PDF réalistes (Python)
+
+Les PJ sont de vraies factures HTML converties en PDF.
+
+**Prérequis Python :**
+```bash
+python -m pip install xhtml2pdf pymysql
+```
+
+**Génération :**
+```bash
+cd backend
+python scripts/generate-fake-pj.py
+```
+
+Ce script :
+- Supprime les anciennes PJ liées aux événements 1-4
+- Génère 11 factures HTML (AudioPro, Domaine des Pins, Gascogne Traiteur, etc.)
+- Convertit chaque facture en PDF via `xhtml2pdf`
+- Enregistre les fichiers dans `backend/uploads/`
+- Insère les références en BDD (`budget_attachments`)
+
+### Vérification
+
+```sql
+USE gestion_assos;
+SELECT COUNT(*) FROM events;          -- 5
+SELECT COUNT(*) FROM members;         -- ~47
+SELECT COUNT(*) FROM budget_lines;    -- ~30
+SELECT COUNT(*) FROM budget_attachments; -- ~11
+SELECT COUNT(*) FROM shifts;          -- ~68
+SELECT COUNT(*) FROM kanban_cards;    -- ~15
+```
+
+---
+
+## 5. Identifiants
+
+### Connexion à l'application Angular (`http://localhost:4200`)
+
+| Email | Mot de passe | Rôle | Accès |
+|---|---|---|---|
+| `toto@mail.com` | `toto` | **ADMIN** | Tout : budget, exports, validation FSDIE |
+
+> Le compte `toto` est le compte de test principal. Il a accès à toutes les fonctionnalités y compris les exports PDF/Excel et la validation FSDIE.
+
+### Comptes API backend (`http://localhost:3000`)
+
+Pour tester l'API REST directement (Postman, Insomnia) :
+
+| Email | Mot de passe | Rôle BDD |
+|---|---|---|
+| `admin@kubik.fr` | `admin123` | ADMIN |
+| `bureau@kubik.fr` | `admin123` | ADMIN |
+| `tresorier@kubik.fr` | `admin123` | MEMBER |
+
+```bash
+# Exemple login API
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@kubik.fr","password":"admin123"}'
+```
+
+---
+
+## 6. Lancer l'application
+
+### Terminal 1 — Backend
+
+```bash
+cd backend
+npm install      # première fois seulement
+npm run dev      # nodemon (rechargement auto)
+# OU
+node server.js   # si nodemon non installé
+```
+
+✅ Message attendu : `Serveur backend lancé sur http://localhost:3000`
+
+### Terminal 2 — Frontend
+
+```bash
+cd frontend
+npm install      # première fois seulement
+ng serve
+```
+
+✅ Application disponible sur `http://localhost:4200`
+
+### Vérification rapide
+
+```bash
+# Test backend
+curl http://localhost:3000/api/hello
+# Attendu : {"success":true,"message":"Hello World depuis MySQL"}
+
+# Test données
+curl http://localhost:3000/api/events
+# Attendu : tableau JSON avec 5 événements
+```
+
+---
+
+## 7. Fonctionnalités disponibles
+
+### 7.1 Budget & exports (compte toto)
+
+Les boutons d'export apparaissent en haut de l'onglet **Budget** de chaque événement :
+
+| Bouton | Format | Contenu |
+|---|---|---|
+| **Excel** | `.xlsx` | Budget complet (2 colonnes DÉPENSES/RECETTES, groupé par catégorie) |
+| **Dossier FSDIE** | `.pdf` | Couverture + budget complet + tableau FSDIE + table annexes + PJ réelles mergées |
+
+**Règles FSDIE automatiques :**
+- Seules les lignes `is_fsdie_eligible = true` de type `EXPENSE` apparaissent dans le dossier
+- La subvention FSDIE attendue (= total éligible) est **automatiquement portée en recette** dans le budget
+- Les lignes `REFUSE` sont affichées barrées et exclues du total demandé
+- Chaque PJ est mergée dans le PDF avec sa page séparatrice `ANNEXE A1 — [Libellé]`
+
+### 7.2 Planning shifts (grille 24h)
+
+- Onglet **Planning** de chaque événement
+- Grille horaire de 00h à 23h59 (gestion des soirées et nettoyages nocturnes)
+- Clic sur un créneau → drawer latéral : inscrits, validation, suppression
+- Chevauchements de créneaux gérés visuellement
+
+### 7.3 Kanban
+
+- Onglet **Kanban** de chaque événement
+- Drag & drop sur la carte entière (Angular CDK)
+- Persistance immédiate en BDD
+
+---
+
+## 8. Tests automatisés
+
+Voir **[TESTING.md](TESTING.md)** pour le détail complet.
+
+```bash
+# Tests backend (42 tests — API + intégration)
+cd backend
+npm test
+
+# Tests frontend
+cd frontend
+npm test
+
+# Tests E2E Playwright
+cd e2e
+npx playwright test
+```
+
+---
+
+## 9. Structure du projet
+
+```
 projetagileM2/
-├── README.md
-├── .gitignore
-├── frontend/
-│   ├── package.json
-│   └── src/
+├── README.md                    ← Ce fichier
+├── SFD_projetagileM2.md         ← Spécification Fonctionnelle Détaillée
+├── STD_projetagileM2.md         ← Spécification Technique Détaillée
+├── TESTING.md                   ← Stratégie et exécution des tests
+│
+├── database/
+│   ├── init.sql                 ← Schéma complet (CREATE TABLE)
+│   ├── seed-data.sql            ← Users + events de base
+│   ├── seed-members.sql         ← 47 membres fictifs
+│   ├── seed-participants.sql    ← ~180 inscriptions
+│   ├── seed-budget.sql          ← Lignes budget EXPENSE + REVENUE
+│   ├── seed-kanban.sql          ← Colonnes + cartes Kanban
+│   ├── seed-shifts.sql          ← 68 créneaux de planning
+│   ├── migration_kanban.sql     ← Migration tables kanban_*
+│   ├── migration_shifts.sql     ← Migration table shifts
+│   └── migration_validation_status.sql
+│
 ├── backend/
-│   ├── package.json
-│   ├── server.js
-│   └── .env
-└── database/
-    └── init.sql
-
+│   ├── .env                     ← À créer (voir §3)
+│   ├── server.js                ← Point d'entrée Express
+│   ├── controllers/
+│   │   ├── export.controller.js ← PDF FSDIE + Excel
+│   │   └── ...
+│   ├── routes/
+│   ├── uploads/                 ← PJ PDF générées (gitignored)
+│   ├── scripts/
+│   │   ├── setup-test-data.js   ← Script tout-en-un données de test
+│   │   ├── generate-fake-pj.py  ← Générateur factures HTML→PDF (Python)
+│   │   ├── seed-prod.js         ← Seed budget basé sur vrais events
+│   │   ├── generate-budget.js   ← Génération lignes budget
+│   │   └── apply-prod-migrations.js
+│   └── test/
+│       ├── auth.test.js
+│       ├── events.test.js
+│       ├── budget.test.js
+│       ├── shift-planning.test.js
+│       └── ...
+│
+├── frontend/
+│   └── src/app/
+│       ├── pages/
+│       │   ├── event-detail/
+│       │   │   ├── budget-tab/  ← Budget + exports
+│       │   │   ├── shifts-tab/  ← Planning grille 24h
+│       │   │   └── kanban-tab/  ← Tableau Kanban
+│       │   ├── events/
+│       │   ├── dashboard/
+│       │   └── members/
+│       └── services/
+│
+└── e2e/                         ← Tests Playwright E2E
+```
 
 ---
 
-## Problèmes fréquents
+## 10. Problèmes fréquents
 
-### git n’est pas reconnu
+### `Cannot find module 'dotenv'`
+→ Se placer dans `backend/` avant de lancer les scripts Node :
+```bash
+cd backend && node scripts/setup-test-data.js
+```
 
-Git n’est pas installé ou pas ajouté au PATH.
+### `python -m pip` non reconnu
+→ Utiliser `python3 -m pip` ou vérifier l'installation Python (3.10+).
 
-### npm n’est pas reconnu
-
-Node.js n’est pas installé ou pas ajouté au PATH.
-
-### ng n’est pas reconnu
-
-Angular CLI n’est pas installé. Exécuter :
-
-bash
+### `ng` n'est pas reconnu
+```bash
 npm install -g @angular/cli
-
+```
 
 ### Erreur MySQL : accès refusé
+→ Vérifier `DB_PASSWORD` dans `backend/.env`.
 
-Vérifier dans backend/.env :
+### Les boutons Export ne s'affichent pas
+→ Se connecter avec `toto@mail.com / toto` (rôle ADMIN requis).  
+→ Se déconnecter/reconnecter si une ancienne session est en cache.
 
-env
-DB_USER=root
-DB_PASSWORD=...
+### Le PDF FSDIE génère une erreur 400
+→ Vérifier que l'événement a des lignes budget avec `is_fsdie_eligible = true`.  
+→ Lancer `node scripts/setup-test-data.js` pour reinjecter les données.
 
-
-Si DB_PASSWORD est vide alors que MySQL a un mot de passe, la connexion échouera.
-
-### Angular reste sur “Chargement...”
-
-Vérifier :
-
-* que le backend est lancé
-* que http://localhost:3000/api/hello fonctionne
-* que MySQL est bien initialisé
-
-### Le fichier .env ne fonctionne pas
-
-Vérifier que le fichier est bien ici :
-
-text
-backend/.env
-
-
-et qu’il ne s’appelle pas .env.txt
+### Les PJ n'apparaissent pas dans le PDF FSDIE
+→ Lancer le générateur Python :
+```bash
+cd backend
+python scripts/generate-fake-pj.py
+```
 
 ---
 
-## État actuel du projet
+## Liens utiles
 
-Cette première version valide :
-
-* l’installation de l’environnement
-* la communication Angular ↔ Node.js
-* la communication Node.js ↔ MySQL
-* le fonctionnement global de l’architecture
+| Ressource | URL |
+|---|---|
+| Application | http://localhost:4200 |
+| API backend | http://localhost:3000 |
+| Health check | http://localhost:3000/api/hello |
+| Événements API | http://localhost:3000/api/events |
+| Export FSDIE event 1 | http://localhost:3000/api/export/events/1/fsdie |
+| Export Excel event 1 | POST http://localhost:3000/api/export/budget |
 
 ---
+
+> 📄 **Docs complémentaires** : [SFD](SFD_projetagileM2.md) · [STD](STD_projetagileM2.md) · [TESTING](TESTING.md)
