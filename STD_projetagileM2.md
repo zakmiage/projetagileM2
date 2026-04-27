@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétro-ingéniéré** à partir du code source du projet `projetagileM2`  
-> Version : **1.5** — Dernière modification : **27/04/2026**
+> Version : **1.6** — Dernière modification : **27/04/2026**
 
 ---
 
@@ -51,9 +51,9 @@ users ──────────────┐
                     │
                     │ event_id
                     ▼
-members ──── event_registrations ──► events
-   │
-   └──► member_attachments
+members ──── event_participants ──► events ◄── shifts ◄── shift_registrations
+   │                                  │
+   └──► member_attachments            └──► kanban_columns ◄── kanban_cards ◄── kanban_card_members
 ```
 
 ### 3.2 Tables détaillées
@@ -104,7 +104,7 @@ members ──── event_registrations ──► events
 | capacity | INT | NOT NULL |
 | created_at | DATETIME | DEFAULT NOW() |
 
-#### `event_registrations`
+#### `event_participants`
 | Colonne | Type | Contraintes |
 |---------|------|-------------|
 | id | INT | PK, AUTO_INCREMENT |
@@ -245,10 +245,12 @@ members ──── event_registrations ──► events
 
 #### Export — `/api/export`
 
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/export/events/:id/invoices` | Génère un PDF fusionnant toutes les PJ d'un événement |
-| GET | `/api/export/events/:id/fsdie` | Génère le dossier FSDIE complet (PDF structuré) |
+| Méthode | Route | Description | Accès |
+|---------|-------|-------------|-------|
+| POST | `/api/export/budget` | Génère le fichier Excel budget (toutes lignes, groupé par catégorie) | TRESORIER/ADMIN |
+| GET | `/api/export/events/:id/fsdie` | Génère le dossier FSDIE PDF complet (couverture + budget + tableau + PJ) | TRESORIER/ADMIN |
+
+> ⚠️ L'ancien endpoint `/api/export/events/:id/invoices` a été **supprimé** — sa fonctionnalité est intégrée dans le dossier FSDIE.
 
 #### Shifts — `/api/events/:id/shifts` *(nouveau)*
 
@@ -480,11 +482,47 @@ Le contrôleur `export.controller.js` utilise `exceljs` :
 
 - **Structure** : 6 colonnes (3 SORTIES + 3 ENTRÉES côte à côte)
 - **Groupement** : Par catégorie avec sous-totaux et ligne TOTAL
-- **Style** : 
+- **Style** :
   - SORTIES : rouge pastel `#FADCD9` / en-tête `#E06666`
   - ENTRÉES : vert pastel `#DFF0D8` / en-tête `#93C47D`
   - TOTAL : gris `#B7B7B7`
-- **Mode FSDIE** : Filtre = Toutes les REVENUE + EXPENSE où `is_fsdie_eligible = true`
+- **Endpoint** : `POST /api/export/budget` — reçoit `{ lines, fsdieOnly }`
+
+### 5.8 Algorithme FSDIE PDF (Backend)
+
+Le contrôleur `export.controller.js` / `exportFsdie` applique la séquence suivante :
+
+```
+1. Charger event + budget_lines + budget_attachments (JOIN)
+2. Filtrer les lignes éligibles : is_fsdie_eligible=1 AND type='EXPENSE'
+3. Pour chaque ligne : montant = actual_amount > 0 ? actual_amount : forecast_amount
+4. totalFsdie = Σ montants (lignes non REFUSE)
+5. recettesPropres = Σ REVENUE hors catégorie 'Subvention FSDIE'
+6. montantDemandé = max(0, totalFsdie − recettesPropres)    ← R6
+7. Générer PDF via pdfkit :
+   - Page 1 : Couverture (bandeau, chips, montantDemandé)
+   - Page 2 : Budget complet 2 colonnes style Excel
+              → ligne "Subvention FSDIE (R14)" en indigo = totalFsdie
+   - Page 3 : Tableau FSDIE détaillé
+   - Page 4 : Table des annexes
+8. Pour chaque PJ (file_path) :
+   - Ajouter page séparatrice "ANNEXE Ax — [label]"
+   - Merger le PDF physique via pdf-lib (PDFDocument.copyPages)
+9. Envoyer le buffer résultant en réponse
+```
+
+**Règle R14 en BDD :** Le seed `seed-budget.sql` insère automatiquement une ligne `REVENUE` de catégorie `Subvention FSDIE` pour chaque événement. Son montant = totalFsdie calculé. Cette ligne n'est **pas** comptée dans les recettes propres (exclue du dénominateur du montant demandé).
+
+| Event | Subvention FSDIE (R14) |
+|---|---|
+| E1 — Gala 2024 | 5 506,00 € |
+| E2 — WEI 2024 | 6 316,73 € (Gonflables REFUSE exclu) |
+| E3 — WES 2024 | 2 133,00 € |
+| E4 — St-Valentin | 195,00 € |
+| E5 — Tournoi | 80,00 € |
+| E6 — WEI 2025 | 6 800,00 € (prévisionnel) |
+| E7 — Gala Noël | 6 300,00 € (prévisionnel) |
+| E8 — Ski 2026 | 7 400,00 € (prévisionnel) |
 
 ---
 
