@@ -52,6 +52,28 @@
           >
             Participants
           </button>
+
+          <button 
+            (click)="activeTab = 'shifts'"
+            [class.border-primary]="activeTab === 'shifts'"
+            [class.text-primary]="activeTab === 'shifts'"
+            [class.border-transparent]="activeTab !== 'shifts'"
+            [class.text-gray-500]="activeTab !== 'shifts'"
+            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm hover:text-primary transition"
+          >
+            Créneaux (Shifts)
+          </button>
+
+          <button 
+            (click)="activeTab = 'kanban'"
+            [class.border-primary]="activeTab === 'kanban'"
+            [class.text-primary]="activeTab === 'kanban'"
+            [class.border-transparent]="activeTab !== 'kanban'"
+            [class.text-gray-500]="activeTab !== 'kanban'"
+            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm hover:text-primary transition"
+          >
+            Kanban
+          </button>
         </nav>
       </div>
 
@@ -61,6 +83,10 @@
           <app-budget-tab [eventId]="event.id"></app-budget-tab>
         } @else if (activeTab === 'participants') {
           <app-participants-tab [eventId]="event.id"></app-participants-tab>
+        } @else if (activeTab === 'shifts') {
+          <app-shifts-tab [eventId]="event.id"></app-shifts-tab>
+        } @else if (activeTab === 'kanban') {
+          <app-kanban-tab [eventId]="event.id"></app-kanban-tab>
         }
       </div>
     </div>

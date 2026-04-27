@@ -15,6 +15,8 @@ const budgetRoutes = require('./routes/budget.routes');
 const memberRoutes = require('./routes/member.routes');
 const fileRoutes = require('./routes/fileRoutes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const shiftRoutes = require('./routes/shift.routes');
+const kanbanRoutes = require('./routes/kanban.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +31,8 @@ app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/events/:id/shifts', shiftRoutes);
+app.use('/api/events/:id/kanban', kanbanRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/budget-lines', budgetRoutes);

@@ -7,11 +7,13 @@ import { EventService } from '../../services/event.service';
 import { Event } from '../../models/event.model';
 import { BudgetTabComponent } from './budget-tab/budget-tab.component';
 import { ParticipantsTabComponent } from './participants-tab/participants-tab.component';
+import { ShiftsTabComponent } from './shifts-tab/shifts-tab.component';
+import { KanbanTabComponent } from './kanban-tab/kanban-tab.component';
 
 @Component({
   selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BudgetTabComponent, ParticipantsTabComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BudgetTabComponent, ParticipantsTabComponent, ShiftsTabComponent, KanbanTabComponent],
   templateUrl: './event-detail.component.html'
 })
 export class EventDetailComponent implements OnInit {
@@ -22,7 +24,7 @@ export class EventDetailComponent implements OnInit {
   
   event?: Event;
   error?: string;
-  activeTab: 'budget' | 'participants' = 'budget';
+  activeTab: 'budget' | 'participants' | 'shifts' | 'kanban' = 'budget';
   isEditModalOpen = false;
   isDeleteModalOpen = false;
   isSaving = false;

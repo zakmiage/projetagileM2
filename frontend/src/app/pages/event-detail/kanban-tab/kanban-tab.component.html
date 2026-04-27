@@ -1,0 +1,125 @@
+<div class="kanban-wrapper">
+  @if (isLoading) {
+    <div class="flex justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  }
+
+  @if (!isLoading) {
+    <div class="kanban-board">
+      @for (col of columns; track col.id) {
+        <div class="kanban-col">
+          <!-- Col Header -->
+          <div class="kanban-col__header" [style.borderTopColor]="col.color">
+            <span class="kanban-col__title">{{ col.title }}</span>
+            <div class="kanban-col__actions">
+              <span class="kanban-col__count">{{ col.cards.length }}</span>
+              <button (click)="deleteColumn(col)" title="Supprimer la colonne" class="kanban-col__del">✕</button>
+            </div>
+          </div>
+
+          <!-- Cards -->
+          <div class="kanban-cards"
+            cdkDropList
+            [id]="'col-' + col.id"
+            [cdkDropListData]="col.cards"
+            [cdkDropListConnectedTo]="connectedLists"
+            (cdkDropListDropped)="onDrop($event, col)">
+
+            @for (card of col.cards; track card.id) {
+              <div class="kanban-card" cdkDrag>
+                <div class="kanban-card__drag-handle" cdkDragHandle>⠿</div>
+                @if (card.label) {
+                  <span class="kanban-card__label" [style.backgroundColor]="labelColor(card.label)">
+                    {{ card.label }}
+                  </span>
+                }
+                <p class="kanban-card__title">{{ card.title }}</p>
+                @if (card.description) {
+                  <p class="kanban-card__desc">{{ card.description }}</p>
+                }
+                @if (card.due_date) {
+                  <p class="kanban-card__due">📅 {{ card.due_date | date:'dd/MM/yyyy' }}</p>
+                }
+                @if (card.members?.length) {
+                  <div class="kanban-card__members">
+                    @for (m of card.members!; track m.id) {
+                      <span class="kanban-card__avatar" [title]="m.first_name + ' ' + m.last_name">
+                        {{ m.first_name[0] }}{{ m.last_name[0] }}
+                      </span>
+                    }
+                  </div>
+                }
+                <div class="kanban-card__footer">
+                  <button (click)="openEditCard(card)" class="kanban-card__btn">Modifier</button>
+                  <button (click)="deleteCard(col, card)" class="kanban-card__btn kanban-card__btn--del">Supprimer</button>
+                </div>
+              </div>
+            }
+
+            <!-- Add card -->
+            @if (addingCardInCol === col.id) {
+              <div class="kanban-add-card">
+                <input type="text" [(ngModel)]="newCardTitle" placeholder="Titre de la carte..."
+                  class="kanban-add-card__input" (keyup.enter)="addCard(col)">
+                <div class="kanban-add-card__actions">
+                  <button (click)="addCard(col)" class="kanban-add-card__confirm">Ajouter</button>
+                  <button (click)="addingCardInCol = null" class="kanban-add-card__cancel">Annuler</button>
+                </div>
+              </div>
+            } @else {
+              <button (click)="startAddCard(col.id)" class="kanban-add-btn">+ Ajouter une carte</button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Add column -->
+      <div class="kanban-col kanban-col--add">
+        <input type="text" [(ngModel)]="newColTitle" placeholder="Nouvelle colonne..."
+          class="kanban-newcol__input" (keyup.enter)="addColumn()">
+        <button (click)="addColumn()" class="kanban-newcol__btn">+ Colonne</button>
+      </div>
+    </div>
+  }
+
+  <!-- Edit card modal -->
+  @if (editingCard) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75" (click)="editingCard = null"></div>
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Modifier la carte</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Titre *</label>
+            <input type="text" [(ngModel)]="editCardForm.title"
+              class="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea [(ngModel)]="editCardForm.description" rows="3"
+              class="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Label</label>
+              <input type="text" [(ngModel)]="editCardForm.label"
+                class="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Échéance</label>
+              <input type="date" [(ngModel)]="editCardForm.due_date"
+                class="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button (click)="editingCard = null"
+            class="px-4 py-2 border rounded-md text-sm text-gray-700 hover:bg-gray-50">Annuler</button>
+          <button (click)="saveCard()"
+            class="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-opacity-90">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
