@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétroingénéré** à partir du code source du projet `projetagileM2`  
-> Version : 1.0 — Dernière modification du dépôt : **03/04/2026 à 12h09**
+> Version : 1.2 — Dernière modification du dépôt : **27/04/2026**
 
 ---
 
@@ -77,6 +77,19 @@ L'application est une plateforme web de gestion interne pour association étudia
 - Cliquer sur un événement navigue vers `/events/:id`
 - La page affiche le nom, la date et la capacité de l'événement
 - Elle contient deux **onglets** : **Budget & FSDIE** et **Participants**
+
+### 3.4 Modification d'un événement
+
+- Un bouton **"Modifier"** dans le header de la page détail ouvre une **modale de formulaire** pré-remplie avec les données actuelles
+- Champs modifiables : Nom, Description, Date de début, Date de fin, Capacité
+- Les modifications sont persistées via `PUT /api/events/:id`
+
+### 3.5 Suppression d'un événement
+
+- Un bouton **"Supprimer"** (rouge) dans le header ouvre une **modale de confirmation**
+- La modale affiche le nom de l'événement et un avertissement : _"Attention, la suppression est définitive. Toutes les données liées (budget, participants) seront supprimées."_
+- Boutons : **Annuler** (ferme la modale) / **Supprimer** (confirme)
+- Après suppression, l'utilisateur est redirigé vers `/events`
 
 ---
 
@@ -176,6 +189,15 @@ L'application est une plateforme web de gestion interne pour association étudia
 - Le type de document est demandé via une invite
 - ⚠️ **Note** : Upload simulé, non persisté en BDD
 
+### 6.6 Suppression d'un membre
+
+- Un bouton **corbeille** (icône SVG) est affiché sur chaque ligne du tableau
+- Le clic ouvre une **modale de confirmation** affichant le prénom/nom du membre
+- Message : _"Attention, la suppression est définitive. Cette action ne peut pas être annulée."_
+- Boutons : **Annuler** / **Supprimer**
+- Après suppression, le membre est retiré de la liste sans rechargement
+- Branché sur `DELETE /api/members/:id`
+
 ---
 
 ## 7. Navigation et layout
@@ -198,6 +220,8 @@ L'application est une plateforme web de gestion interne pour association étudia
 | RG-06 | La session utilisateur expire après 24h |
 | RG-07 | La recherche de membres dans les participants exclut les déjà inscrits |
 | RG-08 | La suppression d'un événement entraîne la suppression en cascade de ses inscriptions et lignes de budget |
+| RG-09 | Les boutons Export Global et Export FSDIE ne sont visibles que par le rôle `TRESORIER` ou `ADMIN` |
+| RG-10 | Une ligne de budget FSDIE passe par les statuts : `SOUMIS` → `APPROUVE` ou `REFUSE`. Seul le `TRESORIER`/`ADMIN` peut changer le statut |
 
 ---
 
@@ -206,12 +230,14 @@ L'application est une plateforme web de gestion interne pour association étudia
 | Fonctionnalité | État |
 |----------------|------|
 | Authentification JWT complète (frontend ↔ backend) | ❌ Non connectée |
-| Upload réel de pièces jointes en BDD | ❌ Simulé (ObjectURL) |
+| Upload réel de pièces jointes en BDD | ✅ Implémenté (multer, persisté) |
 | Import de budget depuis CSV/Excel | ❌ Bouton présent mais non fonctionnel |
-| Modification / suppression d'un événement | ❌ Non implémenté |
-| Suppression d'un membre | ❌ Non implémenté |
+| Modification / suppression d'un événement | ✅ Implémenté (modales dédiées) |
+| Suppression d'un membre | ✅ Implémenté (modale de confirmation) |
 | Page Paramètres (`/settings`) | ⚠️ Route déclarée mais contenu non visible |
-| Gestion de rôles (admin vs membre) | ❌ Non implémentée |
+| Gestion de rôles (`TRESORIER` / `ADMIN`) | ✅ Partiel — hardcodé session frontend, contrôle UI export FSDIE |
+| Workflow validation FSDIE (`SOUMIS`/`APPROUVE`/`REFUSE`) | ✅ Implémenté |
+| Mode hors-ligne PWA (IndexedDB + Service Worker) | ✅ Implémenté |
 | Pagination | ❌ Absente |
 
 ---

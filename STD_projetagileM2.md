@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétroingénéré** à partir du code source du projet `projetagileM2`  
-> Version : 1.0 — Dernière modification du dépôt : **03/04/2026 à 12h09**
+> Version : 1.2 — Dernière modification du dépôt : **27/04/2026**
 
 ---
 
@@ -125,6 +125,7 @@ members ──── event_registrations ──► events
 | forecast_amount | DECIMAL(10,2) | DEFAULT 0.00 |
 | actual_amount | DECIMAL(10,2) | NULL |
 | is_fsdie_eligible | BOOLEAN | DEFAULT FALSE |
+| **validation_status** | ENUM('SOUMIS','APPROUVE','REFUSE') | NOT NULL DEFAULT 'SOUMIS' |
 | created_by | INT | FK → users(id) |
 | updated_by | INT | FK → users(id) NULL |
 | created_at | DATETIME | DEFAULT NOW() |
@@ -168,8 +169,11 @@ members ──── event_registrations ──► events
 | Méthode | Route | Description |
 |---------|-------|-------------|
 | GET | `/api/events` | Retourne tous les événements (ORDER BY start_date DESC) |
+| GET | `/api/events/feed.ics` | Génère un flux ICS (calendrier) |
 | GET | `/api/events/:id` | Retourne l'événement + ses inscriptions (JOIN members) |
 | POST | `/api/events` | Crée un événement |
+| PUT | `/api/events/:id` | Met à jour un événement |
+| DELETE | `/api/events/:id` | Supprime un événement (cascade budget + participants) |
 | POST | `/api/events/:id/participants` | Inscrit un membre (`{ memberId }`) |
 | DELETE | `/api/events/:id/participants/:memberId` | Désinscrit un membre |
 
@@ -181,6 +185,7 @@ members ──── event_registrations ──► events
 | POST | `/api/budget-lines` | Crée une ligne de budget |
 | PUT | `/api/budget-lines/:id` | Mise à jour partielle d'une ligne |
 | DELETE | `/api/budget-lines/:id` | Supprime une ligne |
+| PATCH | `/api/budget-lines/:id/status` | Met à jour `validation_status` (`SOUMIS`\|`APPROUVE`\|`REFUSE`) |
 
 #### Membres — `/api/members`
 
@@ -353,10 +358,10 @@ Tous les services utilisent `HttpClient` (inject pattern) et retournent des `Obs
 
 | Service | URL de base | Méthodes exposées |
 |---------|-------------|-------------------|
-| `EventService` | `/api/events` | `getEvents()`, `getEvent(id)`, `createEvent()`, `addParticipant()`, `removeParticipant()` |
-| `BudgetService` | `/api/budget-lines` | `getBudgetLines(eventId)`, `createBudgetLine()`, `updateBudgetLine()`, `deleteBudgetLine()`, `exportBudgetExcel()` |
-| `MemberService` | `/api/members` | `getMembers()`, `updateMember()`, `createMember()` |
-| `AuthService` | localStorage | `login()`, `logout()`, `isAuthenticated()`, `forgotPassword()` |
+| `EventService` | `/api/events` | `getEvents()`, `getEvent(id)`, `createEvent()`, `updateEvent()`, `deleteEvent()`, `addParticipant()`, `removeParticipant()`, `downloadIcsFeed()` |
+| `BudgetService` | `/api/budget-lines` | `getBudgetLines(eventId)`, `createBudgetLine()`, `updateBudgetLine()`, `deleteBudgetLine()`, `exportBudgetExcel()`, `updateValidationStatus()` |
+| `MemberService` | `/api/members` | `getMembers()`, `updateMember()`, `createMember()`, `deleteMember()` |
+| `AuthService` | localStorage | `login()`, `logout()`, `isAuthenticated()`, `getRole()`, `hasRole()`, `forgotPassword()` |
 
 **Note :** `AuthService` n'appelle pas le backend. La validation est hardcodée :
 ```typescript
@@ -442,6 +447,8 @@ JWT_EXPIRES_IN=1d
 | `@angular/router` | Routing avec lazy loading |
 | `tailwindcss` | Framework CSS utilitaire |
 | `@angular/ssr` | Rendu côté serveur (SSR) |
+| `ng2-charts` | Graphiques Angular (dashboard analytics) |
+| `chart.js` | Bibliothèque de graphiques sous-jacente |
 
 ---
 
@@ -497,7 +504,7 @@ cd e2e && npx playwright test
 | T-01 | URL API hardcodée `http://localhost:3000` dans les services | Bloque le déploiement en production |
 | T-02 | Authentification frontend en dur (pas de JWT) | Aucune sécurité réelle |
 | T-03 | `created_by` hardcodé à `1` dans `BudgetTabComponent` | Erreur si user admin non créé |
-| T-04 | Pièces jointes non persistées (ObjectURL) | Données perdues au rechargement |
+| T-04 | Rôle `TRESORIER` hardcodé en session (non issu du JWT) | Contrôle d'accès front-only |
 | T-05 | Pas de middleware d'authentification sur les routes backend | API ouverte sans token |
 | T-06 | Pas de pagination | Performance dégradée sur gros volumes |
 | T-07 | `ChangeDetectorRef.detectChanges()` appelé manuellement | Zone.js ou signal à préférer |
