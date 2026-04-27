@@ -1,12 +1,13 @@
--- Création et sélection de la base de données
--- Création et sélection de la base de données
+-- =============================================================================
+-- init.sql — Création du schéma complet
+-- Usage : source ./database/init.sql
+-- =============================================================================
 CREATE DATABASE IF NOT EXISTS gestion_assos;
 USE gestion_assos;
 
 -- ==========================================
--- 1. UTILISATEURS & MEMBRES (Le socle humain)
+-- 1. UTILISATEURS & MEMBRES
 -- ==========================================
-
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -30,11 +31,10 @@ CREATE TABLE IF NOT EXISTS members (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Nouvelle table : Pièces jointes liées aux membres (GED Individuelle)
 CREATE TABLE IF NOT EXISTS member_attachments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     member_id INT NOT NULL,
-    document_type VARCHAR(50) NOT NULL, -- ex: 'CERTIFICATE', 'WAIVER', 'PARENTAL_CONSENT'
+    document_type VARCHAR(50) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(255) NOT NULL,
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
@@ -42,9 +42,8 @@ CREATE TABLE IF NOT EXISTS member_attachments (
 );
 
 -- ==========================================
--- 2. ÉVÉNEMENTS & INSCRIPTIONS (Le métier)
+-- 2. ÉVÉNEMENTS & INSCRIPTIONS
 -- ==========================================
-
 CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -55,9 +54,6 @@ CREATE TABLE IF NOT EXISTS events (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Inscrits à un événement : entité indépendante des adhérents (members)
--- Un inscrit n'est pas nécessairement adhérent de l'asso.
--- Seule la décharge droit à l'image est requise pour participer à un event.
 CREATE TABLE IF NOT EXISTS event_participants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     event_id INT NOT NULL,
@@ -72,9 +68,8 @@ CREATE TABLE IF NOT EXISTS event_participants (
 );
 
 -- ==========================================
--- 3. FINANCES & JUSTIFICATIFS (L'Epic FSDIE)
+-- 3. FINANCES & JUSTIFICATIFS
 -- ==========================================
-
 CREATE TABLE IF NOT EXISTS budget_lines (
     id INT AUTO_INCREMENT PRIMARY KEY,
     event_id INT NOT NULL,
@@ -94,7 +89,6 @@ CREATE TABLE IF NOT EXISTS budget_lines (
     CONSTRAINT fk_budget_updated_by FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
--- Table des pièces jointes (Justificatifs FSDIE)
 CREATE TABLE IF NOT EXISTS budget_attachments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     budget_line_id INT NOT NULL,
