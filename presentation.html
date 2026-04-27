@@ -7,213 +7,130 @@
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600&display=swap');
 
 :root{
-  --bg:     oklch(0.09 0.010 255);
-  --surf:   oklch(0.13 0.010 255);
-  --line:   oklch(0.19 0.008 255);
-  --tx:     oklch(0.93 0.006 255);
-  --tx2:    oklch(0.56 0.006 255);
-  --tx3:    oklch(0.32 0.006 255);
-  --acc:    oklch(0.72 0.17  52);
-  --acc-d:  oklch(0.72 0.17  52 / 0.13);
-  --red:    oklch(0.62 0.19 25);
-  --grn:    oklch(0.64 0.16 150);
-  --vio:    oklch(0.60 0.18 290);
+  --bg:   oklch(0.09 0.010 255);
+  --surf: oklch(0.13 0.010 255);
+  --line: oklch(0.19 0.008 255);
+  --tx:   oklch(0.93 0.006 255);
+  --tx2:  oklch(0.56 0.006 255);
+  --tx3:  oklch(0.32 0.006 255);
+  --acc:  oklch(0.72 0.17  52);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Manrope',sans-serif;background:oklch(0.05 0.008 255);display:flex;flex-direction:column;align-items:center;gap:4px;padding:20px}
 .slide{width:297mm;height:210mm;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
-
-/* ─── SLIDE 1 ─── */
-.s1{padding:0}
-.s1-content{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:44px 60px 48px}
-.s1-kicker{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:500;margin-bottom:20px}
-.s1-h{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(28pt,5vw,40pt);font-weight:800;color:var(--tx);line-height:1.06;margin-bottom:8px;max-width:520px}
-.s1-h mark{background:none;color:var(--acc)}
-.s1-sub{font-size:10pt;color:var(--tx2);font-weight:300;margin-bottom:36px;max-width:440px;line-height:1.6}
-.s1-chaos{display:flex;gap:24px}
-.chip{padding:7px 14px;background:var(--surf);font-size:8.5pt;color:var(--tx2);border-radius:4px;display:flex;align-items:center;gap:8px}
-.chip .e{opacity:.7}
-/* déco top-right : block vertical de couleur */
-.s1-bar{position:absolute;top:0;right:80px;width:2px;height:100%;background:var(--acc);opacity:.18}
-.s1-block{position:absolute;top:0;right:0;width:80px;height:100%;background:var(--acc);opacity:.04}
-.s1-num{position:absolute;top:28px;right:26px;font-family:'Bricolage Grotesque',sans-serif;font-size:72pt;font-weight:800;color:var(--acc);opacity:.07;line-height:1;letter-spacing:-3px}
-.pg{position:absolute;bottom:22px;right:28px;font-size:7pt;color:var(--tx3);letter-spacing:1px}
 .tag{position:absolute;top:22px;left:28px;font-size:7pt;color:var(--tx3);letter-spacing:.3px}
+.pg{position:absolute;bottom:22px;right:28px;font-size:7pt;color:var(--tx3);letter-spacing:1px}
 
-/* ─── SLIDE 2 ─── */
+/* ── SLIDE 1 ── */
+.s1{justify-content:flex-end;padding:0}
+.s1-content{padding:44px 60px 48px}
+.s1-kicker{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:22px}
+.s1-h{font-family:'Bricolage Grotesque',sans-serif;font-size:38pt;font-weight:800;color:var(--tx);line-height:1.06;margin-bottom:10px;max-width:560px}
+.s1-h mark{background:none;color:var(--acc)}
+.s1-team{font-size:8.5pt;color:var(--tx3);font-weight:300;margin-bottom:32px;line-height:1.7}
+.chips{display:flex;gap:12px;flex-wrap:wrap}
+.chip{padding:6px 14px;background:var(--surf);font-size:8pt;color:var(--tx2);border-radius:4px}
+/* déco */
+.deco-bar{position:absolute;top:0;right:0;width:3px;height:100%;background:var(--acc);opacity:.25}
+.deco-num{position:absolute;top:16px;right:24px;font-family:'Bricolage Grotesque',sans-serif;font-size:120pt;font-weight:800;color:var(--acc);opacity:.04;line-height:1;letter-spacing:-4px}
+
+/* ── SLIDE 2 ── */
 .s2{flex-direction:row}
-.s2-left{width:40%;padding:40px 32px 40px 48px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line)}
-.s2-kicker{font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:500;margin-bottom:14px}
-.s2-h{font-family:'Bricolage Grotesque',sans-serif;font-size:20pt;font-weight:800;color:var(--tx);line-height:1.1;margin-bottom:28px}
-.mods{display:flex;flex-direction:column;gap:14px}
-.mod{display:grid;grid-template-columns:20px 1fr auto;align-items:baseline;gap:10px}
-.mod-n-num{font-family:'Bricolage Grotesque',sans-serif;font-size:9pt;font-weight:700;color:var(--tx3)}
-.mod-name{font-size:9.5pt;color:var(--tx);font-weight:500}
-.mod-tag{font-size:7.5pt;color:var(--tx3);font-weight:400}
-.stack{font-size:7.5pt;color:var(--tx3);line-height:1.8;padding-top:20px;border-top:1px solid var(--line)}
-.stack b{color:var(--tx2)}
+/* screenshot panel */
+.s2-img{width:54%;position:relative;overflow:hidden;background:oklch(0.95 0.005 250)}
+.s2-img img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.s2-img-label{position:absolute;bottom:12px;left:12px;background:oklch(0 0 0 / .55);color:#fff;font-size:7pt;padding:4px 10px;border-radius:3px;backdrop-filter:blur(4px)}
+/* content panel */
+.s2-right{flex:1;padding:36px 36px 36px 40px;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg)}
+.s2-kicker{font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:14px}
+.s2-h{font-family:'Bricolage Grotesque',sans-serif;font-size:17pt;font-weight:800;color:var(--tx);line-height:1.15;margin-bottom:28px}
+.benefits{display:flex;flex-direction:column;gap:18px}
+.benefit{}
+.b-title{font-size:9.5pt;font-weight:600;color:var(--tx);margin-bottom:3px}
+.b-desc{font-size:8pt;color:var(--tx2);font-weight:300;line-height:1.55}
+.stack-line{font-size:7.5pt;color:var(--tx3);padding-top:20px;border-top:1px solid var(--line)}
+.stack-line b{color:oklch(0.48 0.006 255)}
 
-.s2-right{flex:1;display:flex;align-items:center;justify-content:center;padding:18px 22px;background:oklch(0.07 0.008 255)}
-/* ── APP MOCKUP (fidèle à l'UI réelle) ── */
-.app{width:100%;height:168px;background:oklch(0.96 0.005 250);border-radius:8px;overflow:hidden;box-shadow:0 16px 48px oklch(0 0 0 / .5);display:flex;font-family:'Manrope',sans-serif}
-.app-nav{width:46px;background:oklch(0.32 0.07 200);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:6px}
-.nav-logo{width:26px;height:26px;background:oklch(1 0 0 / .15);border-radius:5px;margin-bottom:6px}
-.nav-dot{width:22px;height:4px;border-radius:2px;background:oklch(1 0 0 / .18)}
-.nav-dot.on{background:oklch(1 0 0 / .70)}
-.app-body{flex:1;display:flex;flex-direction:column}
-.app-bar{height:22px;background:oklch(0.99 0.003 250);border-bottom:1px solid oklch(0.9 0.004 250);display:flex;align-items:center;padding:0 10px;gap:6px}
-.bar-title{font-size:6.5pt;font-weight:600;color:oklch(0.2 0.01 255)}
-.tabs{display:flex;padding:0 10px;background:oklch(0.99 0.003 250);border-bottom:1px solid oklch(0.9 0.004 250)}
-.tab{font-size:6pt;padding:4px 7px;color:oklch(0.6 0.006 255)}
-.tab.on{color:oklch(0.45 0.18 290);font-weight:600;box-shadow:inset 0 -2px 0 oklch(0.45 0.18 290)}
-.main{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px 8px;background:oklch(0.95 0.005 250)}
-.card{background:oklch(1 0 0);border-radius:5px;padding:6px 8px;box-shadow:0 1px 3px oklch(0 0 0 / .07)}
-.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.card-label{font-size:6.5pt;font-weight:600;color:oklch(0.25 0.01 255)}
-.card-amt{font-size:7.5pt;font-weight:700}
-.row{display:flex;align-items:baseline;padding:3px 0;gap:5px;border-bottom:1px solid oklch(0.94 0.003 250)}
-.row:last-child{border:none}
-.r-cat{font-size:5.5pt;color:oklch(0.62 0.005 255);width:44px;flex-shrink:0}
-.r-lib{font-size:6pt;color:oklch(0.28 0.01 255);flex:1}
-.r-amt{font-size:6.5pt;font-weight:600;margin-left:auto}
-.bads{display:flex;gap:2px;margin-top:1px}
-.b{font-size:4.5pt;padding:1px 4px;border-radius:3px;font-weight:600}
-.b-ok{background:oklch(0.92 0.09 150);color:oklch(0.36 0.13 150)}
-.b-sub{background:oklch(0.96 0.10 80);color:oklch(0.52 0.14 70)}
-.b-f{background:oklch(0.93 0.08 290);color:oklch(0.42 0.16 290)}
-.add{margin-top:5px;border:1px dashed oklch(0.87 0.004 255);border-radius:4px;padding:4px;text-align:center;font-size:5.5pt;color:oklch(0.72 0.004 255)}
-
-/* ─── SLIDE 3 ─── */
+/* ── SLIDE 3 ── */
 .s3{background:oklch(0.06 0.008 255);justify-content:flex-end}
 .s3-body{padding:0 60px 52px}
-.s3-label{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:500;margin-bottom:14px}
-.s3-h{font-family:'Bricolage Grotesque',sans-serif;font-size:72pt;font-weight:800;color:var(--tx);line-height:0.92;letter-spacing:-2px;margin-bottom:32px}
+.s3-kicker{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:14px}
+.s3-h{font-family:'Bricolage Grotesque',sans-serif;font-size:72pt;font-weight:800;color:var(--tx);line-height:.92;letter-spacing:-2px;margin-bottom:28px}
 .s3-h mark{background:none;color:var(--acc)}
-.s3-pills{display:flex;gap:10px}
-.pill{padding:7px 16px;border-radius:4px;font-size:8pt;color:var(--tx2);background:var(--surf);font-weight:400}
+.seq{display:flex;gap:10px}
+.seq-item{padding:8px 16px;background:oklch(0.11 0.010 255);border-radius:4px;font-size:8pt;color:var(--tx2)}
+.seq-item b{display:block;font-size:9pt;color:var(--tx);margin-bottom:2px}
 
-/* EXPORT BTN */
-#eb{position:fixed;bottom:20px;right:20px;background:var(--acc);color:oklch(0.12 0.01 255);font-family:'Manrope',sans-serif;font-size:9pt;font-weight:600;padding:10px 22px;border:none;border-radius:4px;cursor:pointer;z-index:999}
+/* EXPORT */
+#eb{position:fixed;bottom:20px;right:20px;background:var(--acc);color:oklch(0.12 0.01 255);font-family:'Manrope',sans-serif;font-size:9pt;font-weight:700;padding:10px 22px;border:none;border-radius:4px;cursor:pointer;z-index:999}
 @media print{body{background:#000;padding:0;gap:0}#eb{display:none!important}}
 @page{size:A4 landscape;margin:0}
 </style>
 </head>
 <body>
 
-<!-- ─── SLIDE 1 ─── -->
+<!-- ── SLIDE 1 — Le problème ── -->
 <div class="slide s1">
-  <div class="s1-bar"></div>
-  <div class="s1-block"></div>
-  <div class="s1-num">01</div>
+  <div class="deco-bar"></div>
+  <div class="deco-num">01</div>
   <div class="tag">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
   <div class="s1-content">
     <div class="s1-kicker">Projet agile · Avril 2026</div>
-    <div class="s1-h">Gérer un événement associatif.<br><mark>Sans les outils pour ça.</mark></div>
-    <div class="s1-sub">Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya · Oumeyma Soukah · Zakaria Zemmari · Youba Tiab</div>
-    <div class="s1-chaos">
-      <div class="chip"><span class="e">📊</span> Budget sur Excel partagé</div>
-      <div class="chip"><span class="e">💬</span> Créneaux par messages</div>
-      <div class="chip"><span class="e">📄</span> FSDIE à la main</div>
+    <div class="s1-h">Le dossier FSDIE remis<br>au dernier moment.<br><mark>Comme chaque année.</mark></div>
+    <div class="s1-team">Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya<br>Oumeyma Soukah · Zakaria Zemmari · Youba Tiab</div>
+    <div class="chips">
+      <div class="chip">Budget sur Excel partagé</div>
+      <div class="chip">Bénévoles gérés par DMs</div>
+      <div class="chip">FSDIE mis en forme à la main</div>
     </div>
   </div>
   <div class="pg">01 / 03</div>
 </div>
 
-<!-- ─── SLIDE 2 ─── -->
+<!-- ── SLIDE 2 — La solution ── -->
 <div class="slide s2">
-  <div class="tag">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
-  <div class="s2-left">
-    <div>
-      <div class="s2-kicker">La réponse</div>
-      <div class="s2-h">Une plateforme web,<br>4 modules.</div>
-      <div class="mods">
-        <div class="mod"><span class="mod-n-num">01</span><span class="mod-name">Budget & FSDIE</span><span class="mod-tag">export PDF auto</span></div>
-        <div class="mod"><span class="mod-n-num">02</span><span class="mod-name">Planning bénévoles</span><span class="mod-tag">agenda 24h</span></div>
-        <div class="mod"><span class="mod-n-num">03</span><span class="mod-name">Kanban</span><span class="mod-tag">drag & drop persisté</span></div>
-        <div class="mod"><span class="mod-n-num">04</span><span class="mod-name">Membres & inscriptions</span><span class="mod-tag">gestion des rôles</span></div>
-      </div>
-    </div>
-    <div class="stack"><b>Angular</b> · Express.js · MySQL<br><b>42 tests</b> · Git Flow · sprints 2 semaines</div>
+  <div class="tag" style="z-index:2">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+
+  <div class="s2-img">
+    <img src="assets/slides/budget.png" alt="Interface budget" />
+    <div class="s2-img-label">Week-end ski Alpes 2027 · Budget &amp; FSDIE</div>
   </div>
+
   <div class="s2-right">
-    <div class="app">
-      <div class="app-nav">
-        <div class="nav-logo"></div>
-        <div class="nav-dot"></div>
-        <div class="nav-dot on"></div>
-        <div class="nav-dot"></div>
-        <div class="nav-dot"></div>
-      </div>
-      <div class="app-body">
-        <div class="app-bar">
-          <div class="bar-title">Week-end ski Alpes 2027</div>
-          <div style="margin-left:auto;display:flex;gap:5px">
-            <div style="padding:2px 8px;background:oklch(0.93 0.005 250);border-radius:3px;font-size:5.5pt;color:oklch(0.5 0.006 255)">Prévisionnel</div>
-            <div style="padding:2px 8px;background:oklch(0.45 0.18 290);border-radius:3px;font-size:5.5pt;color:#fff">Réel</div>
-          </div>
+    <div>
+      <div class="s2-kicker">Ce que ça change</div>
+      <div class="s2-h">Un outil pensé<br>pour les BDE.</div>
+      <div class="benefits">
+        <div class="benefit">
+          <div class="b-title">Dossier FSDIE en un clic</div>
+          <div class="b-desc">Le PDF est généré automatiquement à partir des dépenses validées. Plus de mise en forme manuelle avant chaque dépôt.</div>
         </div>
-        <div class="tabs">
-          <div class="tab on">Budget & FSDIE</div>
-          <div class="tab">Participants</div>
-          <div class="tab">Créneaux (Shifts)</div>
-          <div class="tab">Kanban</div>
+        <div class="benefit">
+          <div class="b-title">Budget qui se met à jour seul</div>
+          <div class="b-desc">La subvention FSDIE se recalcule en temps réel quand une dépense change. Zéro erreur de cohérence.</div>
         </div>
-        <div class="main">
-          <div class="card">
-            <div class="card-h">
-              <div class="card-label" style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block"></span> Dépenses</div>
-              <div class="card-amt" style="color:var(--red)">- 18 403 €</div>
-            </div>
-            <div class="row">
-              <div class="r-cat">Logistique</div>
-              <div><div class="r-lib">Hébergement (chalet)</div><div class="bads"><span class="b b-f">FSDIE</span><span class="b b-ok">Approuvé</span></div></div>
-              <div class="r-amt" style="color:oklch(0.28 0.01 255)">5 555 €</div>
-            </div>
-            <div class="row">
-              <div class="r-cat">Logistique</div>
-              <div><div class="r-lib">Forfaits ski (40 pax)</div><div class="bads"><span class="b b-f">FSDIE</span><span class="b b-ok">Approuvé</span></div></div>
-              <div class="r-amt" style="color:oklch(0.28 0.01 255)">8 888 €</div>
-            </div>
-            <div class="row" style="border:none">
-              <div class="r-cat">Logistique</div>
-              <div><div class="r-lib">Location de matériel</div><div class="bads"><span class="b b-sub">Soumis</span></div></div>
-              <div class="r-amt" style="color:oklch(0.28 0.01 255)">3 960 €</div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-h">
-              <div class="card-label" style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--grn);display:inline-block"></span> Revenus</div>
-              <div class="card-amt" style="color:var(--grn)">+ 20 576 €</div>
-            </div>
-            <div class="row">
-              <div class="r-cat">Billetterie</div>
-              <div class="r-lib">Cotisations (40 × 195 €)</div>
-              <div class="r-amt" style="color:oklch(0.28 0.01 255)">7 800 €</div>
-            </div>
-            <div class="row" style="border:none">
-              <div class="r-cat">FSDIE</div>
-              <div><div class="r-lib">Subvention FSDIE (R14)</div><div class="bads"><span class="b b-f">Auto-calculé</span></div></div>
-              <div class="r-amt" style="color:oklch(0.45 0.16 290)">12 776 €</div>
-            </div>
-            <div class="add">+ Ajouter un revenu</div>
-          </div>
+        <div class="benefit">
+          <div class="b-title">Bénévoles planifiés sans conflit</div>
+          <div class="b-desc">Vue agenda 24h, inscriptions par créneau, protection contre les chevauchements. Tout visible d'un coup d'œil.</div>
         </div>
       </div>
     </div>
+    <div class="stack-line"><b>Angular · Express.js · MySQL</b> — 42 tests · Git Flow · sprints 2 semaines</div>
   </div>
-  <div class="pg">02 / 03</div>
+
+  <div class="pg" style="z-index:2">02 / 03</div>
 </div>
 
-<!-- ─── SLIDE 3 ─── -->
+<!-- ── SLIDE 3 — Démo ── -->
 <div class="slide s3">
   <div class="tag" style="color:oklch(0.22 0.008 255)">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
   <div class="s3-body">
-    <div class="s3-label">Place à la</div>
+    <div class="s3-kicker">Place à la</div>
     <div class="s3-h">DÉ<mark>MO</mark></div>
-    <div class="s3-pills">
-      <div class="pill">💰 Budget FSDIE</div>
-      <div class="pill">📅 Planning 24h</div>
-      <div class="pill">🗂️ Kanban</div>
+    <div class="seq">
+      <div class="seq-item"><b>Budget & FSDIE</b>~2 min 30</div>
+      <div class="seq-item"><b>Planning bénévoles</b>~2 min</div>
+      <div class="seq-item"><b>Kanban</b>~1 min 30</div>
     </div>
   </div>
   <div class="pg" style="color:oklch(0.22 0.008 255)">03 / 03</div>
