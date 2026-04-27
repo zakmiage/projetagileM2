@@ -104,7 +104,7 @@ export class BudgetTabComponent {
     };
 
     this.budgetService.updateBudgetLine(line.id, payload).subscribe({
-      next: () => this.reloadBudget(),
+      next: () => setTimeout(() => this.reloadBudget(), 0),
       error: () => console.error('Failed to save')
     });
   }
