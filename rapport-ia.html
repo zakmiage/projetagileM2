@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport IA — KUBIK ERP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Linux+Libertine&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Georgia,"Times New Roman",serif;font-size:10pt;line-height:1.5;color:#111;background:#fff;width:210mm;margin:0 auto;padding:18mm 20mm 14mm}
+h1{font-size:13pt;font-weight:bold;text-align:center;margin-bottom:2px}
+.meta{text-align:center;font-size:8.5pt;color:#444;margin-bottom:4px}
+.authors{text-align:center;font-size:9pt;margin-bottom:2px}
+hr{border:none;border-top:1.5px solid #111;margin:8px 0}
+hr.thin{border-top:0.5px solid #999;margin:6px 0}
+h2{font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 3px}
+p{text-align:justify;margin-bottom:5px;font-size:9.5pt}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+ul{padding-left:14px;margin:3px 0}
+li{font-size:9pt;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;margin:4px 0;font-size:8.5pt}
+th{background:#111;color:#fff;padding:3px 7px;text-align:left;font-weight:normal}
+td{padding:3px 7px;border-bottom:0.5px solid #ccc}
+tr:nth-child(even) td{background:#f9f9f9}
+.abstract{background:#f5f5f5;border-left:3px solid #111;padding:5px 10px;margin:6px 0;font-style:italic;font-size:9pt}
+</style>
+</head>
+<body>
+
+<h1>Rapport d'Utilisation de l'Intelligence Artificielle dans le Projet</h1>
+<div class="authors">Projet KUBIK ERP — Gestion d'événements associatifs</div>
+<div class="meta">M2 Ingénierie Logicielle · UE Projet Agile · Équipe : Dardan, Zacharie, Arno, Huzaifah, Oumeyma, Zakaria, Youba · Avril 2026</div>
+<hr>
+
+<div class="abstract">
+L'assistant IA Gemini (Google DeepMind) a été intégré comme outil de soutien au développement dans le respect d'un cadre éthique strict : supervision humaine systématique, périmètre délimité aux tâches à faible valeur ajoutée, et utilisation exclusivement via interface conversationnelle — jamais en mode agent autonome.
+</div>
+
+<div class="cols">
+<div>
+<h2>1. Cadre d'utilisation</h2>
+<p>Dès le démarrage, l'équipe a défini un protocole garantissant que l'IA reste un outil d'assistance et non un acteur décisionnaire. Toute suggestion est soumise à une validation humaine explicite avant intégration, et aucune commande (commit, migration SQL, installation de dépendance) n'est exécutée sans approbation manuelle.</p>
+<p>L'outil retenu — Gemini via interface conversationnelle — exclut par construction tout mode d'exécution autonome : le code proposé doit être copié, analysé et intégré manuellement par le développeur.</p>
+
+<h2>2. Usages dans le projet</h2>
+<ul>
+  <li><strong>Jeux de données de test</strong> : génération des seeds SQL (shifts, kanban, budget) et de 11 factures PDF réalistes via Python/xhtml2pdf — tâches répétitives sans valeur ajoutée intellectuelle.</li>
+  <li><strong>Débogage assisté</strong> : analyse du bug R14 (mélange forecast/actual dans <code>syncFsdieSubvention</code>), du bug <code>capacity||10</code> (opérateur falsy), et de l'erreur NG0203 (Service Worker). Chaque correctif proposé a été relu et testé avant application.</li>
+  <li><strong>Documentation</strong> : rédaction initiale de la SFD et STD par rétro-ingénierie du code, mises à jour de la v1.1 à la v1.7. Chaque version relue et corrigée par l'équipe.</li>
+  <li><strong>Optimisation</strong> : proposition de l'architecture de short polling (5s), cache mémoire <code>Map&lt;eventId&gt;</code> et mise à jour optimiste. Adapté à l'architecture Angular existante avant intégration.</li>
+</ul>
+</div>
+
+<div>
+<h2>3. Garde-fous et supervision</h2>
+<table>
+  <tr><th>Ce que l'IA fait</th><th>Ce que l'IA ne fait pas</th></tr>
+  <tr><td>Suggère du code soumis à validation</td><td>Décider de l'architecture</td></tr>
+  <tr><td>Génère des données de test</td><td>Exécuter sans approbation</td></tr>
+  <tr><td>Analyse et propose des correctifs</td><td>Fusionner du code sur main</td></tr>
+  <tr><td>Rédige la doc à partir du code</td><td>Accéder à des données réelles</td></tr>
+  <tr><td>Vérifie la cohérence métier</td><td>Remplacer la revue humaine</td></tr>
+</table>
+
+<p style="margin-top:5px">Le processus systématique suivi : <strong>(1)</strong> identification de la tâche → <strong>(2)</strong> requête contextuelle → <strong>(3)</strong> proposition IA → <strong>(4)</strong> revue critique du développeur → <strong>(5)</strong> approbation explicite → <strong>(6)</strong> test avant merge.</p>
+
+<h2>4. Limites reconnues</h2>
+<ul>
+  <li><strong>Hallucinations</strong> : plusieurs suggestions incorrectes (colonnes SQL inexistantes, chemins erronés) ont été détectées lors des tests — confirmant que l'étape de validation ne peut être sautée.</li>
+  <li><strong>Dépendance</strong> : risque de sollicitation réflexe, pallié en limitant les usages aux tâches clairement identifiées en amont.</li>
+  <li><strong>Compréhension du contexte</strong> : l'IA est inefficace sur les dimensions à forte valeur ajoutée (arbitrages métier, dynamique d'équipe, choix long terme) — dimensions restées entièrement humaines.</li>
+</ul>
+
+<h2>5. Conclusion</h2>
+<p>L'IA a accéléré les tâches répétitives et libéré du temps pour les problèmes complexes. La discipline imposée — validation systématique, interface conversationnelle uniquement, périmètre défini — démontre qu'une utilisation responsable est possible en contexte académique. <strong>L'humain reste décisionnaire, l'IA conseille et assiste.</strong></p>
+<p style="font-style:italic;font-size:8.5pt;margin-top:4px">L'ensemble de l'équipe confirme que ces règles ont été respectées tout au long du sprint. Aucun code n'a été intégré sans compréhension et validation humaine préalable.</p>
+</div>
+</div>
+
+<hr class="thin">
+<div style="font-size:7.5pt;color:#666;display:flex;justify-content:space-between;margin-top:4px">
+  <span>projetagileM2 · dépôt GitHub : zakmiage/projetagileM2 · branche main · commit 942aee3</span>
+  <span>Rapport IA · M2 Ingénierie Logicielle · Avril 2026</span>
+</div>
+
+</body>
+</html>
