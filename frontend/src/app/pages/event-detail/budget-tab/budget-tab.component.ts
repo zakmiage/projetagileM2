@@ -85,29 +85,23 @@ export class BudgetTabComponent {
     if (this.viewMode === 'forecast') {
       line.forecast_amount = Number(line.forecast_amount) || 0;
     } else {
-      // Mode réel : s'assurer que actual_amount est bien un nombre (pas null/undefined)
-      line.actual_amount = line.actual_amount !== null && line.actual_amount !== undefined
-        ? Number(line.actual_amount)
-        : null;
+      const v = line.actual_amount;
+      line.actual_amount = (v !== null && v !== undefined && v !== ('' as any))
+        ? Number(v)
+        : undefined;
     }
 
-    // Payload minimal : envoyer les deux montants pour être sûr
     const payload: Partial<BudgetLine> = {
       category:          line.category,
       label:             line.label,
       forecast_amount:   line.forecast_amount,
-      actual_amount:     line.actual_amount,
+      actual_amount:     line.actual_amount ?? null as any,
       is_fsdie_eligible: line.is_fsdie_eligible,
       validation_status: line.validation_status,
     };
 
     this.budgetService.updateBudgetLine(line.id, payload).subscribe({
-      next: (res: any) => {
-        // Merger in-place pour ne pas casser les références ngModel actives
-        if (res?.lines) {
-          this.applyLines(res.lines);
-        }
-      },
+      next: () => this.reloadBudget(),
       error: () => console.error('Failed to save')
     });
   }
@@ -122,9 +116,7 @@ export class BudgetTabComponent {
       is_fsdie_eligible: false,
       created_by: 1
     }).subscribe({
-      next: (newLine) => {
-        this.lines.push(newLine);
-      },
+      next: () => this.reloadBudget(),
       error: (err) => {
         console.error('Erreur lors de la création:', err);
         alert('Impossible de créer la ligne');
@@ -135,14 +127,7 @@ export class BudgetTabComponent {
   deleteLine(line: BudgetLine) {
     if (confirm("Êtes-vous sûr de vouloir supprimer cette ligne de budget ?")) {
       this.budgetService.deleteBudgetLine(line.id).subscribe({
-        next: (res: any) => {
-          if (res?.lines) {
-            // Refresh complet depuis le backend (inclut la Subvention FSDIE recalculée)
-            this.applyLines(res.lines);
-          } else {
-            this.lines = this.lines.filter(l => l.id !== line.id);
-          }
-        },
+        next: () => this.reloadBudget(),
         error: () => alert('Erreur lors de la suppression')
       });
     }
@@ -325,13 +310,9 @@ export class BudgetTabComponent {
    */
   setStatus(line: BudgetLine, status: 'SOUMIS' | 'APPROUVE' | 'REFUSE'): void {
     this.budgetService.updateValidationStatus(line.id, status).subscribe({
-      next: (res: any) => {
-        line.validation_status = status;
-        // Appliquer les lignes recalculées (Subvention FSDIE mise à jour)
-        if (res?.lines) {
-          this.applyLines(res.lines);
-        }
-        this.cdr.detectChanges();
+      next: () => {
+        line.validation_status = status; // Mise à jour locale immédiate du badge
+        this.reloadBudget();             // Puis rechargement complet (Subvention FSDIE)
       },
       error: (err) => {
         console.error('Erreur mise à jour statut:', err);
@@ -341,29 +322,22 @@ export class BudgetTabComponent {
   }
 
   /**
-   * Applique les lignes fraîches du backend EN PLACE (Object.assign)
-   * pour ne pas casser les références ngModel actives en cours d'édition.
-   * Les nouvelles lignes (Subvention FSDIE créée à la volée) sont ajoutées.
+   * Recharge silencieusement toutes les lignes de budget depuis la BDD.
+   * Préserve les attachments déjà chargés pour éviter des requêtes inutiles.
    */
-  private applyLines(freshLines: BudgetLine[]): void {
-    const freshIds = new Set(freshLines.map(l => l.id));
-
-    // Supprimer les lignes disparues
-    this.lines = this.lines.filter(l => freshIds.has(l.id));
-
-    for (const fresh of freshLines) {
-      const existing = this.lines.find(l => l.id === fresh.id);
-      if (existing) {
-        // Merger in-place : on garde la référence de l'objet (ngModel ne perd pas le focus)
-        const savedAttachments = existing.attachments;
-        Object.assign(existing, fresh);
-        existing.attachments = savedAttachments ?? fresh.attachments;
-      } else {
-        // Nouvelle ligne (ex: Subvention FSDIE créée automatiquement)
-        this.lines.push(fresh);
+  private reloadBudget(): void {
+    this.budgetService.getBudgetLines(this.eventId).subscribe({
+      next: (freshLines) => {
+        // Normaliser les montants (mysql2 retourne parfois des strings)
+        const prevAttachments = new Map(this.lines.map(l => [l.id, l.attachments]));
+        this.lines = freshLines.map(l => ({
+          ...l,
+          forecast_amount: Number(l.forecast_amount) || 0,
+          actual_amount:   l.actual_amount != null ? Number(l.actual_amount) : undefined,
+          attachments:     prevAttachments.get(l.id) ?? l.attachments
+        }));
+        this.cdr.detectChanges();
       }
-    }
-
-    this.cdr.detectChanges();
+    });
   }
 }
