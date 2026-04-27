@@ -5,20 +5,20 @@
 <title>Rapport IA — KUBIK ERP</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Georgia,"Times New Roman",serif;font-size:10pt;line-height:1.5;color:#111;background:#fff;width:210mm;margin:0 auto;padding:16mm 22mm 12mm}
+body{font-family:Georgia,"Times New Roman",serif;font-size:10pt;line-height:1.55;color:#111;background:#fff;width:210mm;margin:0 auto;padding:16mm 22mm 12mm}
 h1{font-size:13pt;font-weight:bold;text-align:center;margin-bottom:3px}
 .meta{text-align:center;font-size:8.5pt;color:#444;margin-bottom:2px}
-hr{border:none;border-top:1.5px solid #111;margin:7px 0}
+hr{border:none;border-top:1.5px solid #111;margin:8px 0}
 hr.thin{border-top:0.5px solid #999;margin:6px 0}
-h2{font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;margin:7px 0 2px}
-p{text-align:justify;margin-bottom:4px;font-size:9.5pt}
-ul{padding-left:16px;margin:2px 0 4px}
-li{font-size:9pt;margin-bottom:2px}
-table{width:100%;border-collapse:collapse;margin:4px 0;font-size:8.5pt}
-th{background:#111;color:#fff;padding:3px 8px;text-align:left;font-weight:normal}
-td{padding:3px 8px;border-bottom:0.5px solid #ccc}
+h2{font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 3px}
+p{text-align:justify;margin-bottom:5px;font-size:9.5pt}
+ul{padding-left:16px;margin:2px 0 5px}
+li{font-size:9.5pt;margin-bottom:3px}
+table{width:100%;border-collapse:collapse;margin:5px 0;font-size:9pt}
+th{background:#111;color:#fff;padding:4px 8px;text-align:left;font-weight:normal}
+td{padding:4px 8px;border-bottom:0.5px solid #ccc}
 tr:nth-child(even) td{background:#f7f7f7}
-.abstract{background:#f5f5f5;border-left:3px solid #111;padding:5px 10px;margin:6px 0;font-style:italic;font-size:9pt}
+.abstract{background:#f5f5f5;border-left:3px solid #111;padding:6px 10px;margin:6px 0;font-style:italic;font-size:9.5pt}
 </style>
 </head>
 <body>
@@ -28,39 +28,39 @@ tr:nth-child(even) td{background:#f7f7f7}
 <div class="meta">Équipe : Dardan, Zacharie, Arno, Huzaifah, Oumeyma, Zakaria, Youba</div>
 <hr>
 
-<div class="abstract">L'assistant IA Gemini (Google DeepMind) a été intégré comme outil d'assistance au développement dans le respect d'un cadre éthique strict : supervision humaine systématique, périmètre délimité aux tâches à faible valeur ajoutée, et usage exclusivement via interface conversationnelle — jamais en mode agent autonome.</div>
+<div class="abstract">L'assistant IA Gemini (Google DeepMind) a été intégré comme outil de soutien au développement dans le respect d'un cadre éthique strict : supervision humaine à chaque étape, usage limité aux tâches à faible valeur ajoutée, et utilisation exclusivement via interface conversationnelle — jamais en mode autonome.</div>
 
-<h2>1. Cadre d'utilisation</h2>
-<p>L'équipe a défini dès le démarrage un protocole garantissant que l'IA reste un outil de conseil et non un acteur décisionnaire. Toute suggestion est soumise à validation humaine explicite avant intégration, et aucune commande (commit, migration SQL, installation de dépendance) n'est exécutée sans approbation manuelle. L'interface conversationnelle retenue exclut par construction tout mode d'exécution autonome : le code proposé est copié, analysé et intégré manuellement par le développeur.</p>
+<h2>1. Contexte et choix de l'outil</h2>
+<p>Face à un périmètre fonctionnel large et des contraintes de temps propres à un projet de Master, l'équipe a fait le choix d'intégrer un assistant IA comme outil de soutien. L'outil retenu, Gemini, a été utilisé uniquement via son interface conversationnelle : chaque réponse obtenue est un texte ou un bloc de code que le développeur doit lire, évaluer et intégrer manuellement. Ce choix exclut par construction tout mode d'exécution automatique.</p>
 
-<h2>2. Usages concrets dans le projet</h2>
+<h2>2. Usages dans le projet</h2>
 <ul>
-  <li><strong>Génération de données de test</strong> : seeds SQL (shifts, kanban, budget) et 11 factures PDF réalistes via Python/xhtml2pdf — tâches répétitives sans valeur ajoutée intellectuelle directe.</li>
-  <li><strong>Débogage assisté</strong> : analyse du bug R14 (mélange forecast/actual dans <code>syncFsdieSubvention</code>), du bug <code>capacity||10</code> (opérateur falsy traitant 0 comme 10), et de l'erreur NG0203 (conflit Service Worker). Chaque correctif proposé a été relu, compris et testé avant application.</li>
-  <li><strong>Documentation technique</strong> : rédaction initiale de la SFD et STD par rétro-ingénierie du code source, mise à jour de la v1.1 à la v1.7. Chaque version relue et corrigée par l'équipe avant commit.</li>
-  <li><strong>Optimisation</strong> : proposition de l'architecture de short polling (5 s), cache mémoire <code>Map&lt;eventId&gt;</code> et mise à jour optimiste dans le module Budget. Adapté à l'architecture Angular existante avant intégration.</li>
+  <li><strong>Génération de données de test</strong> : création de jeux de données fictifs mais réalistes pour alimenter la base de données lors des phases de test — une tâche longue et répétitive sans apport intellectuel significatif.</li>
+  <li><strong>Assistance au débogage</strong> : analyse de comportements inattendus de l'application. L'IA a formulé des hypothèses et proposé des pistes de correction, systématiquement vérifiées et testées par l'équipe avant toute application.</li>
+  <li><strong>Rédaction documentaire</strong> : aide à la rédaction des spécifications fonctionnelles et techniques à partir du code existant. Chaque version produite a été relue et corrigée par l'équipe.</li>
+  <li><strong>Optimisation de l'interface</strong> : suggestion de mécanismes pour rendre l'application plus réactive (mises à jour en temps réel, synchronisation multi-utilisateurs). Les propositions ont été adaptées à l'architecture existante avant intégration.</li>
 </ul>
 
-<h2>3. Garde-fous et supervision</h2>
+<h2>3. Garde-fous mis en place</h2>
 <table>
   <tr><th style="width:50%">Ce que l'IA peut faire</th><th>Ce que l'IA ne fait pas</th></tr>
-  <tr><td>Suggérer du code soumis à validation</td><td>Prendre des décisions architecturales</td></tr>
-  <tr><td>Générer des jeux de données de test</td><td>Exécuter une action sans approbation explicite</td></tr>
-  <tr><td>Analyser des erreurs et proposer des correctifs</td><td>Fusionner ou pousser du code sur les branches</td></tr>
-  <tr><td>Rédiger la documentation à partir du code</td><td>Remplacer la revue de code entre pairs</td></tr>
+  <tr><td>Suggérer du code soumis à validation</td><td>Prendre des décisions de conception</td></tr>
+  <tr><td>Proposer des données de test</td><td>Exécuter une action sans approbation</td></tr>
+  <tr><td>Analyser des erreurs et formuler des hypothèses</td><td>Pousser du code sur le dépôt</td></tr>
+  <tr><td>Rédiger une première version de documentation</td><td>Remplacer la revue de code entre pairs</td></tr>
   <tr><td>Vérifier la cohérence des règles métier</td><td>Accéder à des données réelles ou sensibles</td></tr>
 </table>
-<p style="margin-top:4px">Processus systématique suivi : <strong>(1)</strong> identification de la tâche → <strong>(2)</strong> requête contextuelle → <strong>(3)</strong> proposition IA → <strong>(4)</strong> revue critique → <strong>(5)</strong> approbation explicite → <strong>(6)</strong> test avant merge.</p>
+<p style="margin-top:5px">Le processus suivi à chaque interaction : identification de la tâche → requête formulée par le développeur → proposition de l'IA → relecture critique → approbation explicite → test avant intégration.</p>
 
-<h2>4. Limites reconnues</h2>
+<h2>4. Limites identifiées</h2>
 <ul>
-  <li><strong>Hallucinations</strong> : plusieurs suggestions incorrectes (colonnes SQL inexistantes, chemins de fichiers erronés) ont été détectées lors des tests, confirmant que l'étape de validation ne peut être sautée.</li>
-  <li><strong>Dépendance potentielle</strong> : risque de sollicitation réflexe, pallié en limitant les usages aux tâches clairement identifiées en amont et en exigeant que le développeur soit capable d'expliquer chaque modification intégrée.</li>
-  <li><strong>Périmètre incompressible</strong> : l'IA est inefficace sur les dimensions à forte valeur ajoutée — arbitrages métier, dynamique d'équipe, choix d'architecture long terme — qui sont restées entièrement sous responsabilité humaine.</li>
+  <li><strong>Erreurs et imprécisions</strong> : l'IA a produit à plusieurs reprises des suggestions incorrectes, détectées lors des tests. Cela confirme que la validation humaine est indispensable et ne peut être raccourcie.</li>
+  <li><strong>Risque de dépendance</strong> : un usage non encadré pourrait conduire à intégrer du code sans le comprendre. L'équipe a exigé que chaque développeur soit capable d'expliquer toute modification intégrée.</li>
+  <li><strong>Valeur ajoutée limitée sur le fond</strong> : l'IA est peu pertinente sur les arbitrages métier, la dynamique d'équipe et les choix d'architecture à long terme, qui sont restés entièrement sous responsabilité humaine.</li>
 </ul>
 
 <h2>5. Conclusion</h2>
-<p>L'IA a permis d'accélérer les tâches répétitives et de libérer du temps pour les problèmes à forte valeur ajoutée. La discipline imposée — validation systématique, interface conversationnelle uniquement, périmètre défini — démontre qu'une utilisation responsable est possible en contexte académique. <strong>L'humain reste décisionnaire, l'IA conseille et assiste.</strong> L'ensemble de l'équipe confirme que ces principes ont été respectés tout au long du sprint, et qu'aucun code n'a été intégré sans compréhension et validation humaine préalable.</p>
+<p>L'utilisation de l'IA dans ce projet a été bénéfique sur les tâches répétitives et d'analyse, et a libéré du temps pour les problèmes à plus forte valeur ajoutée. La discipline imposée par l'équipe — validation systématique, refus du mode autonome, périmètre clairement défini — démontre qu'une utilisation responsable est tout à fait compatible avec un projet académique. <strong>L'humain est resté décisionnaire à chaque étape ; l'IA a conseillé, jamais décidé.</strong> L'ensemble de l'équipe confirme que ces principes ont été respectés tout au long du sprint.</p>
 
 <hr class="thin">
 <div style="font-size:7.5pt;color:#666;display:flex;justify-content:space-between;margin-top:3px">
