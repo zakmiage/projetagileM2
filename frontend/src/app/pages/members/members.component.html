@@ -29,6 +29,7 @@
               <th scope="col" class="px-6 py-3 text-center font-medium">Certificat</th>
               <th scope="col" class="px-6 py-3 text-center font-medium">Décharge</th>
               <th scope="col" class="px-6 py-3 text-center font-medium">Droit d'Image</th>
+              <th scope="col" class="px-6 py-3 text-center font-medium">Actions</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -61,6 +62,20 @@
                       class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                   {{ member.is_image_rights_ok ? 'OK' : 'Manquant' }}
                 </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center" (click)="$event.stopPropagation()">
+                <button
+                  id="btn-delete-member-{{ member.id }}"
+                  type="button"
+                  (click)="requestDeleteMember(member, $event)"
+                  class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                  title="Supprimer ce membre"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -212,6 +227,53 @@
           <button type="button" class="bg-primary text-white border border-transparent rounded-md shadow-sm py-2 px-6 inline-flex justify-center text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition" (click)="saveMember()">
             Enregistrer
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale de confirmation de suppression -->
+    <div *ngIf="memberToDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="cancelDelete()"></div>
+
+      <!-- Panel -->
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-sm overflow-hidden text-left">
+        <div class="p-6">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
+              <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-gray-900">Supprimer le membre</h3>
+              <p class="text-sm text-gray-500 mt-0.5">
+                {{ memberToDelete.first_name }} {{ memberToDelete.last_name }}
+              </p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600 mb-6">
+            Attention, la suppression est définitive. Cette action ne peut pas être annulée.
+          </p>
+          <div class="flex justify-end space-x-3">
+            <button
+              id="btn-cancel-delete"
+              type="button"
+              (click)="cancelDelete()"
+              class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition"
+            >
+              Annuler
+            </button>
+            <button
+              id="btn-confirm-delete"
+              type="button"
+              (click)="confirmDelete()"
+              class="bg-red-600 text-white border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition"
+            >
+              Supprimer
+            </button>
+          </div>
         </div>
       </div>
     </div>
