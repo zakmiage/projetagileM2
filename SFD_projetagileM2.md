@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétroingénéré** à partir du code source du projet `projetagileM2`  
-> Version : 1.2 — Dernière modification du dépôt : **27/04/2026**
+> Version : 1.3 — Dernière modification du dépôt : **27/04/2026**
 
 ---
 
@@ -76,7 +76,7 @@ L'application est une plateforme web de gestion interne pour association étudia
 
 - Cliquer sur un événement navigue vers `/events/:id`
 - La page affiche le nom, la date et la capacité de l'événement
-- Elle contient deux **onglets** : **Budget & FSDIE** et **Participants**
+- Elle contient quatre **onglets** : **Budget & FSDIE**, **Participants**, **Créneaux (Shifts)**, **Kanban**
 
 ### 3.4 Modification d'un événement
 
@@ -134,7 +134,22 @@ L'application est une plateforme web de gestion interne pour association étudia
 | **Export FSDIE** | Exporte uniquement les revenus + les dépenses marquées "Éligible FSDIE" |
 
 - Le fichier généré est un `.xlsx` formaté avec couleurs, sous-totaux par catégorie et ligne TOTAL
-- Colonnes : Catégorie | Libellé | Montant (dépenses à gauche, revenus à droite)
+
+### 4.6 Export PDF — Concaténation des factures
+
+- Bouton **"Exporter toutes les PJ"** sur l'onglet Budget
+- Génère un PDF unique : page de garde récapitulative + liste de chaque pièce jointe
+- Téléchargement direct
+- Si aucune PJ → message d'erreur toast
+
+### 4.7 Générateur PDF Dossier FSDIE
+
+- Bouton **"Générer dossier FSDIE"** dédié (distinct de l'export Excel)
+- **Structure du PDF :**
+  - Page 1 : En-tête FSDIE + informations générales de l'événement
+  - Page 2 : Tableau budget — lignes éligibles FSDIE uniquement, avec statuts de validation
+  - Pages suivantes : chaque pièce jointe en annexe numérotée
+- Désactivé si aucune ligne `is_fsdie_eligible = true`
 
 ---
 
@@ -219,9 +234,13 @@ L'application est une plateforme web de gestion interne pour association étudia
 | RG-05 | Les dépenses ne sont incluses dans l'export FSDIE que si `is_fsdie_eligible = true` |
 | RG-06 | La session utilisateur expire après 24h |
 | RG-07 | La recherche de membres dans les participants exclut les déjà inscrits |
-| RG-08 | La suppression d'un événement entraîne la suppression en cascade de ses inscriptions et lignes de budget |
-| RG-09 | Les boutons Export Global et Export FSDIE ne sont visibles que par le rôle `TRESORIER` ou `ADMIN` |
+| RG-08 | La suppression d'un événement entraîne la suppression en cascade de ses inscriptions, lignes de budget, shifts et colonnes Kanban |
+| RG-09 | Les boutons Export sont visibles uniquement par les rôles `TRESORIER` ou `ADMIN` |
 | RG-10 | Une ligne de budget FSDIE passe par les statuts : `SOUMIS` → `APPROUVE` ou `REFUSE`. Seul le `TRESORIER`/`ADMIN` peut changer le statut |
+| RG-11 | Un membre ne peut pas s'inscrire à deux shifts dont les horaires se chevauchent (anti-conflit) |
+| RG-12 | Un shift complet (registered_count >= capacity) refuse toute nouvelle inscription |
+| RG-13 | L'export PDF FSDIE est refusé si aucune ligne `is_fsdie_eligible = true` n'existe pour l'événement |
+| RG-14 | L'export Concaténation PJ est refusé si aucune `budget_attachment` n'existe pour l'événement |
 
 ---
 
@@ -232,13 +251,18 @@ L'application est une plateforme web de gestion interne pour association étudia
 | Authentification JWT complète (frontend ↔ backend) | ❌ Non connectée |
 | Upload réel de pièces jointes en BDD | ✅ Implémenté (multer, persisté) |
 | Import de budget depuis CSV/Excel | ❌ Bouton présent mais non fonctionnel |
-| Modification / suppression d'un événement | ✅ Implémenté (modales dédiées) |
-| Suppression d'un membre | ✅ Implémenté (modale de confirmation) |
+| Modification / suppression d'un événement | ✅ Implémenté |
+| Suppression d'un membre | ✅ Implémenté |
 | Page Paramètres (`/settings`) | ⚠️ Route déclarée mais contenu non visible |
-| Gestion de rôles (`TRESORIER` / `ADMIN`) | ✅ Partiel — hardcodé session frontend, contrôle UI export FSDIE |
+| Gestion de rôles (`TRESORIER` / `ADMIN`) | ✅ Partiel — hardcodé session frontend |
 | Workflow validation FSDIE (`SOUMIS`/`APPROUVE`/`REFUSE`) | ✅ Implémenté |
 | Mode hors-ligne PWA (IndexedDB + Service Worker) | ✅ Implémenté |
 | Pagination | ❌ Absente |
+| **Créneaux de staffing (Shifts)** | ✅ Implémenté |
+| **Tableau Kanban Drag & Drop** | ✅ Implémenté |
+| **Concaténation des factures PDF** | ✅ Implémenté |
+| **Générateur dossier FSDIE PDF** | ✅ Implémenté |
+| **Notifications Toast globales** | ✅ Implémenté |
 
 ---
 
@@ -264,19 +288,17 @@ Les règles de gestion internes sont validées sur une base de test isolée :
 Afin d'atteindre le statut d'un véritable ERP associatif, les fonctionnalités suivantes constituent le backlog des développements futurs :
 
 ### 11.1 Organisation Interne de l'Événement
-* **Tableau Kanban (Drag & drop) par événement** : Un onglet "Tâches" divisé en colonnes (À Faire / En Cours / Fini). Permet de créer des cartes de missions et de les assigner aux membres du bureau.
-* **Planning / Créneaux de staffing** : Diviser l'événement en "Shifts" (ex: Buvette 20h-22h, Sécurité) et affecter les bénévoles. L'application vérifie automatiquement qu'un étudiant n'est pas programmé sur deux créneaux en même temps.
+* ~~**Tableau Kanban (Drag & drop) par événement**~~ : ✅ Implémenté dans ce sprint
+* ~~**Planning / Créneaux de staffing**~~ : ✅ Implémenté dans ce sprint
 
 ### 11.2 Logistique et Gestion du Matériel
 * **Catalogue Matériel BVE** : Base de données du matériel disponible (Barnums, enceintes, câbles, gobelets).
 * **Réservations Anti-Conflit** : Lors d'un événement, on "coche" le matériel dont on a besoin. Si un autre événement a déjà réservé le même matériel sur la même date, l'application bloque la réservation.
-* **Suivi des pertes & Consignes** : À la clôture de l'événement, on entre le matériel perdu (ex: 20 Ecocups manquants) et l'app déduit automatiquement la consigne des revenus financiers.
 
-### 11.3 Subvention & Administratifs (Effet Wahou !)
-* **Générateur du Dossier FSDIE (PDF)** : L'application fusionne le suivi budgétaire, extrait uniquement les dépenses cochées "FSDIE" et génère un vrai document PDF paramétré (avec logo de l'université et signature) prêt à être imprimé.
-* **Concaténation des factures** : Lier les images de reçus/factures des dépenses FSDIE et les injecter à la fin du grand PDF généré pour faire une liasse unique.
+### 11.3 Subvention & Administratifs
+* ~~**Générateur du Dossier FSDIE (PDF)**~~ : ✅ Implémenté dans ce sprint
+* ~~**Concaténation des factures**~~ : ✅ Implémenté dans ce sprint
 
 ### 11.4 Financement et Partenaires
 * **CRM Sponsoring** : Un annuaire distinct dédié aux entreprises (Banques, Imprimeurs, Bars).
 * **Pipeline de Démarchage** : Suivi de l'état des partenaires (Contacté ➔ En négociation ➔ Contrat Signé ➔ Paiement reçu).
-* **Alertes Trésorerie** : Lien automatique entre les "Contrats Signés" du CRM et les "Revenus prévisionnels" de l'événement pour vérifier si l'argent a bien été viré sur le compte.
