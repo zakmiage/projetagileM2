@@ -34,10 +34,13 @@ export class BudgetService {
     );
   }
 
-  updateBudgetLine(id: number, data: Partial<BudgetLine>): Observable<BudgetLine> {
-    return this.http.put<{success: boolean, data: BudgetLine}>(`${this.apiUrl}/${id}`, data).pipe(
-      map(res => res.data),
-      tap(updated => this.idb.put(STORE, updated).subscribe()),
+  updateBudgetLine(id: number, data: Partial<BudgetLine>): Observable<any> {
+    // Retourne la réponse complète { success, data, lines } pour que le composant
+    // puisse exploiter `lines` (Subvention FSDIE recalculée R14)
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data).pipe(
+      tap(res => {
+        if (res?.data) this.idb.put(STORE, res.data).subscribe();
+      }),
       catchError(err => throwError(() => err))
     );
   }
@@ -50,9 +53,10 @@ export class BudgetService {
     );
   }
 
-  deleteBudgetLine(id: number): Observable<boolean> {
-    return this.http.delete<{success: boolean}>(`${this.apiUrl}/${id}`).pipe(
-      map(res => res.success),
+  deleteBudgetLine(id: number): Observable<any> {
+    // Retourne la réponse complète { success, lines } pour que le composant
+    // puisse appliquer les lignes recalculées après suppression
+    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
       tap(() => this.idb.delete(STORE, id).subscribe()),
       catchError(err => throwError(() => err))
     );
@@ -65,8 +69,10 @@ export class BudgetService {
     );
   }
 
-  updateValidationStatus(id: number, status: 'SOUMIS' | 'APPROUVE' | 'REFUSE'): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, { status }).pipe(
+  updateValidationStatus(id: number, status: 'SOUMIS' | 'APPROUVE' | 'REFUSE'): Observable<any> {
+    // Retourne la réponse complète { success, message, lines } pour que le composant
+    // puisse appliquer la Subvention FSDIE recalculée après changement de statut
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, { status }).pipe(
       catchError(err => throwError(() => err))
     );
   }
