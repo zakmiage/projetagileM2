@@ -4,209 +4,227 @@
 <meta charset="UTF-8">
 <title>Présentation — Gestion d'événements associatifs</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600&display=swap');
+
+:root{
+  --bg:     oklch(0.09 0.010 255);
+  --surf:   oklch(0.13 0.010 255);
+  --line:   oklch(0.19 0.008 255);
+  --tx:     oklch(0.93 0.006 255);
+  --tx2:    oklch(0.56 0.006 255);
+  --tx3:    oklch(0.32 0.006 255);
+  --acc:    oklch(0.72 0.17  52);
+  --acc-d:  oklch(0.72 0.17  52 / 0.13);
+  --red:    oklch(0.62 0.19 25);
+  --grn:    oklch(0.64 0.16 150);
+  --vio:    oklch(0.60 0.18 290);
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;display:flex;flex-direction:column;align-items:center;gap:4px;padding:20px;font-family:'Inter',sans-serif}
+body{font-family:'Manrope',sans-serif;background:oklch(0.05 0.008 255);display:flex;flex-direction:column;align-items:center;gap:4px;padding:20px}
+.slide{width:297mm;height:210mm;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
 
-.slide{width:297mm;height:210mm;position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
+/* ─── SLIDE 1 ─── */
+.s1{padding:0}
+.s1-content{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:44px 60px 48px}
+.s1-kicker{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:500;margin-bottom:20px}
+.s1-h{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(28pt,5vw,40pt);font-weight:800;color:var(--tx);line-height:1.06;margin-bottom:8px;max-width:520px}
+.s1-h mark{background:none;color:var(--acc)}
+.s1-sub{font-size:10pt;color:var(--tx2);font-weight:300;margin-bottom:36px;max-width:440px;line-height:1.6}
+.s1-chaos{display:flex;gap:24px}
+.chip{padding:7px 14px;background:var(--surf);font-size:8.5pt;color:var(--tx2);border-radius:4px;display:flex;align-items:center;gap:8px}
+.chip .e{opacity:.7}
+/* déco top-right : block vertical de couleur */
+.s1-bar{position:absolute;top:0;right:80px;width:2px;height:100%;background:var(--acc);opacity:.18}
+.s1-block{position:absolute;top:0;right:0;width:80px;height:100%;background:var(--acc);opacity:.04}
+.s1-num{position:absolute;top:28px;right:26px;font-family:'Bricolage Grotesque',sans-serif;font-size:72pt;font-weight:800;color:var(--acc);opacity:.07;line-height:1;letter-spacing:-3px}
+.pg{position:absolute;bottom:22px;right:28px;font-size:7pt;color:var(--tx3);letter-spacing:1px}
+.tag{position:absolute;top:22px;left:28px;font-size:7pt;color:var(--tx3);letter-spacing:.3px}
 
-/* ────────────────────────────────────────────
-   SLIDE 1 — dark, phrase choc, rien d'autre
-──────────────────────────────────────────── */
-.s1{background:#06060e;justify-content:center;padding:0 80px}
-.s1-kicker{font-size:8pt;letter-spacing:3px;text-transform:uppercase;color:#4f46e5;margin-bottom:20px}
-.s1-h{font-family:'Syne',sans-serif;font-size:42pt;font-weight:800;color:#fff;line-height:1.05;margin-bottom:40px;max-width:500px}
-.s1-h em{color:#4f46e5;font-style:normal}
-.s1-chaos{display:flex;gap:40px}
-.chaos-item{font-size:9pt;color:#333;display:flex;align-items:center;gap:8px}
-.chaos-item .e{font-size:16px;opacity:.6}
-/* déco géométrique droite */
-.s1-geo{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:300px;height:300px;border:1px solid #4f46e5;border-radius:50%;opacity:.07}
-.s1-geo2{position:absolute;right:30px;top:50%;transform:translateY(-50%);width:180px;height:180px;border:1px solid #4f46e5;border-radius:50%;opacity:.06}
-.s1-geo3{position:absolute;right:80px;top:50%;transform:translateY(-50%);width:80px;height:80px;background:#4f46e5;border-radius:50%;opacity:.06}
+/* ─── SLIDE 2 ─── */
+.s2{flex-direction:row}
+.s2-left{width:40%;padding:40px 32px 40px 48px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line)}
+.s2-kicker{font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:500;margin-bottom:14px}
+.s2-h{font-family:'Bricolage Grotesque',sans-serif;font-size:20pt;font-weight:800;color:var(--tx);line-height:1.1;margin-bottom:28px}
+.mods{display:flex;flex-direction:column;gap:14px}
+.mod{display:grid;grid-template-columns:20px 1fr auto;align-items:baseline;gap:10px}
+.mod-n-num{font-family:'Bricolage Grotesque',sans-serif;font-size:9pt;font-weight:700;color:var(--tx3)}
+.mod-name{font-size:9.5pt;color:var(--tx);font-weight:500}
+.mod-tag{font-size:7.5pt;color:var(--tx3);font-weight:400}
+.stack{font-size:7.5pt;color:var(--tx3);line-height:1.8;padding-top:20px;border-top:1px solid var(--line)}
+.stack b{color:var(--tx2)}
 
-/* ────────────────────────────────────────────
-   SLIDE 2 — split : liste gauche + mockup app
-──────────────────────────────────────────── */
-.s2{background:#06060e;flex-direction:row}
-.s2-left{width:38%;padding:44px 32px 44px 52px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid #111}
-.s2-kicker{font-size:7.5pt;letter-spacing:3px;text-transform:uppercase;color:#4f46e5;margin-bottom:16px}
-.s2-h{font-family:'Syne',sans-serif;font-size:21pt;font-weight:800;color:#fff;line-height:1.1;margin-bottom:26px}
-.mods{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
-.mod{display:flex;align-items:baseline;gap:10px}
-.mod-n{font-size:10.5pt;color:#ccc;font-weight:500}
-.mod-d{font-size:8pt;color:#333;margin-left:auto}
-.stack{font-size:8pt;color:#2a2a3a;padding-top:20px;border-top:1px solid #111;letter-spacing:.3px}
-.stack b{color:#3a3a5a}
+.s2-right{flex:1;display:flex;align-items:center;justify-content:center;padding:18px 22px;background:oklch(0.07 0.008 255)}
+/* ── APP MOCKUP (fidèle à l'UI réelle) ── */
+.app{width:100%;height:168px;background:oklch(0.96 0.005 250);border-radius:8px;overflow:hidden;box-shadow:0 16px 48px oklch(0 0 0 / .5);display:flex;font-family:'Manrope',sans-serif}
+.app-nav{width:46px;background:oklch(0.32 0.07 200);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:6px}
+.nav-logo{width:26px;height:26px;background:oklch(1 0 0 / .15);border-radius:5px;margin-bottom:6px}
+.nav-dot{width:22px;height:4px;border-radius:2px;background:oklch(1 0 0 / .18)}
+.nav-dot.on{background:oklch(1 0 0 / .70)}
+.app-body{flex:1;display:flex;flex-direction:column}
+.app-bar{height:22px;background:oklch(0.99 0.003 250);border-bottom:1px solid oklch(0.9 0.004 250);display:flex;align-items:center;padding:0 10px;gap:6px}
+.bar-title{font-size:6.5pt;font-weight:600;color:oklch(0.2 0.01 255)}
+.tabs{display:flex;padding:0 10px;background:oklch(0.99 0.003 250);border-bottom:1px solid oklch(0.9 0.004 250)}
+.tab{font-size:6pt;padding:4px 7px;color:oklch(0.6 0.006 255)}
+.tab.on{color:oklch(0.45 0.18 290);font-weight:600;box-shadow:inset 0 -2px 0 oklch(0.45 0.18 290)}
+.main{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px 8px;background:oklch(0.95 0.005 250)}
+.card{background:oklch(1 0 0);border-radius:5px;padding:6px 8px;box-shadow:0 1px 3px oklch(0 0 0 / .07)}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.card-label{font-size:6.5pt;font-weight:600;color:oklch(0.25 0.01 255)}
+.card-amt{font-size:7.5pt;font-weight:700}
+.row{display:flex;align-items:baseline;padding:3px 0;gap:5px;border-bottom:1px solid oklch(0.94 0.003 250)}
+.row:last-child{border:none}
+.r-cat{font-size:5.5pt;color:oklch(0.62 0.005 255);width:44px;flex-shrink:0}
+.r-lib{font-size:6pt;color:oklch(0.28 0.01 255);flex:1}
+.r-amt{font-size:6.5pt;font-weight:600;margin-left:auto}
+.bads{display:flex;gap:2px;margin-top:1px}
+.b{font-size:4.5pt;padding:1px 4px;border-radius:3px;font-weight:600}
+.b-ok{background:oklch(0.92 0.09 150);color:oklch(0.36 0.13 150)}
+.b-sub{background:oklch(0.96 0.10 80);color:oklch(0.52 0.14 70)}
+.b-f{background:oklch(0.93 0.08 290);color:oklch(0.42 0.16 290)}
+.add{margin-top:5px;border:1px dashed oklch(0.87 0.004 255);border-radius:4px;padding:4px;text-align:center;font-size:5.5pt;color:oklch(0.72 0.004 255)}
 
-.s2-right{flex:1;display:flex;align-items:center;justify-content:center;padding:20px 24px;background:#0a0a12}
+/* ─── SLIDE 3 ─── */
+.s3{background:oklch(0.06 0.008 255);justify-content:flex-end}
+.s3-body{padding:0 60px 52px}
+.s3-label{font-size:8pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:500;margin-bottom:14px}
+.s3-h{font-family:'Bricolage Grotesque',sans-serif;font-size:72pt;font-weight:800;color:var(--tx);line-height:0.92;letter-spacing:-2px;margin-bottom:32px}
+.s3-h mark{background:none;color:var(--acc)}
+.s3-pills{display:flex;gap:10px}
+.pill{padding:7px 16px;border-radius:4px;font-size:8pt;color:var(--tx2);background:var(--surf);font-weight:400}
 
-/* ── APP MOCKUP (reproduit l'UI réelle) ── */
-.app{width:100%;height:162px;background:#f4f6f9;border-radius:10px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;font-family:'Inter',sans-serif}
-/* sidebar teal */
-.app-nav{width:44px;background:#1e6b7a;display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:7px}
-.nav-logo{width:24px;height:24px;background:rgba(255,255,255,.15);border-radius:5px;margin-bottom:4px}
-.nav-i{width:20px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
-.nav-i.active{background:rgba(255,255,255,.7)}
-/* contenu principal */
-.app-main{flex:1;display:flex;flex-direction:column}
-.app-topbar{height:24px;background:#fff;border-bottom:1px solid #e8ecf0;display:flex;align-items:center;padding:0 12px;gap:8px}
-.app-title{font-size:7pt;font-weight:600;color:#1a1a2e}
-.tab-bar{display:flex;gap:0;padding:0 12px;background:#fff;border-bottom:1px solid #e8ecf0}
-.tab{font-size:6.5pt;padding:5px 8px;color:#888;cursor:default}
-.tab.active{color:#4f46e5;border-bottom:2px solid #4f46e5;font-weight:600}
-.app-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px;background:#f4f6f9}
-/* carte budget */
-.bcard{background:#fff;border-radius:6px;padding:7px 9px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
-.bcard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.bcard-label{font-size:7pt;font-weight:600;color:#333;display:flex;align-items:center;gap:4px}
-.bcard-label .dot{width:7px;height:7px;border-radius:50%}
-.bcard-total{font-size:8pt;font-weight:700}
-.bline{display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f0f0f5;gap:6px}
-.bl-cat{font-size:6pt;color:#888;width:50px;flex-shrink:0}
-.bl-lib{font-size:6.5pt;color:#333;flex:1}
-.bl-amt{font-size:7pt;font-weight:600;color:#333;margin-left:auto}
-.bl-badges{display:flex;gap:3px;margin-top:2px}
-.badge{font-size:5pt;padding:1px 4px;border-radius:3px;font-weight:600}
-.badge.ok{background:#d1fae5;color:#059669}
-.badge.sub{background:#fef3c7;color:#d97706}
-.badge.fsdie{background:#ede9fe;color:#7c3aed}
+/* EXPORT BTN */
+#eb{position:fixed;bottom:20px;right:20px;background:var(--acc);color:oklch(0.12 0.01 255);font-family:'Manrope',sans-serif;font-size:9pt;font-weight:600;padding:10px 22px;border:none;border-radius:4px;cursor:pointer;z-index:999}
+@media print{body{background:#000;padding:0;gap:0}#eb{display:none!important}}
+@page{size:A4 landscape;margin:0}
 </style>
 </head>
 <body>
 
-<!-- ── SLIDE 1 ── -->
+<!-- ─── SLIDE 1 ─── -->
 <div class="slide s1">
-  <div class="s1-geo"></div><div class="s1-geo2"></div><div class="s1-geo3"></div>
-  <div style="position:absolute;top:18px;right:26px;font-size:7pt;color:#1a1a2e;letter-spacing:.5px">M2 MIAGE · Méthodes agiles · Groupe 5</div>
-  <div class="s1-kicker">Projet agile · Avril 2026</div>
-  <div class="s1-h">Gérer un événement associatif.<br><em>Sans les outils<br>pour ça.</em></div>
-  <div class="s1-chaos">
-    <div class="chaos-item"><span class="e">📊</span> Budget sur Excel partagé</div>
-    <div class="chaos-item"><span class="e">💬</span> Créneaux par messages</div>
-    <div class="chaos-item"><span class="e">📄</span> FSDIE à la main</div>
+  <div class="s1-bar"></div>
+  <div class="s1-block"></div>
+  <div class="s1-num">01</div>
+  <div class="tag">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+  <div class="s1-content">
+    <div class="s1-kicker">Projet agile · Avril 2026</div>
+    <div class="s1-h">Gérer un événement associatif.<br><mark>Sans les outils pour ça.</mark></div>
+    <div class="s1-sub">Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya · Oumeyma Soukah · Zakaria Zemmari · Youba Tiab</div>
+    <div class="s1-chaos">
+      <div class="chip"><span class="e">📊</span> Budget sur Excel partagé</div>
+      <div class="chip"><span class="e">💬</span> Créneaux par messages</div>
+      <div class="chip"><span class="e">📄</span> FSDIE à la main</div>
+    </div>
   </div>
-  <div style="position:absolute;bottom:18px;right:26px;font-size:7pt;color:#1a1a2e">01 / 03</div>
+  <div class="pg">01 / 03</div>
 </div>
 
-<!-- ── SLIDE 2 ── -->
+<!-- ─── SLIDE 2 ─── -->
 <div class="slide s2">
-  <div style="position:absolute;top:18px;right:26px;font-size:7pt;color:#1a1a2e;letter-spacing:.5px">M2 MIAGE · Méthodes agiles · Groupe 5</div>
+  <div class="tag">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
   <div class="s2-left">
-    <div class="s2-kicker">La réponse</div>
-    <div class="s2-h">Une plateforme,<br>4 modules.</div>
-    <div class="mods">
-      <div class="mod"><div class="mod-n">💰 Budget & FSDIE</div><div class="mod-d">export PDF auto</div></div>
-      <div class="mod"><div class="mod-n">📅 Planning bénévoles</div><div class="mod-d">agenda 24h</div></div>
-      <div class="mod"><div class="mod-n">🗂️ Kanban</div><div class="mod-d">drag & drop</div></div>
-      <div class="mod"><div class="mod-n">👥 Membres</div><div class="mod-d">rôles & inscriptions</div></div>
+    <div>
+      <div class="s2-kicker">La réponse</div>
+      <div class="s2-h">Une plateforme web,<br>4 modules.</div>
+      <div class="mods">
+        <div class="mod"><span class="mod-n-num">01</span><span class="mod-name">Budget & FSDIE</span><span class="mod-tag">export PDF auto</span></div>
+        <div class="mod"><span class="mod-n-num">02</span><span class="mod-name">Planning bénévoles</span><span class="mod-tag">agenda 24h</span></div>
+        <div class="mod"><span class="mod-n-num">03</span><span class="mod-name">Kanban</span><span class="mod-tag">drag & drop persisté</span></div>
+        <div class="mod"><span class="mod-n-num">04</span><span class="mod-name">Membres & inscriptions</span><span class="mod-tag">gestion des rôles</span></div>
+      </div>
     </div>
-    <div class="stack"><b>Angular</b> · Express.js · MySQL · Git Flow</div>
+    <div class="stack"><b>Angular</b> · Express.js · MySQL<br><b>42 tests</b> · Git Flow · sprints 2 semaines</div>
   </div>
   <div class="s2-right">
-    <!-- Mockup fidèle à l'UI réelle -->
     <div class="app">
       <div class="app-nav">
         <div class="nav-logo"></div>
-        <div class="nav-i"></div>
-        <div class="nav-i active"></div>
-        <div class="nav-i"></div>
-        <div class="nav-i"></div>
+        <div class="nav-dot"></div>
+        <div class="nav-dot on"></div>
+        <div class="nav-dot"></div>
+        <div class="nav-dot"></div>
       </div>
-      <div class="app-main">
-        <div class="app-topbar">
-          <div class="app-title">Week-end ski Alpes 2027</div>
+      <div class="app-body">
+        <div class="app-bar">
+          <div class="bar-title">Week-end ski Alpes 2027</div>
           <div style="margin-left:auto;display:flex;gap:5px">
-            <div style="width:32px;height:12px;background:#f0f0f5;border-radius:3px;border:1px solid #e0e0ea"></div>
-            <div style="width:32px;height:12px;background:#4f46e5;border-radius:3px;opacity:.8"></div>
+            <div style="padding:2px 8px;background:oklch(0.93 0.005 250);border-radius:3px;font-size:5.5pt;color:oklch(0.5 0.006 255)">Prévisionnel</div>
+            <div style="padding:2px 8px;background:oklch(0.45 0.18 290);border-radius:3px;font-size:5.5pt;color:#fff">Réel</div>
           </div>
         </div>
-        <div class="tab-bar">
-          <div class="tab active">Budget & FSDIE</div>
+        <div class="tabs">
+          <div class="tab on">Budget & FSDIE</div>
           <div class="tab">Participants</div>
-          <div class="tab">Créneaux</div>
+          <div class="tab">Créneaux (Shifts)</div>
           <div class="tab">Kanban</div>
         </div>
-        <div class="app-body">
-          <!-- Dépenses -->
-          <div class="bcard">
-            <div class="bcard-head">
-              <div class="bcard-label"><div class="dot" style="background:#ef4444"></div> Dépenses</div>
-              <div class="bcard-total" style="color:#ef4444">- 18 403 €</div>
+        <div class="main">
+          <div class="card">
+            <div class="card-h">
+              <div class="card-label" style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block"></span> Dépenses</div>
+              <div class="card-amt" style="color:var(--red)">- 18 403 €</div>
             </div>
-            <div class="bline">
-              <div class="bl-cat">Logistique</div>
-              <div>
-                <div class="bl-lib">Hébergement (chalet)</div>
-                <div class="bl-badges"><span class="badge fsdie">FSDIE</span><span class="badge ok">Approuvé</span></div>
-              </div>
-              <div class="bl-amt">5 555 €</div>
+            <div class="row">
+              <div class="r-cat">Logistique</div>
+              <div><div class="r-lib">Hébergement (chalet)</div><div class="bads"><span class="b b-f">FSDIE</span><span class="b b-ok">Approuvé</span></div></div>
+              <div class="r-amt" style="color:oklch(0.28 0.01 255)">5 555 €</div>
             </div>
-            <div class="bline">
-              <div class="bl-cat">Logistique</div>
-              <div>
-                <div class="bl-lib">Forfaits ski (40 pax)</div>
-                <div class="bl-badges"><span class="badge fsdie">FSDIE</span><span class="badge ok">Approuvé</span></div>
-              </div>
-              <div class="bl-amt">8 888 €</div>
+            <div class="row">
+              <div class="r-cat">Logistique</div>
+              <div><div class="r-lib">Forfaits ski (40 pax)</div><div class="bads"><span class="b b-f">FSDIE</span><span class="b b-ok">Approuvé</span></div></div>
+              <div class="r-amt" style="color:oklch(0.28 0.01 255)">8 888 €</div>
             </div>
-            <div class="bline" style="border:none">
-              <div class="bl-cat">Logistique</div>
-              <div>
-                <div class="bl-lib">Location de matériel</div>
-                <div class="bl-badges"><span class="badge sub">Soumis</span></div>
-              </div>
-              <div class="bl-amt">3 960 €</div>
+            <div class="row" style="border:none">
+              <div class="r-cat">Logistique</div>
+              <div><div class="r-lib">Location de matériel</div><div class="bads"><span class="b b-sub">Soumis</span></div></div>
+              <div class="r-amt" style="color:oklch(0.28 0.01 255)">3 960 €</div>
             </div>
           </div>
-          <!-- Revenus -->
-          <div class="bcard">
-            <div class="bcard-head">
-              <div class="bcard-label"><div class="dot" style="background:#10b981"></div> Revenus</div>
-              <div class="bcard-total" style="color:#10b981">+ 20 576 €</div>
+          <div class="card">
+            <div class="card-h">
+              <div class="card-label" style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--grn);display:inline-block"></span> Revenus</div>
+              <div class="card-amt" style="color:var(--grn)">+ 20 576 €</div>
             </div>
-            <div class="bline">
-              <div class="bl-cat">Billetterie</div>
-              <div class="bl-lib">Cotisations (40 × 195€)</div>
-              <div class="bl-amt">7 800 €</div>
+            <div class="row">
+              <div class="r-cat">Billetterie</div>
+              <div class="r-lib">Cotisations (40 × 195 €)</div>
+              <div class="r-amt" style="color:oklch(0.28 0.01 255)">7 800 €</div>
             </div>
-            <div class="bline" style="border:none">
-              <div class="bl-cat">FSDIE</div>
-              <div>
-                <div class="bl-lib">Subvention FSDIE (R14)</div>
-                <div class="bl-badges"><span class="badge fsdie">Auto-calculé</span></div>
-              </div>
-              <div class="bl-amt" style="color:#7c3aed">12 776 €</div>
+            <div class="row" style="border:none">
+              <div class="r-cat">FSDIE</div>
+              <div><div class="r-lib">Subvention FSDIE (R14)</div><div class="bads"><span class="b b-f">Auto-calculé</span></div></div>
+              <div class="r-amt" style="color:oklch(0.45 0.16 290)">12 776 €</div>
             </div>
-            <div style="margin-top:8px;border:1.5px dashed #e0e0ea;border-radius:4px;padding:5px;text-align:center;font-size:6pt;color:#aaa">+ Ajouter un revenu</div>
+            <div class="add">+ Ajouter un revenu</div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div style="position:absolute;bottom:18px;right:26px;font-size:7pt;color:#1a1a2e">02 / 03</div>
+  <div class="pg">02 / 03</div>
 </div>
 
-<!-- ── SLIDE 3 ── -->
-<div class="slide" style="background:#03030a;justify-content:center;align-items:center;text-align:center">
-  <div style="position:absolute;top:18px;right:26px;font-size:7pt;color:#111;letter-spacing:.5px">M2 MIAGE · Méthodes agiles · Groupe 5</div>
-  <div style="font-family:'Syne',sans-serif;font-size:82pt;font-weight:800;color:#fff;letter-spacing:-3px;line-height:1">DÉ<span style="color:#4f46e5">MO</span></div>
-  <div style="display:flex;gap:14px;margin-top:28px">
-    <div style="padding:8px 18px;border:1px solid #1a1a30;border-radius:20px;font-size:8.5pt;color:#444">💰 Budget FSDIE</div>
-    <div style="padding:8px 18px;border:1px solid #1a1a30;border-radius:20px;font-size:8.5pt;color:#444">📅 Planning 24h</div>
-    <div style="padding:8px 18px;border:1px solid #1a1a30;border-radius:20px;font-size:8.5pt;color:#444">🗂️ Kanban</div>
+<!-- ─── SLIDE 3 ─── -->
+<div class="slide s3">
+  <div class="tag" style="color:oklch(0.22 0.008 255)">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+  <div class="s3-body">
+    <div class="s3-label">Place à la</div>
+    <div class="s3-h">DÉ<mark>MO</mark></div>
+    <div class="s3-pills">
+      <div class="pill">💰 Budget FSDIE</div>
+      <div class="pill">📅 Planning 24h</div>
+      <div class="pill">🗂️ Kanban</div>
+    </div>
   </div>
-  <div style="position:absolute;bottom:18px;right:26px;font-size:7pt;color:#111">03 / 03</div>
+  <div class="pg" style="color:oklch(0.22 0.008 255)">03 / 03</div>
 </div>
 
-<!-- EXPORT -->
-<button id="exportBtn" onclick="exportPDF()" style="position:fixed;bottom:20px;right:20px;background:#4f46e5;color:#fff;font-family:'Inter',sans-serif;font-size:9pt;font-weight:600;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;z-index:999;box-shadow:0 4px 16px rgba(79,70,229,.4)">⬇ Exporter PDF</button>
-
+<button id="eb" onclick="exportPDF()">⬇ Exporter PDF</button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 async function exportPDF(){
-  const btn=document.getElementById('exportBtn');
+  const btn=document.getElementById('eb');
   btn.style.display='none';
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
@@ -220,6 +238,5 @@ async function exportPDF(){
   btn.style.display='';
 }
 </script>
-<style>@media print{body{background:#000;padding:0;gap:0}#exportBtn{display:none!important}}@page{size:A4 landscape;margin:0}</style>
 </body>
 </html>
