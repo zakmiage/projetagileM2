@@ -52,7 +52,7 @@
           </div>
 
           <div class="space-y-4">
-            <div *ngFor="let line of getExpenses()" class="bg-white p-4 rounded-lg shadow-sm border border-red-50 hover:border-red-200 transition group relative">
+            <div *ngFor="let line of getExpenses(); trackBy: trackById" class="bg-white p-4 rounded-lg shadow-sm border border-red-50 hover:border-red-200 transition group relative">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -171,7 +171,7 @@
           </div>
 
           <div class="space-y-4">
-            <div *ngFor="let line of getRevenues()" class="bg-white p-4 rounded-lg shadow-sm border border-primary/10 hover:border-primary/40 transition group relative">
+            <div *ngFor="let line of getRevenues(); trackBy: trackById" class="bg-white p-4 rounded-lg shadow-sm border border-primary/10 hover:border-primary/40 transition group relative">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>

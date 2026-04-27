@@ -41,6 +41,9 @@ export class BudgetTabComponent {
   selectedBudgetLine: BudgetLine | null = null;
   isUploading = false;
 
+  /** trackBy pour *ngFor : Angular réutilise le DOM node existant au lieu de le recréer */
+  trackById(_: number, line: BudgetLine): number { return line.id; }
+
   loadBudget() {
     console.log('loadBudget called for event:', this.eventId);
     this.budgetService.getBudgetLines(this.eventId).subscribe({
