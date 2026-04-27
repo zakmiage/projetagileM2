@@ -114,14 +114,13 @@ p.lead {
 
 .s1-content {
   max-width: 800px;
-  margin-top: 20px;
 }
 
 .team-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 32px;
-  max-width: 700px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 24px;
+  max-width: 800px;
 }
 
 .team-member {
@@ -151,7 +150,7 @@ p.lead {
 
 .s2-left {
   flex: 1;
-  max-width: 400px;
+  max-width: 450px;
 }
 
 .s2-right {
@@ -159,9 +158,6 @@ p.lead {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surf);
-  border-radius: 12px;
-  padding: 32px;
   height: calc(100% - 60px);
 }
 
@@ -246,7 +242,7 @@ p.lead {
 .s3-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
 }
 
 .agenda {
@@ -257,10 +253,10 @@ p.lead {
 
 .agenda-item {
   background: var(--surf);
-  padding: 32px 24px;
+  padding: 40px 32px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  border-top: 3px solid var(--acc);
+  border-top: 4px solid var(--acc);
 }
 
 .agenda-time {
@@ -289,8 +285,9 @@ p.lead {
 
 #eb {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
+  bottom: auto;
   background: var(--tx);
   color: var(--bg);
   font-family: 'Public Sans', sans-serif;
