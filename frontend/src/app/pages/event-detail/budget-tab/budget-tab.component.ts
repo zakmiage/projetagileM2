@@ -85,6 +85,12 @@ export class BudgetTabComponent {
     if (this.viewMode === 'actual' && line.actual_amount !== undefined) line.actual_amount = Number(line.actual_amount);
 
     this.budgetService.updateBudgetLine(line.id, line).subscribe({
+      next: (res: any) => {
+        // Le backend retourne `lines` avec la Subvention FSDIE recalculée (R14)
+        if (res?.lines) {
+          this.applyLines(res.lines);
+        }
+      },
       error: () => console.error('Failed to save')
     });
   }
@@ -112,8 +118,13 @@ export class BudgetTabComponent {
   deleteLine(line: BudgetLine) {
     if (confirm("Êtes-vous sûr de vouloir supprimer cette ligne de budget ?")) {
       this.budgetService.deleteBudgetLine(line.id).subscribe({
-        next: () => {
-          this.lines = this.lines.filter(l => l.id !== line.id);
+        next: (res: any) => {
+          if (res?.lines) {
+            // Refresh complet depuis le backend (inclut la Subvention FSDIE recalculée)
+            this.applyLines(res.lines);
+          } else {
+            this.lines = this.lines.filter(l => l.id !== line.id);
+          }
         },
         error: () => alert('Erreur lors de la suppression')
       });
@@ -297,8 +308,12 @@ export class BudgetTabComponent {
    */
   setStatus(line: BudgetLine, status: 'SOUMIS' | 'APPROUVE' | 'REFUSE'): void {
     this.budgetService.updateValidationStatus(line.id, status).subscribe({
-      next: () => {
+      next: (res: any) => {
         line.validation_status = status;
+        // Appliquer les lignes recalculées (Subvention FSDIE mise à jour)
+        if (res?.lines) {
+          this.applyLines(res.lines);
+        }
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -306,5 +321,19 @@ export class BudgetTabComponent {
         alert('Impossible de mettre à jour le statut.');
       }
     });
+  }
+
+  /**
+   * Applique une liste de lignes fraîches du backend en préservant
+   * les attachments déjà chargés en mémoire.
+   */
+  private applyLines(freshLines: BudgetLine[]): void {
+    this.lines = freshLines.map(fresh => {
+      const existing = this.lines.find(l => l.id === fresh.id);
+      return existing
+        ? { ...fresh, attachments: existing.attachments }  // conserver les PJ déjà chargées
+        : fresh;
+    });
+    this.cdr.detectChanges();
   }
 }
