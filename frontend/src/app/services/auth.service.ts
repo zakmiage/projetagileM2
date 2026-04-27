@@ -17,7 +17,7 @@ export class AuthService {
       
       const sessionData = {
         email,
-        role: 'TRESORIER', // Rôle hardcodé — la vraie auth JWT est une tâche séparée
+        role: 'ADMIN', // toto est admin — accès complet à toutes les fonctionnalités
         expiresAt: expirationDate.getTime()
       };
       
