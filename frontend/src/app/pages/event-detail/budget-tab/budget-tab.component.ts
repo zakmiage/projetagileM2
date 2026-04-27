@@ -248,18 +248,6 @@ export class BudgetTabComponent {
     });
   }
 
-  /** Télécharge le PDF budget complet + toutes les PJ concaténées */
-  exportPdfInvoices() {
-    const url = `http://localhost:3000/api/export/events/${this.eventId}/invoices`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `budget_pj_event${this.eventId}.pdf`;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-
   /** Génère et télécharge le dossier FSDIE complet (PDF) */
   exportFsdiePdf() {
     const url = `http://localhost:3000/api/export/events/${this.eventId}/fsdie`;
