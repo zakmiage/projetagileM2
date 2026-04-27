@@ -37,8 +37,8 @@ exports.createBudgetLine = async (req, res) => {
     const newLine = await BudgetService.createBudgetLine(req.body);
     const eventId  = req.body.event_id;
 
-    // Sync R14 systématiquement (une nouvelle ligne peut affecter la subvention)
-    await BudgetLine.syncFsdieSubvention(eventId);
+    // Sync auto lines systématiquement (FSDIE + Fonds propres)
+    await BudgetLine.syncAutoLines(eventId);
 
     // Retourner les lignes complètes pour que le front n'ait pas à refaire un GET
     const allLines = await BudgetLine.findByEventId(eventId);
@@ -68,7 +68,7 @@ exports.updateBudgetLine = async (req, res) => {
     // (évite de recalculer inutilement et d'écraser les montants saisis manuellement)
     const isSubventionLine = lineRow?.category === 'Subvention FSDIE' && lineRow?.type === 'REVENUE';
     if (eventId && !isSubventionLine) {
-      await BudgetLine.syncFsdieSubvention(eventId);
+      await BudgetLine.syncAutoLines(eventId);
     }
 
     // Retourner les lignes complètes à jour pour que le front puisse refresh
@@ -95,9 +95,9 @@ exports.deleteBudgetLine = async (req, res) => {
 
     await BudgetService.deleteBudgetLine(id);
 
-    // Sync R14 après suppression
+    // Sync auto lines après suppression
     if (eventId) {
-      await BudgetLine.syncFsdieSubvention(eventId);
+      await BudgetLine.syncAutoLines(eventId);
     }
 
     res.status(200).json({ success: true, message: 'Budget line deleted successfully' });
@@ -124,9 +124,9 @@ exports.updateValidationStatus = async (req, res) => {
 
     await BudgetService.updateStatus(id, status);
 
-    // Sync R14 : un REFUSE/APPROUVE change le total éligible
+    // Sync auto lines : un REFUSE/APPROUVE change le total éligible ou le total global
     if (eventId) {
-      await BudgetLine.syncFsdieSubvention(eventId);
+      await BudgetLine.syncAutoLines(eventId);
     }
 
     // Retourner les lignes complètes à jour
