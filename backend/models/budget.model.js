@@ -100,17 +100,13 @@ class BudgetLine {
     return true;
   }
   /**
-   * Synchronise la ligne "Subvention FSDIE" (R14) pour un événement.
-   * Calcule le total des dépenses éligibles non refusées et upsert la ligne REVENUE
-   * de catégorie 'Subvention FSDIE'.
-   * Appelé automatiquement après chaque mutation (update, delete, status).
+   * Synchronise les lignes automatiques (Subvention FSDIE et Fonds propres).
+   * Appelé automatiquement après chaque mutation.
    * @param {number} eventId
    */
-  static async syncFsdieSubvention(eventId) {
-    // R14 : Subvention FSDIE = somme des dépenses éligibles non refusées
-    //   forecast_amount = somme des FORECAST des lignes éligibles
-    //   actual_amount   = somme des ACTUAL des lignes éligibles (NULL si aucun renseigné)
-    const [rows] = await db.execute(`
+  static async syncAutoLines(eventId) {
+    // 1. SYNCHRONISER LA SUBVENTION FSDIE
+    const [fsdieRows] = await db.execute(`
       SELECT
         SUM(forecast_amount)                                      AS total_forecast,
         SUM(actual_amount)                                        AS total_actual,
@@ -120,29 +116,83 @@ class BudgetLine {
         AND validation_status != 'REFUSE'
     `, [eventId]);
 
-    const totalForecast = Number(rows[0]?.total_forecast) || 0;
-    const hasActual     = Number(rows[0]?.has_actual_count) > 0;
-    const totalActual   = hasActual ? (Number(rows[0]?.total_actual) || 0) : null;
+    const fsdieForecast = Number(fsdieRows[0]?.total_forecast) || 0;
+    const fsdieHasActual = Number(fsdieRows[0]?.has_actual_count) > 0;
+    const fsdieActual = fsdieHasActual ? (Number(fsdieRows[0]?.total_actual) || 0) : null;
 
-    // 2. Upsert la ligne Subvention FSDIE
-    const [existing] = await db.execute(`
+    const [existingFsdie] = await db.execute(`
       SELECT id FROM budget_lines
       WHERE event_id = ? AND type = 'REVENUE' AND category = 'Subvention FSDIE'
       LIMIT 1
     `, [eventId]);
 
-    if (existing.length > 0) {
+    if (existingFsdie.length > 0) {
       await db.execute(`
         UPDATE budget_lines
         SET forecast_amount = ?, actual_amount = ?, updated_at = NOW()
         WHERE id = ?
-      `, [totalForecast, totalActual, existing[0].id]);
-    } else if (totalForecast > 0) {
+      `, [fsdieForecast, fsdieActual, existingFsdie[0].id]);
+    } else if (fsdieForecast > 0) {
       await db.execute(`
         INSERT INTO budget_lines
           (event_id, type, category, label, forecast_amount, actual_amount, is_fsdie_eligible, validation_status, created_by)
         VALUES (?, 'REVENUE', 'Subvention FSDIE', 'Subvention FSDIE envisagée (R14)', ?, ?, 0, 'SOUMIS', 1)
-      `, [eventId, totalForecast, totalActual]);
+      `, [eventId, fsdieForecast, fsdieActual]);
+    }
+
+    // 2. SYNCHRONISER LES FONDS PROPRES (Équilibrage)
+    const [expenseRows] = await db.execute(`
+      SELECT
+        SUM(forecast_amount) AS total_forecast,
+        SUM(actual_amount) AS total_actual,
+        COUNT(CASE WHEN actual_amount IS NOT NULL THEN 1 END) AS has_actual_count
+      FROM budget_lines
+      WHERE event_id = ? AND type = 'EXPENSE'
+    `, [eventId]);
+
+    const totalExpForecast = Number(expenseRows[0]?.total_forecast) || 0;
+    const hasExpActual = Number(expenseRows[0]?.has_actual_count) > 0;
+    const totalExpActual = hasExpActual ? (Number(expenseRows[0]?.total_actual) || 0) : null;
+
+    const [revenueRows] = await db.execute(`
+      SELECT
+        SUM(forecast_amount) AS total_forecast,
+        SUM(actual_amount) AS total_actual,
+        COUNT(CASE WHEN actual_amount IS NOT NULL THEN 1 END) AS has_actual_count
+      FROM budget_lines
+      WHERE event_id = ? AND type = 'REVENUE' AND category != 'Fonds propres'
+    `, [eventId]);
+
+    const totalRevForecast = Number(revenueRows[0]?.total_forecast) || 0;
+    const hasRevActual = Number(revenueRows[0]?.has_actual_count) > 0;
+    const totalRevActual = hasRevActual ? (Number(revenueRows[0]?.total_actual) || 0) : null;
+
+    const fpForecast = Math.max(0, totalExpForecast - totalRevForecast);
+    let fpActual = null;
+    if (hasExpActual || hasRevActual) {
+       const eActual = totalExpActual || 0;
+       const rActual = totalRevActual || 0;
+       fpActual = Math.max(0, eActual - rActual);
+    }
+
+    const [existingFp] = await db.execute(`
+      SELECT id FROM budget_lines
+      WHERE event_id = ? AND type = 'REVENUE' AND category = 'Fonds propres'
+      LIMIT 1
+    `, [eventId]);
+
+    if (existingFp.length > 0) {
+      await db.execute(`
+        UPDATE budget_lines
+        SET forecast_amount = ?, actual_amount = ?, updated_at = NOW()
+        WHERE id = ?
+      `, [fpForecast, fpActual, existingFp[0].id]);
+    } else if (fpForecast > 0 || (fpActual !== null && fpActual > 0)) {
+      await db.execute(`
+        INSERT INTO budget_lines
+          (event_id, type, category, label, forecast_amount, actual_amount, is_fsdie_eligible, validation_status, created_by)
+        VALUES (?, 'REVENUE', 'Fonds propres', 'Apport de l\\'association', ?, ?, 0, 'APPROUVE', 1)
+      `, [eventId, fpForecast, fpActual]);
     }
   }
 }
