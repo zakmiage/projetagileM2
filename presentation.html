@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Présentation — Gestion d'événements associatifs</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;gap:2px;padding:20px}
+.slide{width:297mm;height:210mm;background:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page}
+
+/* BARRE LATÉRALE */
+.slide::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#1a1a2e,#4f46e5)}
+
+/* HEADER COMMUN */
+.slide-header{padding:28px 48px 0 52px;display:flex;justify-content:space-between;align-items:flex-start}
+.slide-num{font-size:8pt;font-weight:600;color:#c0c0c0;letter-spacing:1px;text-transform:uppercase}
+.slide-tag{font-size:8pt;color:#888;letter-spacing:0.5px}
+
+/* CONTENU */
+.slide-body{flex:1;padding:18px 48px 20px 52px;display:flex;flex-direction:column;justify-content:center}
+
+/* SLIDE 1 */
+.s1-title{font-size:26pt;font-weight:700;color:#0f0f1a;line-height:1.15;margin-bottom:6px;letter-spacing:-0.5px}
+.s1-sub{font-size:10pt;color:#666;margin-bottom:28px;font-weight:400}
+.s1-team{font-size:8.5pt;color:#888;margin-bottom:24px}
+.problem-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.problem-list li{display:flex;align-items:flex-start;gap:12px;font-size:10.5pt;color:#333}
+.problem-list li .icon{width:26px;height:26px;border-radius:6px;background:#f0f0ff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.answer{margin-top:20px;font-size:10pt;font-weight:600;color:#4f46e5;border-left:3px solid #4f46e5;padding-left:12px}
+
+/* SLIDE 2 */
+.s2-title{font-size:18pt;font-weight:700;color:#0f0f1a;margin-bottom:20px}
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1}
+.col-title{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4f46e5;margin-bottom:10px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.feat-card{background:#f8f8ff;border:1px solid #e8e8f0;border-radius:8px;padding:10px 12px}
+.feat-card .icon{font-size:16px;margin-bottom:5px}
+.feat-card .name{font-size:9pt;font-weight:600;color:#1a1a2e;margin-bottom:2px}
+.feat-card .desc{font-size:7.5pt;color:#666;line-height:1.4}
+.stack-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.stack-list li{font-size:9pt;color:#333;display:flex;align-items:center;gap:8px}
+.stack-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:#4f46e5;flex-shrink:0}
+.orga-block{margin-top:16px;padding:10px 12px;background:#f0f4ff;border-radius:8px;border-left:3px solid #4f46e5}
+.orga-block .orga-title{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4f46e5;margin-bottom:6px}
+.orga-block ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+.orga-block li{font-size:8.5pt;color:#333}
+
+/* SLIDE 3 */
+.slide.dark{background:#0f0f1a}
+.slide.dark::before{background:linear-gradient(180deg,#4f46e5,#7c3aed)}
+.s3-label{font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#4f46e5;margin-bottom:16px}
+.s3-title{font-size:34pt;font-weight:700;color:#fff;line-height:1.1;margin-bottom:28px}
+.demo-plan{display:flex;gap:16px}
+.demo-step{flex:1;background:rgba(79,70,229,.15);border:1px solid rgba(79,70,229,.3);border-radius:10px;padding:14px 16px}
+.demo-step .num{font-size:8pt;font-weight:700;color:#818cf8;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.demo-step .label{font-size:11pt;font-weight:600;color:#fff;margin-bottom:4px}
+.demo-step .timing{font-size:8pt;color:#94a3b8}
+
+/* FOOTER COMMUN */
+.slide-footer{padding:0 48px 14px 52px;display:flex;justify-content:space-between;align-items:center}
+.footer-left{font-size:7pt;color:#bbb;letter-spacing:0.3px}
+.footer-dot{width:4px;height:4px;border-radius:50%;background:#4f46e5}
+.footer-right{font-size:7pt;color:#bbb}
+
+/* BOUTON EXPORT */
+.export-btn{position:fixed;bottom:24px;right:24px;background:#4f46e5;color:#fff;font-family:'Inter',sans-serif;font-size:9pt;font-weight:600;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;box-shadow:0 4px 12px rgba(79,70,229,.4);z-index:999;transition:background .15s}
+.export-btn:hover{background:#4338ca}
+.export-btn:disabled{background:#888;cursor:not-allowed}
+
+@media print{
+  body{background:#fff;padding:0;gap:0}
+  .export-btn{display:none!important}
+  .slide{page-break-after:always;break-after:page}
+}
+@page{size:A4 landscape;margin:0}
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1 : CONTEXTE & PROBLÈME -->
+<div class="slide">
+  <div class="slide-header">
+    <span class="slide-num">01 / 03</span>
+    <span class="slide-tag">M2 MIAGE · Méthodes agiles pour le développement logiciel</span>
+  </div>
+  <div class="slide-body">
+    <div class="s1-title">Application de gestion<br>d'événements associatifs</div>
+    <div class="s1-sub">Projet agile · Avril 2026</div>
+    <div class="s1-team">Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya · Oumeyma Soukah · Zakaria Zemmari · Youba Tiab</div>
+    <ul class="problem-list">
+      <li><span class="icon">📊</span>Budget suivi sur Excel partagé entre plusieurs personnes : erreurs, versions qui divergent</li>
+      <li><span class="icon">📅</span>Inscriptions bénévoles gérées par messages privés : créneaux non suivis, conflits d'horaires</li>
+      <li><span class="icon">📄</span>Dossiers FSDIE rédigés à la main à chaque événement : chronophage et source d'oublis</li>
+    </ul>
+    <div class="answer">On a construit un outil web pour centraliser tout ça.</div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-left">Application de gestion d'événements associatifs</span>
+    <div class="footer-dot"></div>
+    <span class="footer-right">Groupe 5</span>
+  </div>
+</div>
+
+<!-- SLIDE 2 : CE QU'ON A CONSTRUIT -->
+<div class="slide">
+  <div class="slide-header">
+    <span class="slide-num">02 / 03</span>
+    <span class="slide-tag">M2 MIAGE · Méthodes agiles pour le développement logiciel</span>
+  </div>
+  <div class="slide-body">
+    <div class="s2-title">4 modules, 1 stack</div>
+    <div class="two-cols">
+      <div>
+        <div class="col-title">Fonctionnalités</div>
+        <div class="feat-grid">
+          <div class="feat-card">
+            <div class="icon">💰</div>
+            <div class="name">Budget & FSDIE</div>
+            <div class="desc">Suivi prévisionnel/réel, calcul auto de la subvention, export PDF avec pièces jointes</div>
+          </div>
+          <div class="feat-card">
+            <div class="icon">📅</div>
+            <div class="name">Planning bénévoles</div>
+            <div class="desc">Vue agenda 24h, anti-conflit horaire, inscription en un clic</div>
+          </div>
+          <div class="feat-card">
+            <div class="icon">🗂️</div>
+            <div class="name">Kanban</div>
+            <div class="desc">Tâches par événement, colonnes drag & drop, persistance immédiate</div>
+          </div>
+          <div class="feat-card">
+            <div class="icon">👥</div>
+            <div class="name">Membres</div>
+            <div class="desc">Annuaire, inscriptions aux événements, gestion des rôles</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="col-title">Stack technique</div>
+        <ul class="stack-list">
+          <li>Angular 17 + Angular CDK (drag & drop)</li>
+          <li>Node.js / Express.js — API REST</li>
+          <li>MySQL 8 — base de données</li>
+          <li>ExcelJS + pdf-lib — exports financiers</li>
+          <li>Python / xhtml2pdf — génération de pièces jointes</li>
+        </ul>
+        <div class="orga-block">
+          <div class="orga-title">Organisation</div>
+          <ul>
+            <li>Sprints de 2 semaines, backlog GitHub</li>
+            <li>Git Flow — branche par dev, PR → main</li>
+            <li>42 tests d'intégration backend</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-left">Application de gestion d'événements associatifs</span>
+    <div class="footer-dot"></div>
+    <span class="footer-right">Groupe 5</span>
+  </div>
+</div>
+
+<!-- SLIDE 3 : TRANSITION DÉMO -->
+<div class="slide dark">
+  <div class="slide-header">
+    <span class="slide-num" style="color:#555">03 / 03</span>
+    <span class="slide-tag" style="color:#555">M2 MIAGE · Méthodes agiles pour le développement logiciel</span>
+  </div>
+  <div class="slide-body">
+    <div class="s3-label">Place à la</div>
+    <div class="s3-title">Démonstration</div>
+    <div class="demo-plan">
+      <div class="demo-step">
+        <div class="num">01</div>
+        <div class="label">Budget & FSDIE</div>
+        <div class="timing">~2 min 30</div>
+      </div>
+      <div class="demo-step">
+        <div class="num">02</div>
+        <div class="label">Planning bénévoles</div>
+        <div class="timing">~2 min</div>
+      </div>
+      <div class="demo-step">
+        <div class="num">03</div>
+        <div class="label">Kanban</div>
+        <div class="timing">~1 min 30</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-left" style="color:#444">Application de gestion d'événements associatifs</span>
+    <div class="footer-dot"></div>
+    <span class="footer-right" style="color:#444">Groupe 5</span>
+  </div>
+</div>
+
+<!-- BOUTON EXPORT -->
+<button class="export-btn" id="exportBtn" onclick="exportPDF()">⬇ Exporter en PDF</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+async function exportPDF() {
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true;
+  btn.textContent = 'Génération...';
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const slides = document.querySelectorAll('.slide');
+
+  for (let i = 0; i < slides.length; i++) {
+    const canvas = await html2canvas(slides[i], { scale: 2, useCORS: true, backgroundColor: null });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    if (i > 0) pdf.addPage();
+    pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+  }
+
+  pdf.save('presentation-kubik.pdf');
+  btn.disabled = false;
+  btn.textContent = '⬇ Exporter en PDF';
+}
+</script>
+</body>
+</html>
