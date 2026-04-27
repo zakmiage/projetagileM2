@@ -24,6 +24,7 @@ export class EventDetailComponent implements OnInit {
   error?: string;
   activeTab: 'budget' | 'participants' = 'budget';
   isEditModalOpen = false;
+  isDeleteModalOpen = false;
   isSaving = false;
   editForm: {
     name: string;
@@ -90,11 +91,16 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
-  deleteEvent(): void {
-    if (!this.event) return;
+  openDeleteModal(): void {
+    this.isDeleteModalOpen = true;
+  }
 
-    const confirmed = window.confirm('Supprimer cet événement ? Cette action est irréversible.');
-    if (!confirmed) return;
+  cancelDeleteEvent(): void {
+    this.isDeleteModalOpen = false;
+  }
+
+  confirmDeleteEvent(): void {
+    if (!this.event) return;
 
     this.eventService.deleteEvent(this.event.id).subscribe({
       next: () => {
@@ -102,6 +108,7 @@ export class EventDetailComponent implements OnInit {
       },
       error: () => {
         this.error = 'Impossible de supprimer cet événement.';
+        this.isDeleteModalOpen = false;
         this.cdr.detectChanges();
       }
     });
