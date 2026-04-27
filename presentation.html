@@ -4,178 +4,222 @@
 <meta charset="UTF-8">
 <title>Présentation — Gestion d'événements associatifs</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#111;display:flex;flex-direction:column;align-items:center;gap:3px;padding:16px;font-family:'Inter',sans-serif}
-.slide{width:297mm;height:210mm;background:#070710;position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
-.pg{position:absolute;bottom:20px;right:28px;font-size:7.5pt;color:#333;letter-spacing:1px}
-.tag{position:absolute;top:20px;right:28px;font-size:7pt;color:#2a2a3a;letter-spacing:.5px;text-transform:uppercase}
+body{background:#0a0a0a;display:flex;flex-direction:column;align-items:center;gap:4px;padding:20px;font-family:'Inter',sans-serif}
 
-/* ── SLIDE 1 ── */
-.s1{justify-content:center;padding:0 72px}
-.s1-eyebrow{font-size:8pt;text-transform:uppercase;letter-spacing:3px;color:#6366f1;margin-bottom:24px}
-.s1-headline{font-family:'Syne',sans-serif;font-size:36pt;font-weight:800;color:#fff;line-height:1.1;margin-bottom:36px;max-width:480px}
-.s1-headline em{color:#6366f1;font-style:normal}
-.chaos{display:flex;gap:32px}
-.chaos-item{display:flex;align-items:center;gap:10px}
-.chaos-item .ic{font-size:18px;opacity:.7}
-.chaos-item span{font-size:9pt;color:#444;letter-spacing:.3px}
-.s1-deco{position:absolute;right:0;top:0;bottom:0;width:220px;background:linear-gradient(135deg,#6366f1 0%,#4f46e5 40%,#1e1b4b 100%);opacity:.12}
-.s1-deco2{position:absolute;right:60px;top:50%;transform:translateY(-50%);width:180px;height:180px;border-radius:50%;border:1px solid #6366f1;opacity:.08}
-.s1-deco3{position:absolute;right:30px;top:50%;transform:translateY(-50%);width:280px;height:280px;border-radius:50%;border:1px solid #6366f1;opacity:.04}
+.slide{width:297mm;height:210mm;position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
 
-/* ── SLIDE 2 ── */
-.s2{flex-direction:row}
-.s2-left{width:42%;padding:40px 36px 40px 52px;display:flex;flex-direction:column;justify-content:center;gap:0;border-right:1px solid #1a1a2e}
-.s2-eyebrow{font-size:7.5pt;text-transform:uppercase;letter-spacing:3px;color:#6366f1;margin-bottom:18px}
-.s2-title{font-family:'Syne',sans-serif;font-size:22pt;font-weight:800;color:#fff;line-height:1.1;margin-bottom:24px}
-.modules{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
-.mod{display:flex;align-items:center;gap:12px}
-.mod-dot{width:6px;height:6px;border-radius:50%;background:#6366f1;flex-shrink:0}
-.mod-name{font-size:10pt;color:#ccc;font-weight:500}
-.mod-sub{font-size:8pt;color:#444;margin-left:auto}
-.stack-line{font-size:8pt;color:#333;letter-spacing:.5px;border-top:1px solid #1a1a2e;padding-top:16px}
-.stack-line strong{color:#555}
-.s2-right{flex:1;padding:28px 32px;display:flex;align-items:center;justify-content:center;position:relative}
-/* APP MOCKUP */
-.mockup{width:100%;height:145px;background:#0d0d1a;border-radius:8px;border:1px solid #1e1e35;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.6)}
-.mock-bar{height:28px;background:#0a0a18;border-bottom:1px solid #1a1a30;display:flex;align-items:center;gap:6px;padding:0 12px}
-.mock-dot{width:7px;height:7px;border-radius:50%}
-.mock-body{display:flex;height:calc(100% - 28px)}
-.mock-nav{width:52px;background:#08080f;border-right:1px solid #141428;display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:8px}
-.mock-nav-item{width:26px;height:4px;border-radius:2px}
-.mock-content{flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
-.mock-row{height:10px;border-radius:2px;display:flex;align-items:center;gap:6px}
-.mock-cell{border-radius:1px}
-.mock-badge{border-radius:8px;font-size:0}
+/* ────────────────────────────────────────────
+   SLIDE 1 — dark, phrase choc, rien d'autre
+──────────────────────────────────────────── */
+.s1{background:#06060e;justify-content:center;padding:0 80px}
+.s1-kicker{font-size:8pt;letter-spacing:3px;text-transform:uppercase;color:#4f46e5;margin-bottom:20px}
+.s1-h{font-family:'Syne',sans-serif;font-size:42pt;font-weight:800;color:#fff;line-height:1.05;margin-bottom:40px;max-width:500px}
+.s1-h em{color:#4f46e5;font-style:normal}
+.s1-chaos{display:flex;gap:40px}
+.chaos-item{font-size:9pt;color:#333;display:flex;align-items:center;gap:8px}
+.chaos-item .e{font-size:16px;opacity:.6}
+/* déco géométrique droite */
+.s1-geo{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:300px;height:300px;border:1px solid #4f46e5;border-radius:50%;opacity:.07}
+.s1-geo2{position:absolute;right:30px;top:50%;transform:translateY(-50%);width:180px;height:180px;border:1px solid #4f46e5;border-radius:50%;opacity:.06}
+.s1-geo3{position:absolute;right:80px;top:50%;transform:translateY(-50%);width:80px;height:80px;background:#4f46e5;border-radius:50%;opacity:.06}
 
-/* ── SLIDE 3 ── */
-.s3{justify-content:center;align-items:center;text-align:center;background:#040408}
-.s3-word{font-family:'Syne',sans-serif;font-size:80pt;font-weight:800;color:#fff;letter-spacing:-2px;line-height:1}
-.s3-word span{color:#6366f1}
-.pills{display:flex;gap:12px;margin-top:28px}
-.pill{padding:7px 18px;border-radius:20px;border:1px solid #2a2a4a;font-size:8.5pt;color:#666;letter-spacing:.3px}
+/* ────────────────────────────────────────────
+   SLIDE 2 — split : liste gauche + mockup app
+──────────────────────────────────────────── */
+.s2{background:#06060e;flex-direction:row}
+.s2-left{width:38%;padding:44px 32px 44px 52px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid #111}
+.s2-kicker{font-size:7.5pt;letter-spacing:3px;text-transform:uppercase;color:#4f46e5;margin-bottom:16px}
+.s2-h{font-family:'Syne',sans-serif;font-size:21pt;font-weight:800;color:#fff;line-height:1.1;margin-bottom:26px}
+.mods{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.mod{display:flex;align-items:baseline;gap:10px}
+.mod-n{font-size:10.5pt;color:#ccc;font-weight:500}
+.mod-d{font-size:8pt;color:#333;margin-left:auto}
+.stack{font-size:8pt;color:#2a2a3a;padding-top:20px;border-top:1px solid #111;letter-spacing:.3px}
+.stack b{color:#3a3a5a}
 
-/* EXPORT BTN */
-.export-btn{position:fixed;bottom:20px;right:20px;background:#6366f1;color:#fff;font-family:'Inter',sans-serif;font-size:9pt;font-weight:600;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;z-index:999;box-shadow:0 4px 16px rgba(99,102,241,.4)}
-.export-btn:hover{background:#4f46e5}
-.export-btn:disabled{background:#444}
-@media print{body{background:#000;padding:0;gap:0}.export-btn{display:none!important}}
-@page{size:A4 landscape;margin:0}
+.s2-right{flex:1;display:flex;align-items:center;justify-content:center;padding:20px 24px;background:#0a0a12}
+
+/* ── APP MOCKUP (reproduit l'UI réelle) ── */
+.app{width:100%;height:162px;background:#f4f6f9;border-radius:10px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;font-family:'Inter',sans-serif}
+/* sidebar teal */
+.app-nav{width:44px;background:#1e6b7a;display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:7px}
+.nav-logo{width:24px;height:24px;background:rgba(255,255,255,.15);border-radius:5px;margin-bottom:4px}
+.nav-i{width:20px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
+.nav-i.active{background:rgba(255,255,255,.7)}
+/* contenu principal */
+.app-main{flex:1;display:flex;flex-direction:column}
+.app-topbar{height:24px;background:#fff;border-bottom:1px solid #e8ecf0;display:flex;align-items:center;padding:0 12px;gap:8px}
+.app-title{font-size:7pt;font-weight:600;color:#1a1a2e}
+.tab-bar{display:flex;gap:0;padding:0 12px;background:#fff;border-bottom:1px solid #e8ecf0}
+.tab{font-size:6.5pt;padding:5px 8px;color:#888;cursor:default}
+.tab.active{color:#4f46e5;border-bottom:2px solid #4f46e5;font-weight:600}
+.app-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px;background:#f4f6f9}
+/* carte budget */
+.bcard{background:#fff;border-radius:6px;padding:7px 9px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.bcard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.bcard-label{font-size:7pt;font-weight:600;color:#333;display:flex;align-items:center;gap:4px}
+.bcard-label .dot{width:7px;height:7px;border-radius:50%}
+.bcard-total{font-size:8pt;font-weight:700}
+.bline{display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f0f0f5;gap:6px}
+.bl-cat{font-size:6pt;color:#888;width:50px;flex-shrink:0}
+.bl-lib{font-size:6.5pt;color:#333;flex:1}
+.bl-amt{font-size:7pt;font-weight:600;color:#333;margin-left:auto}
+.bl-badges{display:flex;gap:3px;margin-top:2px}
+.badge{font-size:5pt;padding:1px 4px;border-radius:3px;font-weight:600}
+.badge.ok{background:#d1fae5;color:#059669}
+.badge.sub{background:#fef3c7;color:#d97706}
+.badge.fsdie{background:#ede9fe;color:#7c3aed}
 </style>
 </head>
 <body>
 
 <!-- ── SLIDE 1 ── -->
 <div class="slide s1">
-  <div class="s1-deco"></div>
-  <div class="s1-deco2"></div>
-  <div class="s1-deco3"></div>
-  <div class="tag">M2 MIAGE · Méthodes agiles · Groupe 5</div>
-  <div class="s1-eyebrow">Projet agile · Avril 2026</div>
-  <div class="s1-headline">Gérer un événement associatif.<br><em>Sans les outils pour ça.</em></div>
-  <div class="chaos">
-    <div class="chaos-item"><span class="ic">📊</span><span>Budget sur Excel partagé</span></div>
-    <div class="chaos-item"><span class="ic">💬</span><span>Créneaux par messages</span></div>
-    <div class="chaos-item"><span class="ic">📄</span><span>FSDIE à la main</span></div>
+  <div class="s1-geo"></div><div class="s1-geo2"></div><div class="s1-geo3"></div>
+  <div style="position:absolute;top:18px;right:26px;font-size:7pt;color:#1a1a2e;letter-spacing:.5px">M2 MIAGE · Méthodes agiles · Groupe 5</div>
+  <div class="s1-kicker">Projet agile · Avril 2026</div>
+  <div class="s1-h">Gérer un événement associatif.<br><em>Sans les outils<br>pour ça.</em></div>
+  <div class="s1-chaos">
+    <div class="chaos-item"><span class="e">📊</span> Budget sur Excel partagé</div>
+    <div class="chaos-item"><span class="e">💬</span> Créneaux par messages</div>
+    <div class="chaos-item"><span class="e">📄</span> FSDIE à la main</div>
   </div>
-  <div class="pg">01 / 03</div>
+  <div style="position:absolute;bottom:18px;right:26px;font-size:7pt;color:#1a1a2e">01 / 03</div>
 </div>
 
 <!-- ── SLIDE 2 ── -->
 <div class="slide s2">
-  <div class="tag">M2 MIAGE · Méthodes agiles · Groupe 5</div>
+  <div style="position:absolute;top:18px;right:26px;font-size:7pt;color:#1a1a2e;letter-spacing:.5px">M2 MIAGE · Méthodes agiles · Groupe 5</div>
   <div class="s2-left">
-    <div class="s2-eyebrow">La réponse</div>
-    <div class="s2-title">Une plateforme web,<br>4 modules.</div>
-    <div class="modules">
-      <div class="mod"><div class="mod-dot"></div><div class="mod-name">Budget & FSDIE</div><div class="mod-sub">export PDF auto</div></div>
-      <div class="mod"><div class="mod-dot"></div><div class="mod-name">Planning bénévoles</div><div class="mod-sub">vue agenda 24h</div></div>
-      <div class="mod"><div class="mod-dot"></div><div class="mod-name">Kanban</div><div class="mod-sub">drag & drop</div></div>
-      <div class="mod"><div class="mod-dot"></div><div class="mod-name">Membres & inscriptions</div><div class="mod-sub">gestion des rôles</div></div>
+    <div class="s2-kicker">La réponse</div>
+    <div class="s2-h">Une plateforme,<br>4 modules.</div>
+    <div class="mods">
+      <div class="mod"><div class="mod-n">💰 Budget & FSDIE</div><div class="mod-d">export PDF auto</div></div>
+      <div class="mod"><div class="mod-n">📅 Planning bénévoles</div><div class="mod-d">agenda 24h</div></div>
+      <div class="mod"><div class="mod-n">🗂️ Kanban</div><div class="mod-d">drag & drop</div></div>
+      <div class="mod"><div class="mod-n">👥 Membres</div><div class="mod-d">rôles & inscriptions</div></div>
     </div>
-    <div class="stack-line"><strong>Angular</strong> · Express.js · MySQL · Git Flow · 42 tests</div>
+    <div class="stack"><b>Angular</b> · Express.js · MySQL · Git Flow</div>
   </div>
   <div class="s2-right">
-    <div class="mockup">
-      <div class="mock-bar">
-        <div class="mock-dot" style="background:#ff5f57"></div>
-        <div class="mock-dot" style="background:#febc2e"></div>
-        <div class="mock-dot" style="background:#28c840"></div>
+    <!-- Mockup fidèle à l'UI réelle -->
+    <div class="app">
+      <div class="app-nav">
+        <div class="nav-logo"></div>
+        <div class="nav-i"></div>
+        <div class="nav-i active"></div>
+        <div class="nav-i"></div>
+        <div class="nav-i"></div>
       </div>
-      <div class="mock-body">
-        <div class="mock-nav">
-          <div class="mock-nav-item" style="background:#6366f1;opacity:.7"></div>
-          <div class="mock-nav-item" style="background:#2a2a40"></div>
-          <div class="mock-nav-item" style="background:#2a2a40"></div>
-          <div class="mock-nav-item" style="background:#2a2a40"></div>
+      <div class="app-main">
+        <div class="app-topbar">
+          <div class="app-title">Week-end ski Alpes 2027</div>
+          <div style="margin-left:auto;display:flex;gap:5px">
+            <div style="width:32px;height:12px;background:#f0f0f5;border-radius:3px;border:1px solid #e0e0ea"></div>
+            <div style="width:32px;height:12px;background:#4f46e5;border-radius:3px;opacity:.8"></div>
+          </div>
         </div>
-        <div class="mock-content">
-          <div class="mock-row" style="margin-bottom:4px">
-            <div class="mock-cell" style="width:80px;height:10px;background:#1e1e35;border-radius:2px"></div>
-            <div class="mock-cell" style="width:50px;height:10px;background:#6366f1;border-radius:2px;margin-left:auto;opacity:.8"></div>
+        <div class="tab-bar">
+          <div class="tab active">Budget & FSDIE</div>
+          <div class="tab">Participants</div>
+          <div class="tab">Créneaux</div>
+          <div class="tab">Kanban</div>
+        </div>
+        <div class="app-body">
+          <!-- Dépenses -->
+          <div class="bcard">
+            <div class="bcard-head">
+              <div class="bcard-label"><div class="dot" style="background:#ef4444"></div> Dépenses</div>
+              <div class="bcard-total" style="color:#ef4444">- 18 403 €</div>
+            </div>
+            <div class="bline">
+              <div class="bl-cat">Logistique</div>
+              <div>
+                <div class="bl-lib">Hébergement (chalet)</div>
+                <div class="bl-badges"><span class="badge fsdie">FSDIE</span><span class="badge ok">Approuvé</span></div>
+              </div>
+              <div class="bl-amt">5 555 €</div>
+            </div>
+            <div class="bline">
+              <div class="bl-cat">Logistique</div>
+              <div>
+                <div class="bl-lib">Forfaits ski (40 pax)</div>
+                <div class="bl-badges"><span class="badge fsdie">FSDIE</span><span class="badge ok">Approuvé</span></div>
+              </div>
+              <div class="bl-amt">8 888 €</div>
+            </div>
+            <div class="bline" style="border:none">
+              <div class="bl-cat">Logistique</div>
+              <div>
+                <div class="bl-lib">Location de matériel</div>
+                <div class="bl-badges"><span class="badge sub">Soumis</span></div>
+              </div>
+              <div class="bl-amt">3 960 €</div>
+            </div>
           </div>
-          <div style="display:flex;gap:4px;margin-bottom:6px">
-            <div style="flex:1;height:24px;background:#0f0f20;border-radius:4px;border:1px solid #1a1a30;display:flex;align-items:center;padding:0 8px"><div style="width:60%;height:4px;background:#1e1e35;border-radius:2px"></div></div>
-            <div style="flex:1;height:24px;background:#0f0f20;border-radius:4px;border:1px solid #1a1a30;display:flex;align-items:center;padding:0 8px"><div style="width:40%;height:4px;background:#6366f1;border-radius:2px;opacity:.5"></div></div>
-          </div>
-          <div class="mock-row" style="background:#0f0f20;height:12px;border-radius:3px;padding:0 8px;border:1px solid #1a1a30">
-            <div style="width:90px;height:3px;background:#2a2a40;border-radius:1px"></div>
-            <div style="width:40px;height:3px;background:#2a2a40;border-radius:1px;margin-left:auto"></div>
-            <div style="width:40px;height:3px;background:#2a2a40;border-radius:1px;margin-left:8px"></div>
-          </div>
-          <div class="mock-row" style="background:#0a0a18;height:12px;border-radius:3px;padding:0 8px;border:1px solid #151528">
-            <div style="width:70px;height:3px;background:#222238;border-radius:1px"></div>
-            <div style="width:35px;height:3px;background:#4ade80;border-radius:1px;margin-left:auto;opacity:.7"></div>
-            <div style="width:35px;height:3px;background:#222238;border-radius:1px;margin-left:8px"></div>
-          </div>
-          <div class="mock-row" style="background:#0f0f20;height:12px;border-radius:3px;padding:0 8px;border:1px solid #1a1a30">
-            <div style="width:80px;height:3px;background:#2a2a40;border-radius:1px"></div>
-            <div style="width:40px;height:3px;background:#f87171;border-radius:1px;margin-left:auto;opacity:.7"></div>
-            <div style="width:40px;height:3px;background:#2a2a40;border-radius:1px;margin-left:8px"></div>
-          </div>
-          <div style="margin-top:6px;padding:6px 8px;background:#0d0d1e;border-radius:4px;border:1px solid #6366f1;border-left:3px solid #6366f1;display:flex;align-items:center;gap:8px">
-            <div style="width:4px;height:4px;border-radius:50%;background:#6366f1"></div>
-            <div style="width:100px;height:3px;background:#1e1e40;border-radius:1px"></div>
-            <div style="width:50px;height:3px;background:#6366f1;border-radius:1px;margin-left:auto;opacity:.8"></div>
+          <!-- Revenus -->
+          <div class="bcard">
+            <div class="bcard-head">
+              <div class="bcard-label"><div class="dot" style="background:#10b981"></div> Revenus</div>
+              <div class="bcard-total" style="color:#10b981">+ 20 576 €</div>
+            </div>
+            <div class="bline">
+              <div class="bl-cat">Billetterie</div>
+              <div class="bl-lib">Cotisations (40 × 195€)</div>
+              <div class="bl-amt">7 800 €</div>
+            </div>
+            <div class="bline" style="border:none">
+              <div class="bl-cat">FSDIE</div>
+              <div>
+                <div class="bl-lib">Subvention FSDIE (R14)</div>
+                <div class="bl-badges"><span class="badge fsdie">Auto-calculé</span></div>
+              </div>
+              <div class="bl-amt" style="color:#7c3aed">12 776 €</div>
+            </div>
+            <div style="margin-top:8px;border:1.5px dashed #e0e0ea;border-radius:4px;padding:5px;text-align:center;font-size:6pt;color:#aaa">+ Ajouter un revenu</div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="pg">02 / 03</div>
+  <div style="position:absolute;bottom:18px;right:26px;font-size:7pt;color:#1a1a2e">02 / 03</div>
 </div>
 
 <!-- ── SLIDE 3 ── -->
-<div class="slide s3">
-  <div class="tag" style="color:#1a1a30">M2 MIAGE · Méthodes agiles · Groupe 5</div>
-  <div class="s3-word">DÉ<span>MO</span></div>
-  <div class="pills">
-    <div class="pill">💰 Budget FSDIE</div>
-    <div class="pill">📅 Planning 24h</div>
-    <div class="pill">🗂️ Kanban</div>
+<div class="slide" style="background:#03030a;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;top:18px;right:26px;font-size:7pt;color:#111;letter-spacing:.5px">M2 MIAGE · Méthodes agiles · Groupe 5</div>
+  <div style="font-family:'Syne',sans-serif;font-size:82pt;font-weight:800;color:#fff;letter-spacing:-3px;line-height:1">DÉ<span style="color:#4f46e5">MO</span></div>
+  <div style="display:flex;gap:14px;margin-top:28px">
+    <div style="padding:8px 18px;border:1px solid #1a1a30;border-radius:20px;font-size:8.5pt;color:#444">💰 Budget FSDIE</div>
+    <div style="padding:8px 18px;border:1px solid #1a1a30;border-radius:20px;font-size:8.5pt;color:#444">📅 Planning 24h</div>
+    <div style="padding:8px 18px;border:1px solid #1a1a30;border-radius:20px;font-size:8.5pt;color:#444">🗂️ Kanban</div>
   </div>
-  <div class="pg" style="color:#1a1a30">03 / 03</div>
+  <div style="position:absolute;bottom:18px;right:26px;font-size:7pt;color:#111">03 / 03</div>
 </div>
 
-<button class="export-btn" id="exportBtn" onclick="exportPDF()">⬇ Exporter PDF</button>
+<!-- EXPORT -->
+<button id="exportBtn" onclick="exportPDF()" style="position:fixed;bottom:20px;right:20px;background:#4f46e5;color:#fff;font-family:'Inter',sans-serif;font-size:9pt;font-weight:600;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;z-index:999;box-shadow:0 4px 16px rgba(79,70,229,.4)">⬇ Exporter PDF</button>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 async function exportPDF(){
   const btn=document.getElementById('exportBtn');
-  btn.disabled=true; btn.textContent='Génération...';
+  btn.style.display='none';
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const slides=document.querySelectorAll('.slide');
   for(let i=0;i<slides.length;i++){
-    const c=await html2canvas(slides[i],{scale:2,useCORS:true,backgroundColor:'#070710'});
+    const c=await html2canvas(slides[i],{scale:2,useCORS:true,logging:false});
     if(i>0)pdf.addPage();
     pdf.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,297,210);
   }
   pdf.save('presentation.pdf');
-  btn.disabled=false; btn.textContent='⬇ Exporter PDF';
+  btn.style.display='';
 }
 </script>
+<style>@media print{body{background:#000;padding:0;gap:0}#exportBtn{display:none!important}}@page{size:A4 landscape;margin:0}</style>
 </body>
 </html>
