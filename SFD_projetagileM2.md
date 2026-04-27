@@ -153,6 +153,45 @@ L'application est une plateforme web de gestion interne pour association étudia
 
 ---
 
+## 6bis. Module Créneaux de Staffing (Shifts)
+
+> Accessible via l'onglet "Créneaux (Shifts)" de la page détail d'un événement.
+
+### 6bis.1 Vue Planning (défaut)
+
+- **Grille horaire 24h complète** (00:00 → 23:59) — couvre soirées, nuits et rangements
+- **1 colonne par jour** contenant des shifts, header sticky avec date et badge compteur
+- **Blocs positionnés et dimensionnés** précisément selon les horaires réels (px)
+- **Gestion des chevauchements** : 2 shifts simultanés → affichage côte à côte
+- **Couleur dynamique** selon taux de remplissage : vert <70%, orange 70-99%, rouge 100%
+- **Ligne rouge "maintenant"** visible si le jour courant est affiché
+- **Scroll vertical** + colonne heures sticky à gauche
+
+### 6bis.2 Barre de statistiques
+
+- Chips : total créneaux / inscrits/capacité / % remplissage global
+- Toggle **Planning ⇔ Liste** en haut à droite
+
+### 6bis.3 Drawer latéral (détail shift)
+
+- Clic sur un bloc → panneau coulissant depuis la droite
+- Contenu : méta-infos, barre de remplissage, liste des inscrits avec avatars
+- Inscription rapide par ID membre, désinscription par croix
+- Boutons Modifier / Supprimer intégrés
+
+### 6bis.4 Création / Modification
+
+- Bouton **+ Nouveau créneau** → drawer formulaire
+- Cliquer le `+` dans un header de colonne → préremplit la date
+- Champs : libellé, début, fin (datetime sans limite d'heure), capacité
+
+### 6bis.5 Vue Liste (alternative)
+
+- Barre colorée par statut, horaires, barre de remplissage horizontale
+- Clic → ouvre le même drawer de détail
+
+---
+
 ## 5. Module Participants
 
 > Accessible via l'onglet "Participants" de la page détail d'un événement.

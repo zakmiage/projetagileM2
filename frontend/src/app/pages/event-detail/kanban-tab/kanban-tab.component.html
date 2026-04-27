@@ -28,7 +28,6 @@
 
             @for (card of col.cards; track card.id) {
               <div class="kanban-card" cdkDrag>
-                <div class="kanban-card__drag-handle" cdkDragHandle>⠿</div>
                 @if (card.label) {
                   <span class="kanban-card__label" [style.backgroundColor]="labelColor(card.label)">
                     {{ card.label }}

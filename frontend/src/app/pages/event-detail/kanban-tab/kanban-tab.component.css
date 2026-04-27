@@ -52,16 +52,14 @@
   cursor: grab;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   transition: box-shadow 0.15s;
-  position: relative;
+  user-select: none;
 }
-.kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.kanban-card.cdk-drag-preview { box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: rotate(1deg); }
-.kanban-card.cdk-drag-placeholder { opacity: 0.3; background: #e2e8f0; }
+.kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); border-color: #c7d2fe; }
+.kanban-card.cdk-drag-preview { box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: rotate(1deg); opacity: 0.95; }
+.kanban-card.cdk-drag-placeholder { opacity: 0.25; background: #e0e7ff; border: 2px dashed #6366f1; }
+.kanban-card:active { cursor: grabbing; }
 
-.kanban-card__drag-handle {
-  position: absolute; top: 0.5rem; right: 0.5rem;
-  color: #cbd5e1; cursor: grab; font-size: 1rem; line-height: 1;
-}
+
 
 .kanban-card__label {
   display: inline-block; font-size: 0.65rem; font-weight: 600;
