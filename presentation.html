@@ -4,161 +4,455 @@
 <meta charset="UTF-8">
 <title>Présentation — Gestion d'événements associatifs</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Domine:wght@400;700&family=Public+Sans:wght@300;400;500;600&display=swap');
 
-:root{
-  --bg:    oklch(0.11 0.015 210);
-  --surf:  oklch(0.16 0.015 210);
-  --line:  oklch(0.22 0.010 210);
-  --tx:    oklch(0.93 0.007 210);
-  --tx2:   oklch(0.58 0.007 210);
-  --tx3:   oklch(0.35 0.006 210);
-  --acc:   oklch(0.68 0.09  195);
+:root {
+  --bg: oklch(0.98 0.003 210);
+  --surf: oklch(0.94 0.006 210);
+  --border: oklch(0.88 0.008 210);
+  --tx: oklch(0.18 0.01 210);
+  --tx2: oklch(0.40 0.01 210);
+  --acc: oklch(0.48 0.10 210); /* Teal matching the app */
+  
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+  --space-xl: 64px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Manrope',sans-serif;background:oklch(0.06 0.010 210);display:flex;flex-direction:column;align-items:center;gap:3px;padding:20px}
-.slide{width:297mm;height:210mm;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;page-break-after:always;break-after:page;flex-shrink:0}
-.meta{position:absolute;top:20px;left:28px;font-size:6.5pt;color:var(--tx3);letter-spacing:.3px}
-.pg{position:absolute;bottom:20px;right:28px;font-size:7pt;color:var(--tx3);letter-spacing:.5px}
 
-/* ── S1 ── */
-.s1{justify-content:center}
-.s1 .inner{padding:0 56px;display:flex;flex-direction:column;justify-content:center;height:100%}
-.kicker{font-size:7.5pt;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:20px}
-.s1-h{font-family:'Bricolage Grotesque',sans-serif;font-size:36pt;font-weight:800;color:var(--tx);line-height:1.07;margin-bottom:20px;max-width:540px}
-.s1-h em{font-style:normal;color:var(--acc)}
-.s1-team{font-size:8pt;color:oklch(0.48 0.007 210);font-weight:400;margin-bottom:30px;line-height:1.9}
-.chips{display:flex;gap:10px;flex-wrap:wrap}
-.chip{padding:7px 14px;background:var(--surf);font-size:8pt;color:var(--tx2);border-radius:3px}
-.s1-rule{position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--acc);opacity:.35}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ── S2 ── */
-.s2{flex-direction:row}
-.s2-left{width:40%;padding:32px 28px 32px 44px;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg)}
-.s2-right{flex:1;background:oklch(0.15 0.016 210);display:flex;align-items:center;justify-content:center;padding:24px 28px;position:relative}
-.s2-h{font-family:'Bricolage Grotesque',sans-serif;font-size:16pt;font-weight:800;color:var(--tx);line-height:1.1;margin-bottom:22px}
-.benefits{display:flex;flex-direction:column;gap:14px}
-.b-name{font-size:9pt;font-weight:600;color:var(--tx);margin-bottom:3px}
-.b-desc{font-size:7.5pt;color:var(--tx2);font-weight:300;line-height:1.55}
-.stack{font-size:7.5pt;color:var(--tx3);padding-top:16px;border-top:1px solid var(--line);line-height:1.7}
-.stack strong{color:oklch(0.52 0.007 210)}
-/* screenshot window */
-.win{width:100%;border-radius:8px;overflow:hidden;box-shadow:0 24px 64px oklch(0 0 0 / .7),0 4px 12px oklch(0 0 0 / .45)}
-.win-bar{height:26px;background:oklch(0.94 0.004 240);display:flex;align-items:center;gap:6px;padding:0 12px}
-.dot{width:9px;height:9px;border-radius:50%}
-.win-body{overflow:hidden;height:152px}
-.win-body img{width:100%;display:block;object-fit:cover;object-position:top center;height:100%}
-.win-caption{position:absolute;bottom:12px;right:20px;font-size:6.5pt;color:var(--tx3)}
+body {
+  font-family: 'Public Sans', sans-serif;
+  background: oklch(0.90 0.005 210);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px;
+}
 
-/* ── S3 ── */
-.s3{background:oklch(0.08 0.012 210);justify-content:center}
-.s3 .inner{padding:0 56px;display:flex;flex-direction:column;justify-content:center;height:100%}
-.s3-h{font-family:'Bricolage Grotesque',sans-serif;font-size:80pt;font-weight:800;color:var(--tx);line-height:.9;letter-spacing:-2px;margin-bottom:32px}
-.s3-h em{font-style:normal;color:var(--acc)}
-.seq{display:flex;gap:12px}
-.s-item{padding:12px 20px;background:oklch(0.14 0.015 210);border-radius:4px}
-.s-item strong{display:block;font-size:10pt;color:var(--tx);font-weight:600;margin-bottom:4px}
-.s-item span{font-size:8.5pt;color:var(--tx2)}
+.slide {
+  width: 297mm;
+  height: 210mm;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  page-break-after: always;
+  break-after: page;
+  flex-shrink: 0;
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.05);
+}
 
-#eb{position:fixed;bottom:20px;right:20px;background:var(--acc);color:oklch(0.10 0.012 210);font-family:'Manrope',sans-serif;font-size:9pt;font-weight:700;padding:10px 22px;border:none;border-radius:3px;cursor:pointer;z-index:999}
-@media print{body{background:#000;padding:0;gap:0}#eb{display:none!important}}
-@page{size:A4 landscape;margin:0}
+/* Common Header/Footer Elements */
+.header {
+  position: absolute;
+  top: 40px;
+  left: 56px;
+  right: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--tx2);
+}
+
+.footer {
+  position: absolute;
+  bottom: 40px;
+  left: 56px;
+  right: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8pt;
+  color: var(--tx2);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+/* Typography */
+h1 {
+  font-family: 'Domine', serif;
+  font-size: 44pt;
+  font-weight: 700;
+  color: var(--tx);
+  line-height: 1.1;
+  margin-bottom: var(--space-lg);
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-family: 'Domine', serif;
+  font-size: 28pt;
+  font-weight: 700;
+  color: var(--tx);
+  line-height: 1.2;
+  margin-bottom: var(--space-lg);
+  letter-spacing: -0.5px;
+}
+
+p.lead {
+  font-size: 13pt;
+  color: var(--tx2);
+  line-height: 1.6;
+  max-width: 650px;
+  margin-bottom: var(--space-xl);
+  font-weight: 300;
+}
+
+/* S1 */
+.s1 {
+  padding: 0 56px;
+  justify-content: center;
+}
+
+.s1-content {
+  max-width: 800px;
+  margin-top: 20px;
+}
+
+.team-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  max-width: 700px;
+}
+
+.team-member {
+  font-size: 9pt;
+  color: var(--tx);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-member::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 4px;
+  background: var(--acc);
+  border-radius: 50%;
+}
+
+/* S2 */
+.s2 {
+  padding: 120px 56px 40px; 
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 48px;
+}
+
+.s2-left {
+  flex: 1;
+  max-width: 400px;
+}
+
+.s2-right {
+  flex: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surf);
+  border-radius: 12px;
+  padding: 32px;
+  height: calc(100% - 60px);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feature-title {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.feature-desc {
+  font-size: 9.5pt;
+  line-height: 1.5;
+  color: var(--tx2);
+}
+
+.tech-stack {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 8pt;
+  color: var(--tx2);
+  line-height: 1.6;
+}
+
+/* Browser Frame */
+.browser-frame {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px oklch(0 0 0 / 0.08), 0 4px 12px oklch(0 0 0 / 0.04);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-header {
+  height: 28px;
+  background: oklch(0.98 0 0);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+}
+
+.browser-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.browser-img-wrapper {
+  width: 100%;
+  background: #fff;
+}
+
+.browser-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* S3 */
+.s3 {
+  padding: 0 56px;
+  justify-content: center;
+}
+
+.s3-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.agenda {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.agenda-item {
+  background: var(--surf);
+  padding: 32px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--acc);
+}
+
+.agenda-time {
+  font-family: 'Public Sans', sans-serif;
+  font-size: 10pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--acc);
+  margin-bottom: 16px;
+}
+
+.agenda-title {
+  font-size: 13pt;
+  font-family: 'Domine', serif;
+  font-weight: 700;
+  color: var(--tx);
+  margin-bottom: 12px;
+}
+
+.agenda-desc {
+  font-size: 9.5pt;
+  color: var(--tx2);
+  line-height: 1.5;
+}
+
+#eb {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--tx);
+  color: var(--bg);
+  font-family: 'Public Sans', sans-serif;
+  font-size: 9.5pt;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#eb:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px oklch(0 0 0 / 0.2);
+}
+
+@media print {
+  body { background: #fff; padding: 0; gap: 0; }
+  #eb { display: none !important; }
+}
+
+@page { size: A4 landscape; margin: 0; }
 </style>
 </head>
 <body>
 
-<!-- S1 -->
+<!-- SLIDE 1 -->
 <div class="slide s1">
-  <div class="s1-rule"></div>
-  <div class="meta">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
-  <div class="inner">
-    <div class="kicker">Projet agile · Avril 2026</div>
-    <div class="s1-h">Le dossier FSDIE remis<br>au dernier moment.<br><em>Comme chaque année.</em></div>
-    <div class="s1-team">
-      Dardan Rudari · Zacharie Rousselon · Arno Tome · Huzaifah Panchbhaya<br>
-      Oumeyma Soukah · Zakaria Zemmari · Youba Tiab
-    </div>
-    <div class="chips">
-      <div class="chip">Budget sur Excel partagé</div>
-      <div class="chip">Bénévoles gérés par DMs</div>
-      <div class="chip">FSDIE mis en forme à la main</div>
+  <div class="header">
+    <span>Projet Agile · Groupe 5</span>
+    <span>Soutenance M2 MIAGE</span>
+  </div>
+  
+  <div class="s1-content">
+    <h1>Gérer l'imprévu.<br>Maîtriser le budget.<br>Structurer l'équipe.</h1>
+    <p class="lead">Kubik centralise la gestion des événements associatifs. Un outil pensé par et pour les BDE, pour en finir avec les fichiers Excel éparpillés et les plannings par messages.</p>
+    
+    <div class="team-list">
+      <div class="team-member">Dardan Rudari</div>
+      <div class="team-member">Zacharie Rousselon</div>
+      <div class="team-member">Arno Tome</div>
+      <div class="team-member">Huzaifah Panchbhaya</div>
+      <div class="team-member">Oumeyma Soukah</div>
+      <div class="team-member">Zakaria Zemmari</div>
+      <div class="team-member">Youba Tiab</div>
     </div>
   </div>
-  <div class="pg">01 / 03</div>
+  
+  <div class="footer">
+    <span>Application de gestion d'événements associatifs</span>
+    <span>01 / 03</span>
+  </div>
 </div>
 
-<!-- S2 -->
+<!-- SLIDE 2 -->
 <div class="slide s2">
-  <div class="meta" style="z-index:2">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
+  <div class="header">
+    <span>Solution</span>
+    <span>Soutenance M2 MIAGE</span>
+  </div>
+  
   <div class="s2-left">
-    <div>
-      <div class="kicker">Ce que ça change</div>
-      <div class="s2-h">Un outil pensé<br>pour les BDE.</div>
-      <div class="benefits">
-        <div>
-          <div class="b-name">Dossier FSDIE en un clic</div>
-          <div class="b-desc">Généré automatiquement depuis les dépenses validées. Plus de mise en forme manuelle avant chaque dépôt.</div>
-        </div>
-        <div>
-          <div class="b-name">Budget toujours à jour</div>
-          <div class="b-desc">La subvention FSDIE se recalcule en temps réel dès qu'une dépense change. Zéro risque d'incohérence.</div>
-        </div>
-        <div>
-          <div class="b-name">Bénévoles sans conflit</div>
-          <div class="b-desc">Vue agenda 24h, inscription par créneau, protection anti-chevauchement.</div>
-        </div>
+    <h2>Une vision claire.<br>Zéro double saisie.</h2>
+    
+    <div class="feature-list">
+      <div class="feature">
+        <div class="feature-title">Génération FSDIE automatisée</div>
+        <div class="feature-desc">Fini la mise en forme manuelle. Les dossiers FSDIE sont générés en PDF avec toutes les pièces jointes, prêts à être déposés.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-title">Maîtrise budgétaire en temps réel</div>
+        <div class="feature-desc">Le budget se met à jour automatiquement. Comparez le prévisionnel au réel instantanément.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-title">Coordination fluide des équipes</div>
+        <div class="feature-desc">Un planning interactif pour répartir les bénévoles. Visualisez les créneaux et évitez les conflits d'horaires.</div>
       </div>
     </div>
-    <div class="stack"><strong>Angular · Express.js · MySQL</strong><br>42 tests · Git Flow · sprints 2 semaines</div>
+    
+    <div class="tech-stack">
+      <strong>Stack Technique :</strong> Angular 17, Express.js, MySQL.<br>
+      Méthodologie Agile, 42 tests d'intégration, Git Flow.
+    </div>
   </div>
+  
   <div class="s2-right">
-    <div class="win">
-      <div class="win-bar">
-        <div class="dot" style="background:#ff5f57"></div>
-        <div class="dot" style="background:#febc2e"></div>
-        <div class="dot" style="background:#28c840"></div>
+    <div class="browser-frame">
+      <div class="browser-header">
+        <div class="browser-dot" style="background:#ff5f57"></div>
+        <div class="browser-dot" style="background:#febc2e"></div>
+        <div class="browser-dot" style="background:#28c840"></div>
       </div>
-      <div class="win-body">
-        <img src="assets/slides/events.png" alt="Liste des événements">
+      <div class="browser-img-wrapper">
+        <img src="assets/slides/budget.png" class="browser-img" alt="Interface Budget Kubik" />
       </div>
     </div>
-    <div class="win-caption">6 événements · Interface de gestion</div>
   </div>
-  <div class="pg" style="z-index:2">02 / 03</div>
+  
+  <div class="footer">
+    <span>Application de gestion d'événements associatifs</span>
+    <span>02 / 03</span>
+  </div>
 </div>
 
-<!-- S3 -->
+<!-- SLIDE 3 -->
 <div class="slide s3">
-  <div class="meta" style="color:oklch(0.25 0.010 210)">M2 MIAGE · Méthodes agiles pour le développement logiciel · Groupe 5</div>
-  <div class="inner">
-    <div class="kicker" style="margin-bottom:16px">Place à la</div>
-    <div class="s3-h">DÉ<em>MO</em></div>
-    <div class="seq">
-      <div class="s-item"><strong>Budget &amp; FSDIE</strong><span>~2 min 30</span></div>
-      <div class="s-item"><strong>Planning bénévoles</strong><span>~2 min</span></div>
-      <div class="s-item"><strong>Kanban</strong><span>~1 min 30</span></div>
+  <div class="header">
+    <span>Démonstration</span>
+    <span>Soutenance M2 MIAGE</span>
+  </div>
+  
+  <div class="s3-content">
+    <h2>Au programme de la démonstration</h2>
+    
+    <div class="agenda">
+      <div class="agenda-item">
+        <div class="agenda-time">~ 2 min 30</div>
+        <div class="agenda-title">Budget &amp; FSDIE</div>
+        <div class="agenda-desc">Saisie de dépenses, calcul automatique des subventions et export du dossier complet en un clic.</div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">~ 2 min 00</div>
+        <div class="agenda-title">Planning Bénévoles</div>
+        <div class="agenda-desc">Création de créneaux, gestion des inscriptions et vue agenda pour une coordination sans conflit.</div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">~ 1 min 30</div>
+        <div class="agenda-title">Organisation Kanban</div>
+        <div class="agenda-desc">Gestion des tâches, suivi de l'avancement et organisation globale de l'événement.</div>
+      </div>
     </div>
   </div>
-  <div class="pg" style="color:oklch(0.25 0.010 210)">03 / 03</div>
+  
+  <div class="footer">
+    <span>Application de gestion d'événements associatifs</span>
+    <span>03 / 03</span>
+  </div>
 </div>
 
-<button id="eb" onclick="exportPDF()">⬇ Exporter PDF</button>
+<button id="eb" onclick="exportPDF()">Exporter en PDF</button>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-async function exportPDF(){
-  const btn=document.getElementById('eb');
-  btn.style.display='none';
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-  const slides=document.querySelectorAll('.slide');
-  for(let i=0;i<slides.length;i++){
-    const c=await html2canvas(slides[i],{scale:2,useCORS:true,logging:false});
-    if(i>0)pdf.addPage();
-    pdf.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,297,210);
+async function exportPDF() {
+  const btn = document.getElementById('eb');
+  btn.style.display = 'none';
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const slides = document.querySelectorAll('.slide');
+  
+  for (let i = 0; i < slides.length; i++) {
+    const canvas = await html2canvas(slides[i], { scale: 2, useCORS: true, logging: false });
+    if (i > 0) pdf.addPage();
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, 297, 210);
   }
-  pdf.save('presentation.pdf');
-  btn.style.display='';
+  
+  pdf.save('Soutenance_Kubik_Groupe5.pdf');
+  btn.style.display = '';
 }
 </script>
 </body>
