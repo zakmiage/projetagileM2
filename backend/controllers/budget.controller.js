@@ -55,13 +55,18 @@ exports.updateBudgetLine = async (req, res) => {
   try {
     const id = req.params.id;
 
-    // Récupérer event_id AVANT la mise à jour
-    const eventId = await getEventIdForLine(id);
+    // Récupérer la ligne AVANT la mise à jour (pour event_id et catégorie)
+    const [[lineRow]] = await db.execute(
+      'SELECT event_id, category, type FROM budget_lines WHERE id = ?', [id]
+    );
+    const eventId = lineRow?.event_id;
 
     const updatedLine = await BudgetService.updateBudgetLine(id, req.body);
 
-    // Sync R14 : toujours recalculer (un montant ou l'éligibilité peut avoir changé)
-    if (eventId) {
+    // Sync R14 uniquement si ce n'est PAS la ligne Subvention FSDIE elle-même
+    // (évite de recalculer inutilement et d'écraser les montants saisis manuellement)
+    const isSubventionLine = lineRow?.category === 'Subvention FSDIE' && lineRow?.type === 'REVENUE';
+    if (eventId && !isSubventionLine) {
       await BudgetLine.syncFsdieSubvention(eventId);
     }
 
