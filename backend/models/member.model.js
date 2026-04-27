@@ -65,8 +65,8 @@ class Member {
     return true;
   }
 
-  static async delete(id) {
-    await db.execute('DELETE FROM members WHERE id = ?', [id]);
+  static async delete(id, dbInstance = db) {
+    await dbInstance.execute('DELETE FROM members WHERE id = ?', [id]);
     return true;
   }
 }

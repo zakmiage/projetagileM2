@@ -38,11 +38,26 @@ Pour ne pas corrompre les données réelles lors de l'exécution des tests d'int
 
 Les tests backend se concentrent sur la structure de l'API.
 
-- **Technologie** : `Vitest` (exécuteur de tests ultra-rapide) + `Supertest` (bibliothèque permettant de simuler requêtes HTTP sans ouvrir véritablement un port TCP réseau).
+- **Technologie** : `Vitest` + `Supertest`
 - **Emplacement** : `backend/test/`
 - **Logique** :
-  - **TUF (Authentification)** : S'assure que si on requête la route de login `/api/auth/login` avec de mauvais paramètres, une erreur de type HTTP 401 est rigoureusement renvoyée au client. 
-  - **TR (Événements)** : Interroge la base de donnée `_test` via l'API pour voir si le compositing de l'ORM (ici `MySQL2`) parvient bien à envoyer la réponse JSON `200 OK` contenant de la donnée (`events`).
+  - **TUF (Authentification)** : S'assure que si on requête `/api/auth/login` avec de mauvais paramètres, une erreur HTTP 401 est renvoyée.
+  - **TR (Événements)** : Interroge la base `_test` via l'API pour valider le retour JSON `200 OK` avec données.
+
+### Fichiers de test backend
+
+| Fichier | Feature | Scénarios couverts |
+|---------|---------|-------------------|
+| `api.test.js` | Auth + Events | Login invalide (401), liste événements (200) |
+| `budget.test.js` | Budget Lines | CRUD complet, création FSDIE, mise à jour `actual_amount` |
+| `budget-status.model.test.js` | Validation FSDIE | Changement de statut `SOUMIS → APPROUVE → REFUSE` |
+| `budget-status.route.test.js` | Route PATCH status | Validation HTTP du PATCH `/budget-lines/:id/status` |
+| `event-delete.route.test.js` | Suppression événement | Cascade budget + inscriptions |
+| `member-delete.model.test.js` | Suppression membre | Modèle + intégrité BDD |
+| `member-delete.route.test.js` | Route DELETE membre | HTTP 200 + vérification suppression |
+| **`shift.test.js`** *(nouveau)* | **Shifts** | Création, inscription, anti-conflit horaire, capacité max, désinscription, suppression |
+| **`kanban.test.js`** *(nouveau)* | **Kanban** | CRUD colonnes + cartes, déplacement de carte |
+| **`export.test.js`** *(nouveau)* | **Export PDF** | Concat PJ (200/404), FSDIE PDF (200/400), événement inexistant (404), Excel (200) |
 
 ### Comment lancer ?
 ```bash
@@ -56,12 +71,12 @@ npm run test
 
 La couche Angular est documentée prioritairement via des tests asynchrones sur ses services métiers (logique sans DOM).
 
-- **Technologie** : `Vitest` (avec intégration `jsdom` pour supporter les objets globaux du navigateur comme le *localStorage*).
-- **Emplacement** : Fichiers `.spec.ts` associés aux fichiers `.ts` (Ex: `frontend/src/app/services/auth.service.spec.ts`).
+- **Technologie** : `Vitest` (avec intégration `jsdom`)
+- **Emplacement** : Fichiers `.spec.ts` associés aux fichiers `.ts`
 - **Logique** :
-  - Le test injecte manuellement l'`AuthService`. 
+  - Le test injecte manuellement l'`AuthService`.
   - On *Mock* (simule) le système de routeur (navigation).
-  - L'objectif principal de la validation de la logique de connexion (fictive/prototype) consiste à analyser ce qui se passe quand le service valide `toto@mail.com` et comment le Local Storage réagit à une déconnexion.
+  - Validation de la logique de connexion et du Local Storage lors de la déconnexion.
 
 ### Comment lancer ?
 ```bash
@@ -80,12 +95,21 @@ C'est la couche la plus exhaustive de la stratégie de tests. Elle reproduit le 
 - **Emplacement** : Répertoire `/e2e` à la racine principale du dossier `projetagileM2`.
 - **Logique** :
   - Playwright se lance et interroge automatiquement le front (`http://localhost:4200`).
-  - Le scénario de test repère le formulaire via des sélecteurs CSS ou du texte (ex. l'input "email"), saisit le texte à vitesse grand V, et clique sur le boutton Valider.
-  - Il attend ensuite via une promesse Javascript (`waitForURL`) que la page redirige de force l'utilisateur vers `/dashboard`. Si ça prend plus de 5000 millisecondes (indisponibilité ou échec du login), l'assertion saute, et l'exécuteur marque le script en erreur.
+  - Le scénario repère le formulaire via des sélecteurs CSS ou du texte, saisit les données et clique.
+  - Il attend via `waitForURL` que la page redirige. Timeout à 5000ms → assertion en erreur.
+
+### Scénarios E2E recommandés pour les nouvelles features
+
+| Scénario | Steps |
+|----------|-------|
+| **Shifts — Créer + Inscrire** | Login → event detail → onglet "Créneaux" → créer shift → inscrire membre → vérifier barre remplissage |
+| **Shifts — Anti-conflit** | Login → inscrire même membre sur 2 shifts chevauchants → vérifier toast erreur |
+| **Kanban — D&D** | Login → event detail → onglet "Kanban" → créer colonne → créer carte → drag vers autre colonne → vérifier persistance |
+| **Export PDF FSDIE** | Login → event detail → Budget → "Générer dossier FSDIE" → vérifier téléchargement |
 
 ### Comment lancer ?
 
-⚠️ **Pré-requis :** Le Frontend (port 4200) et le Backend (port 3000) **doivent** tourner de leur côté, simulant un usage de production.
+⚠️ **Pré-requis :** Le Frontend (port 4200) et le Backend (port 3000) **doivent** tourner en parallèle.
 
 ```bash
 cd e2e

@@ -7,11 +7,13 @@ import { EventService } from '../../services/event.service';
 import { Event } from '../../models/event.model';
 import { BudgetTabComponent } from './budget-tab/budget-tab.component';
 import { ParticipantsTabComponent } from './participants-tab/participants-tab.component';
+import { ShiftsTabComponent } from './shifts-tab/shifts-tab.component';
+import { KanbanTabComponent } from './kanban-tab/kanban-tab.component';
 
 @Component({
   selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BudgetTabComponent, ParticipantsTabComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BudgetTabComponent, ParticipantsTabComponent, ShiftsTabComponent, KanbanTabComponent],
   templateUrl: './event-detail.component.html'
 })
 export class EventDetailComponent implements OnInit {
@@ -22,8 +24,9 @@ export class EventDetailComponent implements OnInit {
   
   event?: Event;
   error?: string;
-  activeTab: 'budget' | 'participants' = 'budget';
+  activeTab: 'budget' | 'participants' | 'shifts' | 'kanban' = 'budget';
   isEditModalOpen = false;
+  isDeleteModalOpen = false;
   isSaving = false;
   editForm: {
     name: string;
@@ -90,11 +93,16 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
-  deleteEvent(): void {
-    if (!this.event) return;
+  openDeleteModal(): void {
+    this.isDeleteModalOpen = true;
+  }
 
-    const confirmed = window.confirm('Supprimer cet événement ? Cette action est irréversible.');
-    if (!confirmed) return;
+  cancelDeleteEvent(): void {
+    this.isDeleteModalOpen = false;
+  }
+
+  confirmDeleteEvent(): void {
+    if (!this.event) return;
 
     this.eventService.deleteEvent(this.event.id).subscribe({
       next: () => {
@@ -102,6 +110,7 @@ export class EventDetailComponent implements OnInit {
       },
       error: () => {
         this.error = 'Impossible de supprimer cet événement.';
+        this.isDeleteModalOpen = false;
         this.cdr.detectChanges();
       }
     });

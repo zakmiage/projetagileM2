@@ -2,7 +2,7 @@
 ## Application de Gestion d'Événements pour Associations
 
 > **Document rétroingénéré** à partir du code source du projet `projetagileM2`  
-> Version : 1.0 — Dernière modification du dépôt : **03/04/2026 à 12h09**
+> Version : 1.3 — Dernière modification du dépôt : **27/04/2026**
 
 ---
 
@@ -125,6 +125,7 @@ members ──── event_registrations ──► events
 | forecast_amount | DECIMAL(10,2) | DEFAULT 0.00 |
 | actual_amount | DECIMAL(10,2) | NULL |
 | is_fsdie_eligible | BOOLEAN | DEFAULT FALSE |
+| **validation_status** | ENUM('SOUMIS','APPROUVE','REFUSE') | NOT NULL DEFAULT 'SOUMIS' |
 | created_by | INT | FK → users(id) |
 | updated_by | INT | FK → users(id) NULL |
 | created_at | DATETIME | DEFAULT NOW() |
@@ -138,6 +139,52 @@ members ──── event_registrations ──► events
 | file_name | VARCHAR(255) | NOT NULL |
 | file_path | VARCHAR(255) | NOT NULL |
 | uploaded_at | DATETIME | DEFAULT NOW() |
+
+#### `shifts` *(nouveau)*
+| Colonne | Type | Contraintes |
+|---------|------|-------------|
+| id | INT | PK, AUTO_INCREMENT |
+| event_id | INT | FK → events(id) CASCADE |
+| label | VARCHAR(100) | NOT NULL |
+| start_time | DATETIME | NOT NULL |
+| end_time | DATETIME | NOT NULL |
+| capacity | INT | DEFAULT 10 |
+| created_at | DATETIME | DEFAULT NOW() |
+
+#### `shift_registrations` *(nouveau)*
+| Colonne | Type | Contraintes |
+|---------|------|-------------|
+| id | INT | PK, AUTO_INCREMENT |
+| shift_id | INT | FK → shifts(id) CASCADE |
+| member_id | INT | FK → members(id) CASCADE |
+| registered_at | DATETIME | DEFAULT NOW() |
+| — | — | UNIQUE(shift_id, member_id) |
+
+#### `kanban_columns` *(nouveau)*
+| Colonne | Type | Contraintes |
+|---------|------|-------------|
+| id | INT | PK, AUTO_INCREMENT |
+| event_id | INT | FK → events(id) CASCADE |
+| title | VARCHAR(100) | NOT NULL |
+| position | INT | DEFAULT 0 |
+| color | VARCHAR(20) | DEFAULT '#6366f1' |
+
+#### `kanban_cards` *(nouveau)*
+| Colonne | Type | Contraintes |
+|---------|------|-------------|
+| id | INT | PK, AUTO_INCREMENT |
+| column_id | INT | FK → kanban_columns(id) CASCADE |
+| title | VARCHAR(200) | NOT NULL |
+| description | TEXT | NULL |
+| position | INT | DEFAULT 0 |
+| label | VARCHAR(50) | NULL |
+| due_date | DATE | NULL |
+
+#### `kanban_card_members` *(nouveau)*
+| Colonne | Type | Contraintes |
+|---------|------|-------------|
+| card_id | INT | PK, FK → kanban_cards(id) CASCADE |
+| member_id | INT | PK, FK → members(id) CASCADE |
 
 ---
 
@@ -168,8 +215,11 @@ members ──── event_registrations ──► events
 | Méthode | Route | Description |
 |---------|-------|-------------|
 | GET | `/api/events` | Retourne tous les événements (ORDER BY start_date DESC) |
+| GET | `/api/events/feed.ics` | Génère un flux ICS (calendrier) |
 | GET | `/api/events/:id` | Retourne l'événement + ses inscriptions (JOIN members) |
 | POST | `/api/events` | Crée un événement |
+| PUT | `/api/events/:id` | Met à jour un événement |
+| DELETE | `/api/events/:id` | Supprime un événement (cascade budget + participants) |
 | POST | `/api/events/:id/participants` | Inscrit un membre (`{ memberId }`) |
 | DELETE | `/api/events/:id/participants/:memberId` | Désinscrit un membre |
 
@@ -181,6 +231,7 @@ members ──── event_registrations ──► events
 | POST | `/api/budget-lines` | Crée une ligne de budget |
 | PUT | `/api/budget-lines/:id` | Mise à jour partielle d'une ligne |
 | DELETE | `/api/budget-lines/:id` | Supprime une ligne |
+| PATCH | `/api/budget-lines/:id/status` | Met à jour `validation_status` (`SOUMIS`\|`APPROUVE`\|`REFUSE`) |
 
 #### Membres — `/api/members`
 
@@ -196,7 +247,34 @@ members ──── event_registrations ──► events
 
 | Méthode | Route | Description |
 |---------|-------|-------------|
-| POST | `/api/export/budget` | Génère et télécharge un fichier `.xlsx` |
+| GET | `/api/export/events/:id/invoices` | Génère un PDF fusionnant toutes les PJ d'un événement |
+| GET | `/api/export/events/:id/fsdie` | Génère le dossier FSDIE complet (PDF structuré) |
+
+#### Shifts — `/api/events/:id/shifts` *(nouveau)*
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/events/:id/shifts` | Liste des shifts + nb inscrits |
+| POST | `/api/events/:id/shifts` | Créer un shift |
+| PUT | `/api/events/:id/shifts/:shiftId` | Modifier un shift |
+| DELETE | `/api/events/:id/shifts/:shiftId` | Supprimer un shift |
+| GET | `/api/events/:id/shifts/:shiftId/registrations` | Inscrits d'un shift |
+| POST | `/api/events/:id/shifts/:shiftId/register` | Inscrire un membre (anti-conflit) |
+| DELETE | `/api/events/:id/shifts/:shiftId/register` | Désinscrire un membre |
+
+#### Kanban — `/api/events/:id/kanban` *(nouveau)*
+
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/events/:id/kanban` | Colonnes + cartes + membres |
+| POST | `/api/events/:id/kanban/columns` | Créer une colonne |
+| PUT | `/api/events/:id/kanban/columns/:colId` | Modifier une colonne |
+| DELETE | `/api/events/:id/kanban/columns/:colId` | Supprimer une colonne |
+| POST | `/api/events/:id/kanban/columns/:colId/cards` | Créer une carte |
+| PUT | `/api/events/:id/kanban/cards/:cardId` | Modifier une carte |
+| PUT | `/api/events/:id/kanban/cards/:cardId/move` | Déplacer (D&D) |
+| DELETE | `/api/events/:id/kanban/cards/:cardId` | Supprimer une carte |
+| PUT | `/api/events/:id/kanban/cards/:cardId/members` | Assigner des membres |
 
 **Corps de la requête :**
 ```json
@@ -286,7 +364,12 @@ frontend/src/app/
 │   ├── auth.service.ts
 │   ├── event.service.ts
 │   ├── member.service.ts
-│   └── budget.service.ts
+│   ├── budget.service.ts
+│   ├── shift.service.ts   ← (nouveau)
+│   ├── kanban.service.ts  ← (nouveau)
+│   └── toast.service.ts   ← (nouveau)
+└── core/
+    └── toast/             ← Composant Toast global (nouveau)
 └── pages/
     ├── login/             ← Page de connexion
     ├── events/            ← Liste + création d'événements
@@ -353,10 +436,13 @@ Tous les services utilisent `HttpClient` (inject pattern) et retournent des `Obs
 
 | Service | URL de base | Méthodes exposées |
 |---------|-------------|-------------------|
-| `EventService` | `/api/events` | `getEvents()`, `getEvent(id)`, `createEvent()`, `addParticipant()`, `removeParticipant()` |
-| `BudgetService` | `/api/budget-lines` | `getBudgetLines(eventId)`, `createBudgetLine()`, `updateBudgetLine()`, `deleteBudgetLine()`, `exportBudgetExcel()` |
-| `MemberService` | `/api/members` | `getMembers()`, `updateMember()`, `createMember()` |
-| `AuthService` | localStorage | `login()`, `logout()`, `isAuthenticated()`, `forgotPassword()` |
+| `EventService` | `/api/events` | `getEvents()`, `getEvent(id)`, `createEvent()`, `updateEvent()`, `deleteEvent()`, `addParticipant()`, `removeParticipant()`, `downloadIcsFeed()` |
+| `BudgetService` | `/api/budget-lines` | `getBudgetLines(eventId)`, `createBudgetLine()`, `updateBudgetLine()`, `deleteBudgetLine()`, `exportBudgetExcel()`, `updateValidationStatus()` |
+| `MemberService` | `/api/members` | `getMembers()`, `updateMember()`, `createMember()`, `deleteMember()` |
+| `AuthService` | localStorage | `login()`, `logout()`, `isAuthenticated()`, `getRole()`, `hasRole()`, `forgotPassword()` |
+| `ShiftService` *(nouveau)* | `/api/events/:id/shifts` | `getShifts()`, `createShift()`, `updateShift()`, `deleteShift()`, `register()`, `unregister()`, `getRegistrations()` |
+| `KanbanService` *(nouveau)* | `/api/events/:id/kanban` | `getKanban()`, `createColumn()`, `updateColumn()`, `deleteColumn()`, `createCard()`, `updateCard()`, `moveCard()`, `deleteCard()`, `setCardMembers()` |
+| `ToastService` *(nouveau)* | Signal interne | `show()`, `success()`, `error()`, `warning()`, `info()`, `dismiss()` |
 
 **Note :** `AuthService` n'appelle pas le backend. La validation est hardcodée :
 ```typescript
@@ -431,6 +517,7 @@ JWT_EXPIRES_IN=1d
 | `bcryptjs` | Hashage des mots de passe |
 | `jsonwebtoken` | Génération et vérification de JWT |
 | `exceljs` | Génération de fichiers Excel `.xlsx` |
+| `pdfkit` *(nouveau)* | Génération de fichiers PDF |
 | `nodemon` (dev) | Hot-reload en développement |
 
 ### Frontend (`frontend/package.json`)
@@ -442,6 +529,9 @@ JWT_EXPIRES_IN=1d
 | `@angular/router` | Routing avec lazy loading |
 | `tailwindcss` | Framework CSS utilitaire |
 | `@angular/ssr` | Rendu côté serveur (SSR) |
+| `ng2-charts` | Graphiques Angular (dashboard analytics) |
+| `chart.js` | Bibliothèque de graphiques sous-jacente |
+| `@angular/cdk` *(nouveau)* | Drag & Drop pour le Kanban |
 
 ---
 
@@ -459,8 +549,12 @@ cd frontend && npm install && ng serve
 
 **Initialisation BDD :**
 ```sql
-source database/init.sql;         -- Crée le schéma
-source database/seed-data.sql;    -- Données de test
+source database/init.sql;            -- Crée le schéma
+source database/migration_shifts.sql; -- Tables shifts
+source database/migration_kanban.sql; -- Tables kanban
+source database/seed-data.sql;        -- Données de test
+source database/seed-shifts.sql;      -- Shifts de test
+source database/seed-kanban.sql;      -- Kanban de test
 ```
 
 ---
@@ -497,7 +591,7 @@ cd e2e && npx playwright test
 | T-01 | URL API hardcodée `http://localhost:3000` dans les services | Bloque le déploiement en production |
 | T-02 | Authentification frontend en dur (pas de JWT) | Aucune sécurité réelle |
 | T-03 | `created_by` hardcodé à `1` dans `BudgetTabComponent` | Erreur si user admin non créé |
-| T-04 | Pièces jointes non persistées (ObjectURL) | Données perdues au rechargement |
+| T-04 | Rôle `TRESORIER` hardcodé en session (non issu du JWT) | Contrôle d'accès front-only |
 | T-05 | Pas de middleware d'authentification sur les routes backend | API ouverte sans token |
 | T-06 | Pas de pagination | Performance dégradée sur gros volumes |
 | T-07 | `ChangeDetectorRef.detectChanges()` appelé manuellement | Zone.js ou signal à préférer |

@@ -24,6 +24,9 @@ export class MembersComponent implements OnInit {
   selectedMember: Member | null = null;
   editedMember!: Member;
   isNewMember = false;
+
+  // Gestion de la modale de confirmation de suppression
+  memberToDelete: Member | null = null;
   
   // Tableau de gestion dynamique des inputs d'allergies
   parsedAllergies: string[] = [];
@@ -220,6 +223,31 @@ export class MembersComponent implements OnInit {
 
   canUpload(): boolean {
     return !!this.selectedFile && !!this.editedMember?.id && !this.isUploading;
+  }
+
+  // Ouvre la modale de confirmation (sans ouvrir la modal d'édition)
+  requestDeleteMember(member: Member, event: MouseEvent) {
+    event.stopPropagation();
+    this.memberToDelete = member;
+  }
+
+  // Confirme la suppression : appelle l'API, filtre la liste localement
+  confirmDelete() {
+    if (!this.memberToDelete) return;
+    const id = this.memberToDelete.id;
+    this.memberService.deleteMember(id).subscribe({
+      next: () => {
+        this.members = this.members.filter(m => m.id !== id);
+        this.memberToDelete = null;
+        this.cdr.detectChanges();
+      },
+      error: () => alert('Erreur lors de la suppression du membre')
+    });
+  }
+
+  // Annule la suppression
+  cancelDelete() {
+    this.memberToDelete = null;
   }
 
   private loadAttachments(memberId: number) {

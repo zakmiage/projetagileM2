@@ -48,4 +48,11 @@ export class MemberService {
       catchError(err => throwError(() => err))
     );
   }
+
+  deleteMember(id: number): Observable<void> {
+    return this.http.delete<{success: boolean}>(`${this.apiUrl}/${id}`).pipe(
+      map(() => undefined),
+      catchError(err => throwError(() => err))
+    );
+  }
 }
