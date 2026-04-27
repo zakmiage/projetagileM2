@@ -35,7 +35,7 @@ class Shift {
     const toMysql = (iso) => iso ? iso.replace('T', ' ').substring(0, 19) : null;
     const [result] = await db.execute(
       `INSERT INTO shifts (event_id, label, start_time, end_time, capacity) VALUES (?, ?, ?, ?, ?)`,
-      [eventId, data.label, toMysql(data.start_time), toMysql(data.end_time), data.capacity || 10]
+      [eventId, data.label, toMysql(data.start_time), toMysql(data.end_time), data.capacity ?? 10]
     );
     return { id: result.insertId, event_id: eventId, ...data };
   }
