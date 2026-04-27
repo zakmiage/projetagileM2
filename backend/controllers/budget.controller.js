@@ -35,13 +35,14 @@ exports.getBudgetLines = async (req, res) => {
 exports.createBudgetLine = async (req, res) => {
   try {
     const newLine = await BudgetService.createBudgetLine(req.body);
+    const eventId  = req.body.event_id;
 
-    // Sync R14 si la nouvelle ligne est une dépense FSDIE éligible
-    if (req.body.type === 'EXPENSE' && req.body.is_fsdie_eligible) {
-      await BudgetLine.syncFsdieSubvention(req.body.event_id);
-    }
+    // Sync R14 systématiquement (une nouvelle ligne peut affecter la subvention)
+    await BudgetLine.syncFsdieSubvention(eventId);
 
-    res.status(201).json({ success: true, data: newLine });
+    // Retourner les lignes complètes pour que le front n'ait pas à refaire un GET
+    const allLines = await BudgetLine.findByEventId(eventId);
+    res.status(201).json({ success: true, data: newLine, lines: allLines });
   } catch (error) {
     console.error('Error in createBudgetLine:', error);
     res.status(400).json({ success: false, message: error.message || 'Invalid Request' });
