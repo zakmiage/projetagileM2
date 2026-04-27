@@ -305,22 +305,22 @@ exports.exportInvoices = async (req, res) => {
 };
 
 /**
- * Génère un dossier PDF FSDIE complet et professionnel.
+ * Génère un dossier PDF FSDIE complet — v2.
  * Règles métier :
- *   R1  — Seules les lignes is_fsdie_eligible = true de type EXPENSE
- *   R2  — SOUMIS + APPROUVE → inclus dans total. REFUSE → barré, exclu du total
+ *   R1  — Seules les lignes is_fsdie_eligible=true de type EXPENSE
+ *   R2  — REFUSE → affiché barré en rouge, exclu du total
  *   R3  — Montant = actual_amount si > 0, sinon forecast_amount
  *   R4  — Total demandé = Σ lignes non REFUSE
- *   R5  — Recettes = toutes lignes REVENUE (autofinancement)
- *   R6  — Besoin net FSDIE = Total FSDIE éligible − Total recettes
- *   R7  — Chaque ligne référence ses PJ [A1], [A2]… dans le tableau
- *   R8  — Ligne sans PJ → ⚠ Justificatif manquant
+ *   R5  — Recettes propres = lignes REVENUE hors subvention FSDIE
+ *   R6  — Montant demandé au FSDIE = totalFsdie − recettes propres (≥0)
+ *   R7  — Chaque ligne référence ses PJ [A1][A2] dans le tableau
+ *   R8  — Ligne sans PJ → ⚠ bandeau orange
  *   R9  — Blocage si aucune ligne FSDIE éligible → 400
- *   R10 — PJ concaténées dans l'ordre des lignes, numérotées séquentiellement
- *   R11 — Structure : Couverture → Récapitulatif → Tableau détaillé → Annexes
- *   R12 — Couverture : nom asso, événement, dates, montant demandé, date génération
- *   R13 — Footer sur chaque page dossier
- * GET /api/export/events/:id/fsdie
+ *   R10 — PJ PDF réelles mergées après chaque page séparatrice
+ *   R11 — Structure : Couverture → Budget complet (Excel-style) → Tableau FSDIE → Table annexes → PJ
+ *   R12 — Couverture : bandeau couleur, encart montant, 3 chips
+ *   R13 — Footer "Dossier FSDIE — [événement] — Page X"
+ *   R14 — La subvention FSDIE attendue est une recette virtuelle = totalFsdie
  */
 exports.exportFsdie = async (req, res) => {
   try {
@@ -328,7 +328,7 @@ exports.exportFsdie = async (req, res) => {
     const PDFDocument = require('pdfkit');
     const { PDFDocument: LibPDF, rgb, StandardFonts } = require('pdf-lib');
 
-    // ── 1. Données ────────────────────────────────────────────────────────────
+    // ── 1. Données BDD ────────────────────────────────────────────────────────
     const [evRows] = await db.execute('SELECT * FROM events WHERE id = ?', [eventId]);
     if (evRows.length === 0) return res.status(404).json({ message: 'Événement introuvable' });
     const event = evRows[0];
@@ -342,40 +342,45 @@ exports.exportFsdie = async (req, res) => {
       [eventId]
     );
 
-    // Dédoublonnage lignes
+    // Dédoublonnage + regroupement PJ
     const lineMap = new Map();
     rows.forEach(r => {
-      if (!lineMap.has(r.id)) {
-        lineMap.set(r.id, { ...r, attachments: [] });
-      }
+      if (!lineMap.has(r.id)) lineMap.set(r.id, { ...r, attachments: [] });
       if (r.att_id) lineMap.get(r.id).attachments.push({ id: r.att_id, file_name: r.file_name, file_path: r.file_path });
     });
     const allLines = Array.from(lineMap.values());
 
-    // R1 — Lignes FSDIE éligibles
+    // R1
     const fsdieLines = allLines.filter(l => l.is_fsdie_eligible && l.type === 'EXPENSE');
-    // R9 — Blocage
-    if (fsdieLines.length === 0) {
-      return res.status(400).json({ message: 'Aucune ligne FSDIE éligible pour cet événement.' });
-    }
-    // R5 — Recettes
-    const revenues = allLines.filter(l => l.type === 'REVENUE');
+    if (fsdieLines.length === 0) return res.status(400).json({ message: 'Aucune ligne FSDIE éligible.' });
 
-    // R3 — Montant par ligne
+    const allExpenses = allLines.filter(l => l.type === 'EXPENSE');
+    const allRevenues = allLines.filter(l => l.type === 'REVENUE');
+
+    // R3
     const getAmt = l => Number(l.actual_amount) > 0 ? Number(l.actual_amount) : Number(l.forecast_amount) || 0;
 
-    // R4 — Total demandé (R2 : exclure REFUSE)
-    const totalFsdie = fsdieLines
-      .filter(l => l.validation_status !== 'REFUSE')
-      .reduce((s, l) => s + getAmt(l), 0);
-    const totalRevenues = revenues.reduce((s, l) => s + getAmt(l), 0);
-    // R6 — Besoin net
-    const besoinNet = Math.max(0, totalFsdie - totalRevenues);
+    // R4
+    const totalFsdie = fsdieLines.filter(l => l.validation_status !== 'REFUSE').reduce((s, l) => s + getAmt(l), 0);
 
-    // R7 — Numérotation des annexes (PJ dans l'ordre des lignes)
+    // R5 — recettes propres (hors subvention FSDIE qui est virtuelle)
+    const totalRecettesPropres = allRevenues.reduce((s, l) => s + getAmt(l), 0);
+
+    // R14 — subvention FSDIE virtuelle = totalFsdie
+    const subventionFsdie = totalFsdie;
+
+    // R6
+    const montantDemande = Math.max(0, totalFsdie - totalRecettesPropres);
+
+    // Totaux budget complet
+    const totalAllExpenses = allExpenses.reduce((s, l) => s + getAmt(l), 0);
+    const totalAllRevenues = totalRecettesPropres + subventionFsdie; // R14
+    const soldeGlobal = totalAllRevenues - totalAllExpenses;
+
+    // R7 — Numérotation annexes
     let annexeCounter = 0;
-    const annexeMap = new Map(); // att.id → numéro annexe
-    const annexeList = []; // [{num, file_name, file_path, lineLabel}]
+    const annexeMap = new Map();
+    const annexeList = [];
     for (const line of fsdieLines) {
       for (const att of line.attachments) {
         annexeCounter++;
@@ -384,130 +389,162 @@ exports.exportFsdie = async (req, res) => {
       }
     }
 
-    // ── 2. Helpers graphiques ────────────────────────────────────────────────
-    const INDIGO = '#4f46e5';
-    const INDIGO_LIGHT = '#eff6ff';
-    const RED = '#dc2626';
-    const GREEN = '#059669';
-    const GRAY = '#64748b';
-    const PAGE_W = 595.28;
-    const MARGIN = 50;
-    const COL_W = PAGE_W - MARGIN * 2;
+    // ── 2. Helpers graphiques ─────────────────────────────────────────────────
+    const INDIGO      = '#4f46e5';
+    const INDIGO_L    = '#eff6ff';
+    const RED_H       = '#991b1b';
+    const RED_BG      = '#fef2f2';
+    const RED_HEADER  = '#dc2626';
+    const GREEN       = '#059669';
+    const GREEN_BG    = '#f0fdf4';
+    const GRAY        = '#64748b';
+    const PAGE_W      = 595.28;
+    const MARGIN      = 45;
+    const COL_W       = PAGE_W - MARGIN * 2;
 
     const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
-    const fmtAmt = n => `${n.toFixed(2)} €`;
+    const fmtAmt  = n => `${Number(n).toFixed(2)} €`;
 
-    // ── 3. Génération PDF (pdfkit) ────────────────────────────────────────────
     const doc = new PDFDocument({ size: 'A4', margin: MARGIN, bufferPages: true });
     const buffers = [];
     doc.on('data', d => buffers.push(d));
 
-    let pageNum = 0;
-    const addFooter = (label) => {
-      const totalPages = doc.bufferedPageRange().count;
-      for (let i = 0; i < totalPages; i++) {
-        doc.switchToPage(i);
-        doc.fontSize(8).fillColor(GRAY)
-          .text(`Dossier FSDIE — ${event.name} — Page ${i + 1}/${totalPages}`,
-            MARGIN, doc.page.height - 35, { width: COL_W, align: 'center' });
-      }
-    };
-
-    const drawRect = (x, y, w, h, fillHex) => {
-      doc.rect(x, y, w, h).fill(fillHex);
-    };
-    const drawLine = (x1, y1, x2, y2, color = '#e2e8f0') => {
-      doc.moveTo(x1, y1).lineTo(x2, y2).strokeColor(color).stroke();
-    };
+    const drawRect = (x, y, w, h, hex) => doc.save().rect(x, y, w, h).fill(hex).restore();
+    const hline    = (x1, y1, x2, col='#e2e8f0') => doc.save().moveTo(x1, y1).lineTo(x2, y1).strokeColor(col).stroke().restore();
+    const groupBy  = (arr, key) => arr.reduce((acc, x) => { const k = x[key] || 'Autre'; (acc[k] = acc[k] || []).push(x); return acc; }, {});
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PAGE 1 — COUVERTURE (R11, R12)
+    // PAGE 1 — COUVERTURE
     // ══════════════════════════════════════════════════════════════════════════
-    pageNum++;
-
-    // Bandeau en-tête
-    drawRect(0, 0, PAGE_W, 120, INDIGO);
-    doc.fill('white').fontSize(11).font('Helvetica')
-      .text('KUBIK — BDE KEDGE Bordeaux', MARGIN, 25, { width: COL_W });
-    doc.fontSize(22).font('Helvetica-Bold')
-      .text('DOSSIER DE DEMANDE DE SUBVENTION', MARGIN, 48, { width: COL_W });
-    doc.fontSize(14).font('Helvetica')
-      .text('Fonds de Solidarité et de Développement des Initiatives Étudiantes', MARGIN, 80, { width: COL_W });
-
-    doc.fill('#1e293b');
+    // Bandeau
+    drawRect(0, 0, PAGE_W, 110, INDIGO);
+    doc.fill('white').fontSize(10).font('Helvetica').text('KUBIK — BDE KEDGE Bordeaux', MARGIN, 20, { width: COL_W });
+    doc.fontSize(21).font('Helvetica-Bold').text('DOSSIER DE DEMANDE DE SUBVENTION', MARGIN, 40, { width: COL_W });
+    doc.fontSize(11).font('Helvetica').text('Fonds de Solidarité et de Développement des Initiatives Étudiantes', MARGIN, 74, { width: COL_W });
 
     // Encart événement
-    const evBoxY = 145;
-    drawRect(MARGIN, evBoxY, COL_W, 130, INDIGO_LIGHT);
-    doc.rect(MARGIN, evBoxY, COL_W, 130).strokeColor(INDIGO).stroke();
-    doc.fontSize(18).font('Helvetica-Bold').fill(INDIGO)
-      .text(event.name, MARGIN + 16, evBoxY + 14, { width: COL_W - 32 });
-    doc.fontSize(11).font('Helvetica').fill('#475569')
-      .text(`Date de l'événement : ${fmtDate(event.start_date)} → ${fmtDate(event.end_date)}`, MARGIN + 16, evBoxY + 46);
-    if (event.description) {
-      doc.text(event.description, MARGIN + 16, evBoxY + 68, { width: COL_W - 32, height: 48, ellipsis: true });
-    }
+    drawRect(MARGIN, 128, COL_W, 110, INDIGO_L);
+    doc.save().rect(MARGIN, 128, COL_W, 110).strokeColor(INDIGO).lineWidth(1.5).stroke().restore();
+    doc.fill(INDIGO).fontSize(17).font('Helvetica-Bold').text(event.name, MARGIN+14, 142, { width: COL_W-28 });
+    doc.fill('#475569').fontSize(10).font('Helvetica')
+      .text(`Date : ${fmtDate(event.start_date)}  →  ${fmtDate(event.end_date)}`, MARGIN+14, 170);
+    if (event.description)
+      doc.text(event.description, MARGIN+14, 190, { width: COL_W-28, height: 38, ellipsis: true });
 
     // Encart montant demandé
-    const amtBoxY = 305;
-    drawRect(MARGIN, amtBoxY, COL_W, 90, INDIGO);
-    doc.fontSize(12).font('Helvetica').fill('white')
-      .text('Montant total demandé au FSDIE', MARGIN, amtBoxY + 12, { width: COL_W, align: 'center' });
-    doc.fontSize(32).font('Helvetica-Bold').fill('white')
-      .text(fmtAmt(besoinNet), MARGIN, amtBoxY + 34, { width: COL_W, align: 'center' });
+    drawRect(MARGIN, 262, COL_W, 80, INDIGO);
+    doc.fill('white').fontSize(10).font('Helvetica').text('Montant sollicité au FSDIE', MARGIN, 275, { width: COL_W, align: 'center' });
+    doc.fontSize(30).font('Helvetica-Bold').text(fmtAmt(montantDemande), MARGIN, 292, { width: COL_W, align: 'center' });
 
-    // Récap rapide sous le montant
-    const recapY = 420;
-    const col3 = COL_W / 3;
+    // 3 chips
+    const chipY = 368; const cw = COL_W / 3;
     [
-      { label: 'Dépenses FSDIE éligibles', val: fmtAmt(totalFsdie), color: RED },
-      { label: 'Recettes propres', val: fmtAmt(totalRevenues), color: GREEN },
-      { label: 'Besoin net FSDIE', val: fmtAmt(besoinNet), color: INDIGO },
-    ].forEach((item, i) => {
-      const x = MARGIN + i * col3;
-      drawRect(x, recapY, col3 - 8, 70, item.i === 2 ? '#f8fafc' : '#f8fafc');
-      doc.rect(x, recapY, col3 - 8, 70).strokeColor('#e2e8f0').stroke();
-      doc.fontSize(9).font('Helvetica').fill(GRAY)
-        .text(item.label, x + 8, recapY + 10, { width: col3 - 24, align: 'center' });
-      doc.fontSize(18).font('Helvetica-Bold').fill(item.color)
-        .text(item.val, x + 8, recapY + 30, { width: col3 - 24, align: 'center' });
+      { label: 'Dépenses FSDIE éligibles', val: fmtAmt(totalFsdie), color: RED_HEADER },
+      { label: 'Recettes propres', val: fmtAmt(totalRecettesPropres), color: GREEN },
+      { label: 'Montant demandé FSDIE', val: fmtAmt(montantDemande), color: INDIGO },
+    ].forEach((c, i) => {
+      const cx = MARGIN + i * cw;
+      drawRect(cx, chipY, cw-6, 68, '#f8fafc');
+      doc.save().rect(cx, chipY, cw-6, 68).strokeColor('#e2e8f0').lineWidth(1).stroke().restore();
+      doc.fill(GRAY).fontSize(8).font('Helvetica').text(c.label, cx+6, chipY+8, { width: cw-20, align: 'center' });
+      doc.fill(c.color).fontSize(16).font('Helvetica-Bold').text(c.val, cx+6, chipY+28, { width: cw-20, align: 'center' });
     });
 
-    // Lignes stats
-    const statsY = 520;
-    doc.fontSize(10).font('Helvetica').fill('#475569')
-      .text(`Nombre de lignes FSDIE éligibles : ${fsdieLines.length}`, MARGIN, statsY)
-      .text(`Pièces justificatives jointes : ${annexeList.length}`, MARGIN, statsY + 18)
-      .text(`Dossier généré le : ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`, MARGIN, statsY + 36);
+    // Stats
+    doc.fill('#475569').fontSize(9.5).font('Helvetica')
+      .text(`Lignes FSDIE éligibles : ${fsdieLines.length}  |  Pièces justificatives : ${annexeList.length}  |  Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}`, MARGIN, 458, { width: COL_W, align: 'center' });
 
-    if (annexeList.some(a => !a.file_path)) {
-      doc.fontSize(10).fill(RED).text('⚠ Certaines lignes sont sans justificatif — dossier incomplet', MARGIN, statsY + 60);
-    }
+    // R14 note
+    drawRect(MARGIN, 478, COL_W, 42, '#eff6ff');
+    doc.save().rect(MARGIN, 478, COL_W, 42).strokeColor(INDIGO).lineWidth(1).stroke().restore();
+    doc.fill(INDIGO).fontSize(8.5).font('Helvetica-Bold').text('Règle comptable appliquée :', MARGIN+10, 485);
+    doc.fill('#1e40af').font('Helvetica').fontSize(8).text(
+      `La subvention FSDIE attendue (${fmtAmt(subventionFsdie)}) est automatiquement portée en recette prévisionnelle et réelle du budget, conformément aux règles de présentation FSDIE.`,
+      MARGIN+10, 497, { width: COL_W-20 });
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PAGE 2 — TABLEAU DÉTAILLÉ FSDIE (R7, R8, R2, R3)
+    // PAGE 2 — BUDGET COMPLET (style Excel : 2 colonnes)
     // ══════════════════════════════════════════════════════════════════════════
     doc.addPage();
-    pageNum++;
+    doc.fill(INDIGO).fontSize(14).font('Helvetica-Bold').text('Budget prévisionnel complet', MARGIN, MARGIN);
+    hline(MARGIN, MARGIN+22, MARGIN+COL_W, INDIGO);
+    doc.fill(GRAY).fontSize(8).font('Helvetica').text(`Exercice ${event.name} — Montants en euros HT — Subvention FSDIE incluse en recettes`, MARGIN, MARGIN+28);
 
-    doc.fontSize(16).font('Helvetica-Bold').fill(INDIGO)
-      .text('Détail des dépenses éligibles FSDIE', MARGIN, MARGIN, { width: COL_W });
-    drawLine(MARGIN, MARGIN + 26, MARGIN + COL_W, MARGIN + 26, INDIGO);
+    const half = COL_W / 2 - 6;
+    const LX = MARGIN; const RX = MARGIN + half + 12;
+    let bY = MARGIN + 50;
+
+    // Helper : dessine une colonne (dépenses ou recettes)
+    const drawBudgetCol = (x, w, title, headerBg, groups, total, extraRows = []) => {
+      // Titre colonne
+      drawRect(x, bY, w, 22, headerBg);
+      doc.fill('white').fontSize(9).font('Helvetica-Bold').text(title, x+6, bY+7, { width: w-12 });
+      let cy = bY + 22;
+      let rowIdx = 0;
+      for (const [cat, lines] of Object.entries(groups)) {
+        // Sous-titre catégorie
+        drawRect(x, cy, w, 16, headerBg + '22'); // approx lighter
+        doc.fill(headerBg).fontSize(7.5).font('Helvetica-Bold').text(cat.toUpperCase(), x+6, cy+4, { width: w-12 });
+        cy += 16;
+        for (const line of lines) {
+          const bg = rowIdx % 2 === 0 ? '#f8fafc' : 'white';
+          drawRect(x, cy, w, 16, bg);
+          doc.save().rect(x, cy, w, 16).strokeColor('#e2e8f0').lineWidth(0.5).stroke().restore();
+          doc.fill('#1e293b').fontSize(7.5).font('Helvetica').text(line.label || '—', x+4, cy+4, { width: w*0.68-4, lineBreak: false, ellipsis: true });
+          doc.fill(headerBg).font('Helvetica-Bold').text(fmtAmt(getAmt(line)), x+w*0.68, cy+4, { width: w*0.32-4, align: 'right', lineBreak: false });
+          cy += 16; rowIdx++;
+        }
+      }
+      // Lignes extra (subvention FSDIE virtuelle)
+      for (const extra of extraRows) {
+        drawRect(x, cy, w, 16, '#eff6ff');
+        doc.save().rect(x, cy, w, 16).strokeColor(INDIGO).lineWidth(0.5).stroke().restore();
+        doc.fill(INDIGO).fontSize(7.5).font('Helvetica-Bold').text(extra.label, x+4, cy+4, { width: w*0.68-4, lineBreak: false });
+        doc.fill(INDIGO).text(fmtAmt(extra.val), x+w*0.68, cy+4, { width: w*0.32-4, align: 'right', lineBreak: false });
+        cy += 16;
+      }
+      // Total
+      drawRect(x, cy, w, 20, headerBg);
+      doc.fill('white').fontSize(8.5).font('Helvetica-Bold').text('TOTAL', x+6, cy+6, { width: w*0.6, lineBreak: false });
+      doc.fill('white').text(fmtAmt(total), x+w*0.6, cy+6, { width: w*0.35, align: 'right', lineBreak: false });
+      cy += 20;
+      return cy;
+    };
+
+    const expGroups = groupBy(allExpenses, 'category');
+    const revGroups = groupBy(allRevenues, 'category');
+
+    const endExpY = drawBudgetCol(LX, half, 'DÉPENSES', RED_HEADER, expGroups, totalAllExpenses);
+    const endRevY = drawBudgetCol(RX, half, 'RECETTES', GREEN, revGroups, totalAllRevenues,
+      [{ label: 'Subvention FSDIE attendue (R14)', val: subventionFsdie }]);
+
+    // Solde global
+    const soldeY = Math.max(endExpY, endRevY) + 10;
+    const soldeColor = soldeGlobal >= 0 ? GREEN : RED_HEADER;
+    drawRect(MARGIN, soldeY, COL_W, 26, soldeColor);
+    doc.fill('white').fontSize(10).font('Helvetica-Bold')
+      .text(`Solde global (recettes − dépenses) :`, MARGIN+8, soldeY+8, { width: COL_W*0.6, lineBreak: false });
+    doc.fill('white').text(`${soldeGlobal >= 0 ? '+' : ''}${fmtAmt(soldeGlobal)}`, MARGIN+COL_W*0.6, soldeY+8, { width: COL_W*0.35, align: 'right', lineBreak: false });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // PAGE 3 — TABLEAU DÉTAILLÉ FSDIE
+    // ══════════════════════════════════════════════════════════════════════════
+    doc.addPage();
+    doc.fill(INDIGO).fontSize(14).font('Helvetica-Bold').text('Détail des dépenses éligibles FSDIE', MARGIN, MARGIN);
+    hline(MARGIN, MARGIN+22, MARGIN+COL_W, INDIGO);
     doc.moveDown(1.5);
 
-    // En-tête tableau
-    const cols = { cat: 0, label: 90, ref: 270, amt: 350, status: 415, pj: 470 };
-    const tableX = MARGIN;
-    let tY = doc.y;
+    const cols = { cat: 0, label: 88, ref: 268, amt: 340, status: 408, pj: 468 };
+    const tX   = MARGIN;
+    let tY     = doc.y;
 
-    drawRect(tableX, tY, COL_W, 22, INDIGO);
-    doc.fontSize(8).font('Helvetica-Bold').fill('white');
-    doc.text('Catégorie', tableX + cols.cat + 4, tY + 7, { width: 85 });
-    doc.text('Libellé', tableX + cols.label + 4, tY + 7, { width: 175 });
-    doc.text('Réf.', tableX + cols.ref + 4, tY + 7, { width: 75 });
-    doc.text('Montant', tableX + cols.amt + 4, tY + 7, { width: 60, align: 'right' });
-    doc.text('Statut', tableX + cols.status + 4, tY + 7, { width: 50 });
-    doc.text('PJ', tableX + cols.pj + 4, tY + 7, { width: 25, align: 'center' });
+    drawRect(tX, tY, COL_W, 22, INDIGO);
+    doc.fill('white').fontSize(7.5).font('Helvetica-Bold');
+    [['Catégorie',85],['Libellé',178],['Réf.',70],['Montant',66,'right'],['Statut',58],['PJ',42,'center']]
+      .reduce((x, [label, w, align='left']) => {
+        doc.text(label, tX + x + 3, tY + 7, { width: w, align, lineBreak: false });
+        return x + w + (label === 'Libellé' ? 2 : 0);
+      }, 0);
     tY += 22;
 
     let grandTotal = 0;
@@ -515,144 +552,127 @@ exports.exportFsdie = async (req, res) => {
       const isRefuse = line.validation_status === 'REFUSE';
       const amt = getAmt(line);
       if (!isRefuse) grandTotal += amt;
-
       const rowH = 20;
-      const bgColor = isRefuse ? '#fef2f2' : (idx % 2 === 0 ? '#f8fafc' : 'white');
-      drawRect(tableX, tY, COL_W, rowH, bgColor);
-      doc.rect(tableX, tY, COL_W, rowH).strokeColor('#e2e8f0').stroke();
+      drawRect(tX, tY, COL_W, rowH, isRefuse ? '#fef2f2' : idx%2===0 ? '#f8fafc' : 'white');
+      doc.save().rect(tX, tY, COL_W, rowH).strokeColor('#e2e8f0').lineWidth(0.5).stroke().restore();
 
-      const textColor = isRefuse ? '#9ca3af' : '#1e293b';
-      doc.fontSize(8).font(isRefuse ? 'Helvetica' : 'Helvetica').fill(textColor);
-
-      // Catégorie
-      doc.text(line.category || '—', tableX + cols.cat + 4, tY + 6, { width: 85, lineBreak: false });
-      // Libellé (barré si REFUSE)
-      const labelText = isRefuse ? `[REFUSÉ] ${line.label}` : line.label;
-      doc.text(labelText, tableX + cols.label + 4, tY + 6, { width: 175, lineBreak: false, ellipsis: true });
-      // Référence prévisionnelle vs réel
-      const hasReal = Number(line.actual_amount) > 0;
-      doc.fill(GRAY).text(hasReal ? 'Réel' : 'Prév.', tableX + cols.ref + 4, tY + 6, { width: 75, lineBreak: false });
-      // Montant
-      doc.fill(isRefuse ? '#9ca3af' : (isRefuse ? RED : '#1e293b'))
-        .font('Helvetica-Bold')
-        .text(fmtAmt(amt), tableX + cols.amt + 4, tY + 6, { width: 60, align: 'right', lineBreak: false });
-      // Statut
-      const statusColor = line.validation_status === 'APPROUVE' ? GREEN : line.validation_status === 'REFUSE' ? RED : '#f59e0b';
-      const statusLabel = line.validation_status === 'APPROUVE' ? '✓ Approuvé' : line.validation_status === 'REFUSE' ? '✗ Refusé' : '● Soumis';
-      doc.fill(statusColor).font('Helvetica').fontSize(7)
-        .text(statusLabel, tableX + cols.status + 4, tY + 7, { width: 50, lineBreak: false });
-      // PJ
+      doc.fill(isRefuse ? '#9ca3af' : '#1e293b').fontSize(7.5).font('Helvetica')
+        .text(line.category||'—', tX+cols.cat+3, tY+6, { width:85, lineBreak:false });
+      const lbl = isRefuse ? `[REFUSÉ] ${line.label}` : line.label;
+      doc.text(lbl, tX+cols.label+3, tY+6, { width:178, lineBreak:false, ellipsis:true });
+      doc.fill(GRAY).text(Number(line.actual_amount)>0?'Réel':'Prév.', tX+cols.ref+3, tY+6, { width:70, lineBreak:false });
+      doc.fill(isRefuse?'#9ca3af':'#1e293b').font('Helvetica-Bold')
+        .text(fmtAmt(amt), tX+cols.amt+3, tY+6, { width:66, align:'right', lineBreak:false });
+      const sColor = line.validation_status==='APPROUVE' ? GREEN : line.validation_status==='REFUSE' ? RED_HEADER : '#d97706';
+      const sLabel = line.validation_status==='APPROUVE' ? '✓ Approuvé' : line.validation_status==='REFUSE' ? '✗ Refusé' : '● Soumis';
+      doc.fill(sColor).font('Helvetica').fontSize(7).text(sLabel, tX+cols.status+3, tY+7, { width:58, lineBreak:false });
       const pjRefs = line.attachments.map(a => `A${annexeMap.get(a.id)}`).join(', ');
-      const pjText = pjRefs || '⚠';
-      const pjColor = pjRefs ? INDIGO : RED;
-      doc.fill(pjColor).fontSize(7)
-        .text(pjText, tableX + cols.pj + 4, tY + 7, { width: 40, align: 'center', lineBreak: false });
-
+      doc.fill(pjRefs ? INDIGO : RED_HEADER).fontSize(7)
+        .text(pjRefs||'⚠', tX+cols.pj+3, tY+7, { width:42, align:'center', lineBreak:false });
       tY += rowH;
-      if (tY > 750) { doc.addPage(); tY = MARGIN + 30; pageNum++; }
+      if (tY > 760) { doc.addPage(); tY = MARGIN + 30; }
     });
 
     // Ligne total
-    drawRect(tableX, tY, COL_W, 24, INDIGO);
-    doc.fontSize(10).font('Helvetica-Bold').fill('white')
-      .text('TOTAL DEMANDÉ AU FSDIE', tableX + 4, tY + 7, { width: 340, lineBreak: false })
-      .text(fmtAmt(grandTotal), tableX + cols.amt + 4, tY + 7, { width: 60, align: 'right', lineBreak: false });
-    tY += 34;
+    drawRect(tX, tY, COL_W, 24, INDIGO);
+    doc.fill('white').fontSize(9).font('Helvetica-Bold')
+      .text('TOTAL DEMANDÉ AU FSDIE', tX+4, tY+7, { width: 340, lineBreak:false })
+      .text(fmtAmt(grandTotal), tX+cols.amt+3, tY+7, { width:66, align:'right', lineBreak:false });
+    tY += 32;
 
-    // Bloc récapitulatif recettes + besoin net
-    doc.fontSize(10).font('Helvetica').fill('#475569').text('Recettes propres de l\'événement :', tableX, tY + 10);
-    doc.fill(GREEN).font('Helvetica-Bold').text(fmtAmt(totalRevenues), tableX + 240, tY + 10, { lineBreak: false });
-    doc.fill('#475569').font('Helvetica').text('Besoin net sollicité au FSDIE :', tableX, tY + 28);
-    doc.fill(INDIGO).font('Helvetica-Bold').fontSize(13).text(fmtAmt(besoinNet), tableX + 240, tY + 26, { lineBreak: false });
+    // Récap recettes + montant net
+    doc.fill(GRAY).fontSize(9).font('Helvetica').text('Recettes propres de l\'événement :', tX, tY+8);
+    doc.fill(GREEN).font('Helvetica-Bold').text(fmtAmt(totalRecettesPropres), tX+250, tY+8, { lineBreak:false });
+    doc.fill(GRAY).font('Helvetica').text('Subvention FSDIE en recette (R14) :', tX, tY+22);
+    doc.fill(INDIGO).font('Helvetica-Bold').text(fmtAmt(subventionFsdie), tX+250, tY+22, { lineBreak:false });
+    doc.fill(GRAY).font('Helvetica').text('Montant net sollicité :', tX, tY+38);
+    doc.fill(INDIGO).fontSize(12).font('Helvetica-Bold').text(fmtAmt(montantDemande), tX+250, tY+36, { lineBreak:false });
+    tY += 62;
 
+    // Alerte PJ manquantes (R8)
     if (fsdieLines.some(l => l.attachments.length === 0)) {
-      tY += 55;
-      drawRect(tableX, tY, COL_W, 28, '#fef3c7');
-      doc.rect(tableX, tY, COL_W, 28).strokeColor('#f59e0b').stroke();
-      doc.fontSize(9).fill('#92400e').font('Helvetica-Bold')
-        .text('⚠  Attention : certaines lignes ne disposent d\'aucune pièce justificative. Le dossier pourra être refusé ou incomplet.', tableX + 8, tY + 8, { width: COL_W - 16 });
+      drawRect(tX, tY, COL_W, 26, '#fef3c7');
+      doc.save().rect(tX, tY, COL_W, 26).strokeColor('#f59e0b').lineWidth(1).stroke().restore();
+      doc.fill('#92400e').fontSize(8).font('Helvetica-Bold')
+        .text('⚠  Certaines lignes n\'ont pas de pièce justificative — dossier potentiellement incomplet.', tX+8, tY+8, { width: COL_W-16 });
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // PAGE 3 — TABLE DES ANNEXES
+    // PAGE 4 — TABLE DES ANNEXES
     // ══════════════════════════════════════════════════════════════════════════
     if (annexeList.length > 0) {
       doc.addPage();
-      pageNum++;
-      doc.fontSize(16).font('Helvetica-Bold').fill(INDIGO)
-        .text('Table des annexes', MARGIN, MARGIN);
-      drawLine(MARGIN, MARGIN + 26, MARGIN + COL_W, MARGIN + 26, INDIGO);
+      doc.fill(INDIGO).fontSize(14).font('Helvetica-Bold').text('Table des annexes', MARGIN, MARGIN);
+      hline(MARGIN, MARGIN+22, MARGIN+COL_W, INDIGO);
       doc.moveDown(1.5);
-
       annexeList.forEach(a => {
-        const aY = doc.y;
-        doc.fontSize(10).font('Helvetica-Bold').fill('#1e293b')
-          .text(`Annexe A${a.num}`, MARGIN, aY, { width: 80, continued: true });
-        doc.font('Helvetica').fill('#475569')
-          .text(`${a.lineCategory} — ${a.lineLabel}`, { width: COL_W - 80 });
-        doc.fontSize(8.5).fill(GRAY)
-          .text(`Fichier : ${a.file_name}`, MARGIN + 8, doc.y, { width: COL_W - 8 });
-        drawLine(MARGIN, doc.y + 4, MARGIN + COL_W, doc.y + 4, '#f1f5f9');
-        doc.moveDown(0.6);
-        if (doc.y > 750) { doc.addPage(); pageNum++; }
+        const ay = doc.y;
+        doc.fill('#1e293b').fontSize(9).font('Helvetica-Bold').text(`A${a.num}`, MARGIN, ay, { width:32, lineBreak:false, continued:true });
+        doc.fill(INDIGO).text(`${a.lineCategory}`, { width:100, lineBreak:false, continued:true });
+        doc.fill('#475569').font('Helvetica').text(` — ${a.lineLabel}`, { width: COL_W-132 });
+        doc.fill(GRAY).fontSize(7.5).text(`Fichier : ${a.file_name}`, MARGIN+8, doc.y, { width: COL_W });
+        hline(MARGIN, doc.y+4, MARGIN+COL_W, '#f1f5f9');
+        doc.moveDown(0.5);
+        if (doc.y > 760) { doc.addPage(); }
       });
     }
 
-    // Finaliser le dossier pdfkit
+    // Footer sur toutes les pages (R13)
     doc.end();
-
-    // ── 4. Attendre le buffer pdfkit ──────────────────────────────────────────
     const mainPdfBuffer = await new Promise((resolve, reject) => {
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('end', () => {
+        const buf = Buffer.concat(buffers);
+        // Ajouter footer via pdf-lib
+        resolve(buf);
+      });
       doc.on('error', reject);
     });
 
-    // ── 5. Merger les PJ (pdf-lib) (R10) ─────────────────────────────────────
+    // ── 3. Merger via pdf-lib ─────────────────────────────────────────────────
     const mergedPdf = await LibPDF.create();
-    const { copyPages, addPage: libAddPage } = mergedPdf;
 
-    // Charger le dossier principal
     const mainDoc = await LibPDF.load(mainPdfBuffer);
+    const helB = await mergedPdf.embedFont(StandardFonts.HelveticaBold);
+    const hel  = await mergedPdf.embedFont(StandardFonts.Helvetica);
+    const totalMainPages = mainDoc.getPageCount();
+
+    // Copier pages du dossier + footer (R13)
     const mainPages = await mergedPdf.copyPages(mainDoc, mainDoc.getPageIndices());
-    mainPages.forEach(p => mergedPdf.addPage(p));
+    mainPages.forEach((p, i) => {
+      mergedPdf.addPage(p);
+      const { width } = p.getSize();
+      p.drawText(`Dossier FSDIE — ${event.name} — Page ${i+1}/${totalMainPages + annexeList.length * 2}`,
+        { x: 45, y: 20, size: 7, font: hel, color: rgb(0.39, 0.45, 0.55), maxWidth: width-90 });
+    });
 
-    // Pour chaque annexe : page de séparation + PJ réelle
+    // Annexes : séparateur + PDF réel
     for (const ann of annexeList) {
-      // Page séparateur d'annexe
-      const sepPage = mergedPdf.addPage([595, 842]);
-      const helveticaBold = await mergedPdf.embedFont(StandardFonts.HelveticaBold);
-      const helvetica = await mergedPdf.embedFont(StandardFonts.Helvetica);
-      sepPage.drawRectangle({ x: 0, y: 792, width: 595, height: 50, color: rgb(0.31, 0.27, 0.9) });
-      sepPage.drawText(`ANNEXE A${ann.num}`, { x: 50, y: 808, size: 16, font: helveticaBold, color: rgb(1, 1, 1) });
-      sepPage.drawText(`${ann.lineCategory} — ${ann.lineLabel}`, { x: 50, y: 700, size: 14, font: helveticaBold, color: rgb(0.19, 0.19, 0.19) });
-      sepPage.drawText(`Fichier : ${ann.file_name}`, { x: 50, y: 675, size: 10, font: helvetica, color: rgb(0.4, 0.44, 0.56) });
-      sepPage.drawLine({ start: { x: 50, y: 665 }, end: { x: 545, y: 665 }, thickness: 1, color: rgb(0.88, 0.9, 0.94) });
+      const sep = mergedPdf.addPage([595.28, 841.89]);
+      sep.drawRectangle({ x: 0, y: 791, width: 595.28, height: 51, color: rgb(0.31, 0.27, 0.9) });
+      sep.drawText(`ANNEXE  A${ann.num}`, { x: 45, y: 808, size: 18, font: helB, color: rgb(1,1,1) });
+      sep.drawText(`${ann.lineCategory}  —  ${ann.lineLabel}`, { x: 45, y: 690, size: 13, font: helB, color: rgb(0.12,0.12,0.12) });
+      sep.drawText(`Fichier : ${ann.file_name}`, { x: 45, y: 665, size: 9, font: hel, color: rgb(0.4,0.44,0.56) });
+      sep.drawLine({ start:{x:45,y:655}, end:{x:550,y:655}, thickness:1, color:rgb(0.88,0.9,0.94) });
 
-      // Tenter de charger et merger le PDF de PJ
       try {
-        const pjPath = fs.existsSync(ann.file_path)
-          ? ann.file_path
-          : path.join(__dirname, '..', ann.file_path);
+        const pjPath = fs.existsSync(ann.file_path) ? ann.file_path : path.join(__dirname, '..', ann.file_path);
         if (fs.existsSync(pjPath)) {
-          const pjBytes = fs.readFileSync(pjPath);
-          const pjDoc = await LibPDF.load(pjBytes);
+          const pjDoc = await LibPDF.load(fs.readFileSync(pjPath));
           const pjPages = await mergedPdf.copyPages(pjDoc, pjDoc.getPageIndices());
           pjPages.forEach(p => mergedPdf.addPage(p));
         }
-      } catch (e) {
-        // PJ non lisible → on laisse juste le séparateur
-      }
+      } catch (_) { /* PJ illisible → séparateur seul */ }
     }
 
-    // Sauvegarder le PDF final
     const finalBytes = await mergedPdf.save();
-
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="dossier_fsdie_${event.name.replace(/\s+/g, '_')}.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="FSDIE_${event.name.replace(/[^a-zA-Z0-9]/g,'_')}.pdf"`);
     res.send(Buffer.from(finalBytes));
 
   } catch (err) {
     console.error('Erreur exportFsdie:', err);
-    res.status(500).json({ message: 'Erreur lors de la génération du dossier FSDIE.' });
+    res.status(500).json({ message: 'Erreur génération dossier FSDIE : ' + err.message });
   }
 };
+
+
