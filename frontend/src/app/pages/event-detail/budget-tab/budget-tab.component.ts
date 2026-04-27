@@ -81,12 +81,29 @@ export class BudgetTabComponent {
   }
 
   save(line: BudgetLine) {
-    if (this.viewMode === 'forecast') line.forecast_amount = Number(line.forecast_amount);
-    if (this.viewMode === 'actual' && line.actual_amount !== undefined) line.actual_amount = Number(line.actual_amount);
+    // Normaliser le champ modifié selon le mode d'affichage
+    if (this.viewMode === 'forecast') {
+      line.forecast_amount = Number(line.forecast_amount) || 0;
+    } else {
+      // Mode réel : s'assurer que actual_amount est bien un nombre (pas null/undefined)
+      line.actual_amount = line.actual_amount !== null && line.actual_amount !== undefined
+        ? Number(line.actual_amount)
+        : null;
+    }
 
-    this.budgetService.updateBudgetLine(line.id, line).subscribe({
+    // Payload minimal : envoyer les deux montants pour être sûr
+    const payload: Partial<BudgetLine> = {
+      category:          line.category,
+      label:             line.label,
+      forecast_amount:   line.forecast_amount,
+      actual_amount:     line.actual_amount,
+      is_fsdie_eligible: line.is_fsdie_eligible,
+      validation_status: line.validation_status,
+    };
+
+    this.budgetService.updateBudgetLine(line.id, payload).subscribe({
       next: (res: any) => {
-        // Le backend retourne `lines` avec la Subvention FSDIE recalculée (R14)
+        // Merger in-place pour ne pas casser les références ngModel actives
         if (res?.lines) {
           this.applyLines(res.lines);
         }
@@ -324,16 +341,29 @@ export class BudgetTabComponent {
   }
 
   /**
-   * Applique une liste de lignes fraîches du backend en préservant
-   * les attachments déjà chargés en mémoire.
+   * Applique les lignes fraîches du backend EN PLACE (Object.assign)
+   * pour ne pas casser les références ngModel actives en cours d'édition.
+   * Les nouvelles lignes (Subvention FSDIE créée à la volée) sont ajoutées.
    */
   private applyLines(freshLines: BudgetLine[]): void {
-    this.lines = freshLines.map(fresh => {
+    const freshIds = new Set(freshLines.map(l => l.id));
+
+    // Supprimer les lignes disparues
+    this.lines = this.lines.filter(l => freshIds.has(l.id));
+
+    for (const fresh of freshLines) {
       const existing = this.lines.find(l => l.id === fresh.id);
-      return existing
-        ? { ...fresh, attachments: existing.attachments }  // conserver les PJ déjà chargées
-        : fresh;
-    });
+      if (existing) {
+        // Merger in-place : on garde la référence de l'objet (ngModel ne perd pas le focus)
+        const savedAttachments = existing.attachments;
+        Object.assign(existing, fresh);
+        existing.attachments = savedAttachments ?? fresh.attachments;
+      } else {
+        // Nouvelle ligne (ex: Subvention FSDIE créée automatiquement)
+        this.lines.push(fresh);
+      }
+    }
+
     this.cdr.detectChanges();
   }
 }
