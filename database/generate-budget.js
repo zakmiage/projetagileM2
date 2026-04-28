@@ -18,18 +18,27 @@ const lines = [
   [1,'REVENUE','Billetterie',  'Vente billets (476 pax)',     5900.00, 5200.00, 0,'APPROUVE',1],
   [1,'REVENUE','Financements', 'Subvention BDE',              1000.00, 1000.00, 0,'APPROUVE',1],
 
-  // ── EVENT 2 : WEI 2024 — tout réel, aucun justificatif joint ──
-  [2,'EXPENSE','Logistique',            'Domaine Peyreguilhot',   2536.00, 2536.00, 1,'APPROUVE',1],
-  [2,'EXPENSE','Logistique',            'Transport (bus)',          1078.00, 1078.00, 1,'APPROUVE',1],
-  [2,'EXPENSE','Logistique',            'Protection civile',         815.00,  815.00, 1,'APPROUVE',1],
-  [2,'EXPENSE','Logistique',            'Essences et péages',        151.88,  151.88, 1,'SOUMIS',  1],
-  [2,'EXPENSE','Nourriture et boissons','Nourriture & petit-dej',   760.85,  760.85, 1,'SOUMIS',  1],
-  [2,'EXPENSE','Nourriture et boissons','Bière (8 fûts)',            790.00,  790.00, 0,'APPROUVE',1],
-  [2,'EXPENSE','Animations',            'DJ',                        975.00,  975.00, 1,'APPROUVE',1],
-  [2,'EXPENSE','Animations',            'Gonflables',                150.00,  150.00, 1,'REFUSE',  1],
-  [2,'REVENUE','Billetterie',           'Cotisations participants',  5900.00, 5900.00, 0,'APPROUVE',1],
-  [2,'REVENUE','Financements',          'FSDIE obtenu',              1500.00, 1500.00, 0,'APPROUVE',1],
-  [2,'REVENUE','Financements',          'UF MIAGE',                   850.00,  850.00, 0,'APPROUVE',1],
+  // ── EVENT 2 : WEI 2025 — tout réel, riche, beaucoup de lignes et justificatifs ──
+  [2,'EXPENSE','Logistique',            'Privatisation Domaine',      12500.00, 12500.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Logistique',            'Transport (4 cars A/R)',      4800.00,  4750.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Logistique',            'Location sono & lumières',    1200.00,  1200.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Logistique',            'Location Tentes & Barnums',    850.00,   850.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Logistique',            'Secouristes (Croix Rouge)',    950.00,   950.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Logistique',            'Assurance RC Événement',       320.00,   320.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Nourriture et boissons','Traiteur repas (3 jours)',    5400.00,  5500.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Nourriture et boissons','Boissons softs & eaux',        800.00,   825.50, 1,'APPROUVE',1],
+  [2,'EXPENSE','Nourriture et boissons','Bière (20 fûts + tireuse)',   2100.00,  2100.00, 0,'APPROUVE',1],
+  [2,'EXPENSE','Nourriture et boissons','Petit-déjeuner géant',         650.00,   610.20, 1,'APPROUVE',1],
+  [2,'EXPENSE','Animations',            'DJ Guest Samedi Soir',        1500.00,  1500.00, 0,'APPROUVE',1],
+  [2,'EXPENSE','Animations',            'Location Taureau Mécanique',   600.00,   600.00, 0,'APPROUVE',1],
+  [2,'EXPENSE','Animations',            'Matériel Olympiades',          450.00,   485.00, 1,'APPROUVE',1],
+  [2,'EXPENSE','Communication',         'T-shirts staff & goodies',    1200.00,  1230.00, 0,'APPROUVE',1],
+  [2,'EXPENSE','Communication',         'Bracelets festival',           150.00,   150.00, 0,'APPROUVE',1],
+  [2,'EXPENSE','Logistique',            'Location Camionnette BDE',     350.00,   350.00, 1,'APPROUVE',1],
+  [2,'REVENUE','Billetterie',           'Cotisations (150 pax)',      22500.00, 22500.00, 0,'APPROUVE',1],
+  [2,'REVENUE','Financements',          'Subvention FSDIE',            4500.00,  4500.00, 0,'APPROUVE',1],
+  [2,'REVENUE','Financements',          'Sponsoring Société Générale', 1000.00,  1000.00, 0,'APPROUVE',1],
+  [2,'REVENUE','Financements',          'Subvention BDE MIAGE',        1500.00,  1500.00, 0,'APPROUVE',1],
 
   // ── EVENT 3 : WES 2024 — partiellement justifié ──
   [3,'EXPENSE','Logistique',  'Gîte de groupe',           1200.00, 1180.00, 1,'APPROUVE',1],
@@ -87,22 +96,36 @@ const lines = [
 // ─── budget_attachments ────────────────────────────────────────────────────
 // Référence les IDs de budget_lines par position (1-indexed après TRUNCATE)
 // Event 1 : lignes 1-8 → FSDIE = ids 1,2,3,6  → justif sur 1,2,3 (pas 6=SOUMIS sans fichier)
-// Event 2 : lignes 9-19 → FSDIE = 9,10,11,12,13,15  → aucun justif (cas pire)
+// Event 2 : lignes 9-28 → FSDIE = plein  → on va les justifier pour que ce soit clean
 // Event 3 : lignes 20-26 → FSDIE = 20,21,22,23 → justif sur 20,21 seulement
 // Event 4 : lignes 27-31 → FSDIE = 27 → justif ok
 // Event 5 : lignes 32-36 → FSDIE = 32 → justif ok
 const attachments = [
-  // Gala 2024 (FSDIE lines 1,2,3,6)
   [1, 'facture_salle_gala2024.pdf',     'uploads/budget/facture_salle_gala2024.pdf'],
   [2, 'facture_transport_gala2024.pdf', 'uploads/budget/facture_transport_gala2024.pdf'],
   [3, 'facture_traiteur_gala2024.pdf',  'uploads/budget/facture_traiteur_gala2024.pdf'],
-  // WES 2024 (FSDIE lines 20,21,22,23 — justif sur 20 et 21 seulement)
-  [20,'facture_gite_wes2024.pdf',       'uploads/budget/facture_gite_wes2024.pdf'],
-  [21,'justif_covoiturage_wes2024.pdf', 'uploads/budget/justif_covoiturage_wes2024.pdf'],
-  // Saint-Valentin (FSDIE line 27)
-  [27,'facture_sono_valentin2025.pdf',  'uploads/budget/facture_sono_valentin2025.pdf'],
-  // Tournoi (FSDIE line 32)
-  [32,'facture_gymnase_tournoi2025.pdf','uploads/budget/facture_gymnase_tournoi2025.pdf'],
+
+  // WEI 2025 (Les dépenses logistiques et nourriture FSDIE)
+  // Indices dans lines[] : 9 à 28. (1-indexed). Les 8 premiers sont event 1.
+  // 9: Privatisation, 10: Cars, 11: Sono, 12: Tentes, 13: Secouristes, 14: Assurance, 15: Traiteur, 16: Softs, 18: Dej, 21: Olympiades, 24: Camionnette
+  [9,  'facture_domaine_wei2025.pdf',       'uploads/budget/facture_domaine_wei2025.pdf'],
+  [10, 'facture_cars_wei2025.pdf',          'uploads/budget/facture_cars_wei2025.pdf'],
+  [11, 'facture_sono_wei2025.pdf',          'uploads/budget/facture_sono_wei2025.pdf'],
+  [12, 'facture_tentes_wei2025.pdf',        'uploads/budget/facture_tentes_wei2025.pdf'],
+  [13, 'facture_croix_rouge.pdf',           'uploads/budget/facture_croix_rouge.pdf'],
+  [14, 'attestation_assurance_rc.pdf',      'uploads/budget/attestation_assurance_rc.pdf'],
+  [15, 'facture_traiteur_wei2025.pdf',      'uploads/budget/facture_traiteur_wei2025.pdf'],
+  [16, 'ticket_caisse_metro.pdf',           'uploads/budget/ticket_caisse_metro.pdf'],
+  [18, 'facture_boulangerie_dej.pdf',       'uploads/budget/facture_boulangerie_dej.pdf'],
+  [21, 'facture_decathlon_olympiades.pdf',  'uploads/budget/facture_decathlon_olympiades.pdf'],
+  [24, 'facture_location_camion_superu.pdf','uploads/budget/facture_location_camion_superu.pdf'],
+  // WES 2024 (FSDIE lines 29,30,31,32 — justif sur 29 et 30 seulement)
+  [29,'facture_gite_wes2024.pdf',       'uploads/budget/facture_gite_wes2024.pdf'],
+  [30,'justif_covoiturage_wes2024.pdf', 'uploads/budget/justif_covoiturage_wes2024.pdf'],
+  // Saint-Valentin (FSDIE line 36)
+  [36,'facture_sono_valentin2025.pdf',  'uploads/budget/facture_sono_valentin2025.pdf'],
+  // Tournoi (FSDIE line 41)
+  [41,'facture_gymnase_tournoi2025.pdf','uploads/budget/facture_gymnase_tournoi2025.pdf'],
 ];
 
 // ─── member_attachments ────────────────────────────────────────────────────

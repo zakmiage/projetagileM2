@@ -15,6 +15,8 @@ Write-Host ">> Chargement MySQL..."
 & "$db\run-sql.ps1" "$db\seed-data.sql"
 & "$db\run-sql.ps1" "$db\seed-participants.sql"
 & "$db\run-sql.ps1" "$db\seed-budget.sql"
+& "$db\run-sql.ps1" "$db\seed-kanban.sql"
+& "$db\run-sql.ps1" "$db\seed-shifts.sql"
 
 Write-Host ""
 Write-Host ">> Termine."

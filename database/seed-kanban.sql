@@ -32,7 +32,7 @@ INSERT INTO kanban_cards (column_id, title, description, position, label, due_da
   (@g_done, 'Réunion kick-off bureau',         NULL, 2, 'admin', NULL);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- EVENT 2 : WEI 2024 — Weekend d'intégration
+-- EVENT 2 : WEI 2025 — Weekend d'intégration
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT INTO kanban_columns (event_id, title, position, color) VALUES
   (2, 'Backlog',   0, '#8b5cf6'),
@@ -44,12 +44,19 @@ SET @w_wip  = (SELECT id FROM kanban_columns WHERE event_id=2 AND title='En cour
 SET @w_done = (SELECT id FROM kanban_columns WHERE event_id=2 AND title='Terminé');
 
 INSERT INTO kanban_cards (column_id, title, description, position, label, due_date) VALUES
-  (@w_todo, 'Louer minibus x2',           'Devis Hertz & Europcar pour 9 places', 0, 'logistique', '2024-08-15'),
-  (@w_todo, 'Acheter matériel jeux',       'Ballons, frisbee, tongs, etc.', 1, 'achats', '2024-09-01'),
-  (@w_wip,  'Planifier programme 3 jours', 'Voir doc partagé Google Drive', 0, 'animation', '2024-08-20'),
-  (@w_wip,  'Répartir les chambres',       'Listes des inscrits à trier par promo', 1, 'logistique', '2024-09-10'),
-  (@w_done, 'Envoyer mail de confirmation','Mail envoyé le 10 sept à 178 inscrits', 0, 'communication', NULL),
-  (@w_done, 'Réserver le domaine des Pins','Contrat signé le 1er août', 1, 'logistique', NULL);
+  (@w_todo, 'Louer minibus x4',           'Devis Hertz & Europcar pour 9 places', 0, 'logistique', '2025-08-15'),
+  (@w_todo, 'Acheter matériel jeux',       'Ballons, frisbee, tongs, etc.', 1, 'achats', '2025-09-01'),
+  (@w_todo, 'Préparer playlist bus',       'Ajouter les classiques MIAGE', 2, 'animation', '2025-09-10'),
+  (@w_todo, 'Faire les courses petit-déj', 'Super U : 200 croissants', 3, 'achats', '2025-09-18'),
+  (@w_todo, 'Point sécurité croix rouge',  'Vérifier les habilitations', 4, 'admin', '2025-09-05'),
+  (@w_wip,  'Planifier programme 3 jours', 'Voir doc partagé Google Drive', 0, 'animation', '2025-08-20'),
+  (@w_wip,  'Répartir les chambres',       'Listes des inscrits à trier par promo', 1, 'logistique', '2025-09-10'),
+  (@w_wip,  'Briefing des capitaines',     'Réunion sur Discord ce soir', 2, 'communication', '2025-09-15'),
+  (@w_wip,  'Récupérer chèques caution',   'Encore 15 personnes manquantes', 3, 'admin', '2025-09-16'),
+  (@w_done, 'Envoyer mail de confirmation','Mail envoyé le 10 sept à 150 inscrits', 0, 'communication', NULL),
+  (@w_done, 'Réserver le domaine des Pins','Contrat signé le 1er août avec acompte 30%', 1, 'logistique', NULL),
+  (@w_done, 'Valider devis traiteur',      'Menu validé pour les 3 repas', 2, 'logistique', NULL),
+  (@w_done, 'Achat des fûts de bière',     '20 fûts livrés au local BDE', 3, 'achats', NULL);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- EVENT 3 : WES 2024

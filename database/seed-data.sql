@@ -73,9 +73,9 @@ INSERT INTO events (id, name, description, start_date, end_date, capacity) VALUE
  'Soirée de gala annuelle — salle de prestige, traiteur, DJ. 500 personnes.',
  '2024-12-14 19:00:00', '2024-12-15 04:00:00', 500),
 
-(2, 'WEI 2024',
+(2, 'WEI 2025',
  'Week-end d''intégration — 3 jours en domaine privé, 150 étudiants.',
- '2024-09-20 08:00:00', '2024-09-22 18:00:00', 150),
+ '2025-09-19 08:00:00', '2025-09-21 18:00:00', 150),
 
 (3, 'WES 2024',
  'Week-end des étudiants en stage — détente, outdoor, soirée.',
