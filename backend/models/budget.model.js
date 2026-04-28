@@ -106,19 +106,49 @@ class BudgetLine {
    */
   static async syncAutoLines(eventId) {
     // 1. SYNCHRONISER LA SUBVENTION FSDIE
-    const [fsdieRows] = await db.execute(`
-      SELECT
-        SUM(forecast_amount)                                      AS total_forecast,
-        SUM(actual_amount)                                        AS total_actual,
-        COUNT(CASE WHEN actual_amount IS NOT NULL THEN 1 END)     AS has_actual_count
-      FROM budget_lines
-      WHERE event_id = ? AND type = 'EXPENSE' AND is_fsdie_eligible = 1
-        AND validation_status != 'REFUSE'
-    `, [eventId]);
+    // Récupérer les infos de l'événement pour le calcul au forfait
+    const [eventRows] = await db.execute('SELECT name, start_date, end_date, capacity FROM events WHERE id = ?', [eventId]);
+    const eventInfo = eventRows[0];
+    let isWei = false;
+    let days = 1;
+    if (eventInfo) {
+      isWei = eventInfo.name.toLowerCase().includes('wei');
+      if (eventInfo.start_date && eventInfo.end_date) {
+        const start = new Date(eventInfo.start_date);
+        const end = new Date(eventInfo.end_date);
+        // On compte chaque jour entamé (+1 pour inclure le jour de départ)
+        days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+      }
+    }
 
-    const fsdieForecast = Number(fsdieRows[0]?.total_forecast) || 0;
-    const fsdieHasActual = Number(fsdieRows[0]?.has_actual_count) > 0;
-    const fsdieActual = fsdieHasActual ? (Number(fsdieRows[0]?.total_actual) || 0) : null;
+    let fsdieForecast = 0;
+    let fsdieActual = null;
+
+    if (isWei) {
+      // Pour un WEI : Forfait FSDIE (ex: 10€ par jour et par tête)
+      const ratePerDay = 10;
+      fsdieForecast = ratePerDay * days * (eventInfo.capacity || 0);
+
+      // Calcul réel basé sur le nombre d'inscrits réels
+      const [participantRows] = await db.execute('SELECT COUNT(*) as count FROM event_participants WHERE event_id = ?', [eventId]);
+      const actualCount = Number(participantRows[0].count) || 0;
+      fsdieActual = ratePerDay * days * actualCount;
+    } else {
+      // Pour les autres événements, calcul aux frais réels (somme des dépenses éligibles)
+      const [fsdieRows] = await db.execute(`
+        SELECT
+          SUM(forecast_amount)                                      AS total_forecast,
+          SUM(actual_amount)                                        AS total_actual,
+          COUNT(CASE WHEN actual_amount IS NOT NULL THEN 1 END)     AS has_actual_count
+        FROM budget_lines
+        WHERE event_id = ? AND type = 'EXPENSE' AND is_fsdie_eligible = 1
+          AND validation_status != 'REFUSE'
+      `, [eventId]);
+
+      fsdieForecast = Number(fsdieRows[0]?.total_forecast) || 0;
+      const fsdieHasActual = Number(fsdieRows[0]?.has_actual_count) > 0;
+      fsdieActual = fsdieHasActual ? (Number(fsdieRows[0]?.total_actual) || 0) : null;
+    }
 
     const [existingFsdie] = await db.execute(`
       SELECT id FROM budget_lines
