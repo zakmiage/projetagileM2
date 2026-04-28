@@ -2,13 +2,10 @@ const db = require('../config/db');
 
 class Event {
   static async findAll() {
-    // Prochains événements d'abord (ASC), puis les passés du plus récent (DESC)
+    // Tous les événements triés par date décroissante (plus récent/futur en premier)
     const [rows] = await db.execute(`
       SELECT * FROM events
-      ORDER BY
-        CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC,
-        CASE WHEN start_date >= NOW() THEN start_date END ASC,
-        CASE WHEN start_date < NOW() THEN start_date END DESC
+      ORDER BY start_date DESC
     `);
     return rows;
   }

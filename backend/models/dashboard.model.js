@@ -7,10 +7,7 @@ class Dashboard {
   static async getAllEvents() {
     const [rows] = await db.execute(
       `SELECT id, name, start_date, end_date, capacity FROM events
-       ORDER BY
-         CASE WHEN start_date >= NOW() THEN 0 ELSE 1 END ASC,
-         CASE WHEN start_date >= NOW() THEN start_date END ASC,
-         CASE WHEN start_date < NOW() THEN start_date END DESC`
+       ORDER BY start_date DESC`
     );
     return rows;
   }
