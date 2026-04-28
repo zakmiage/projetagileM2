@@ -109,30 +109,43 @@ class BudgetLine {
     // Récupérer les infos de l'événement pour le calcul au forfait
     const [eventRows] = await db.execute('SELECT name, start_date, end_date, capacity FROM events WHERE id = ?', [eventId]);
     const eventInfo = eventRows[0];
+    
     let isWei = false;
-    let days = 1;
+    let isGala = false;
     if (eventInfo) {
-      isWei = eventInfo.name.toLowerCase().includes('wei');
-      if (eventInfo.start_date && eventInfo.end_date) {
-        const start = new Date(eventInfo.start_date);
-        const end = new Date(eventInfo.end_date);
-        // On compte chaque jour entamé (+1 pour inclure le jour de départ)
-        days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
-      }
+      const lowerName = eventInfo.name.toLowerCase();
+      isWei = lowerName.includes('wei') || lowerName.includes('intégration');
+      isGala = lowerName.includes('gala');
     }
 
     let fsdieForecast = 0;
     let fsdieActual = null;
 
-    if (isWei) {
-      // Pour un WEI : Forfait FSDIE (ex: 10€ par jour et par tête)
-      const ratePerDay = 10;
-      fsdieForecast = ratePerDay * days * (eventInfo.capacity || 0);
-
-      // Calcul réel basé sur le nombre d'inscrits réels
+    if (isWei || isGala) {
+      // Calcul du nombre de participants (prévisionnel vs réel)
+      const forecastCount = eventInfo.capacity || 0;
       const [participantRows] = await db.execute('SELECT COUNT(*) as count FROM event_participants WHERE event_id = ?', [eventId]);
       const actualCount = Number(participantRows[0].count) || 0;
-      fsdieActual = ratePerDay * days * actualCount;
+
+      // Fonction de calcul du plafond selon le règlement de l'UB
+      const calculateFsdie = (count) => {
+        if (isWei) {
+          // WEI / Séjours intégratifs : Plafond de 15€ par étudiant (quelle que soit la durée)
+          return 15 * count;
+        } else if (isGala) {
+          // Gala : 15€ par étudiant jusqu'à 250, puis 7.50€ par étudiant supplémentaire
+          if (count <= 250) {
+            return 15 * count;
+          } else {
+            return (15 * 250) + (7.5 * (count - 250));
+          }
+        }
+        return 0;
+      };
+
+      fsdieForecast = calculateFsdie(forecastCount);
+      fsdieActual = calculateFsdie(actualCount);
+
     } else {
       // Pour les autres événements, calcul aux frais réels (somme des dépenses éligibles)
       const [fsdieRows] = await db.execute(`
