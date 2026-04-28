@@ -432,24 +432,14 @@ p.lead {
 
 <button id="eb" onclick="exportPDF()">Exporter en PDF</button>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-async function exportPDF() {
-  const btn = document.getElementById('eb');
-  btn.style.display = 'none';
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  const slides = document.querySelectorAll('.slide');
-  
-  for (let i = 0; i < slides.length; i++) {
-    const canvas = await html2canvas(slides[i], { scale: 2, useCORS: true, logging: false });
-    if (i > 0) pdf.addPage();
-    pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, 297, 210);
-  }
-  
-  pdf.save('Soutenance_Kubik_Groupe5.pdf');
-  btn.style.display = '';
+function exportPDF() {
+  // L'export via html2canvas bug souvent en local (erreur CORS avec file://).
+  // La méthode la plus propre et native est d'utiliser la boîte de dialogue d'impression
+  // avec l'option "Enregistrer au format PDF", qui garde en plus le texte sélectionnable !
+  setTimeout(() => {
+    window.print();
+  }, 100);
 }
 </script>
 </body>
