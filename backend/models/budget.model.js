@@ -112,56 +112,54 @@ class BudgetLine {
     
     let isWei = false;
     let isGala = false;
+    let isSport = false;
+    let days = 1;
+
     if (eventInfo) {
       const lowerName = eventInfo.name.toLowerCase();
-      isWei = lowerName.includes('wei') || lowerName.includes('intégration');
+      isWei = lowerName.includes('wei') || lowerName.includes('intégration') || lowerName.includes('wes');
       isGala = lowerName.includes('gala');
+      isSport = lowerName.includes('sport') || lowerName.includes('ski');
+
+      if (eventInfo.start_date && eventInfo.end_date) {
+        const start = new Date(eventInfo.start_date);
+        const end = new Date(eventInfo.end_date);
+        days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+      }
     }
 
     let fsdieForecast = 0;
     let fsdieActual = null;
 
-    if (isWei || isGala) {
-      // Calcul du nombre de participants (prévisionnel vs réel)
-      const forecastCount = eventInfo.capacity || 0;
-      const [participantRows] = await db.execute('SELECT COUNT(*) as count FROM event_participants WHERE event_id = ?', [eventId]);
-      const actualCount = Number(participantRows[0].count) || 0;
+    // Calcul du nombre de participants (prévisionnel vs réel)
+    const forecastCount = eventInfo?.capacity || 0;
+    const [participantRows] = await db.execute('SELECT COUNT(*) as count FROM event_participants WHERE event_id = ?', [eventId]);
+    const actualCount = Number(participantRows[0].count) || 0;
 
-      // Fonction de calcul du plafond selon le règlement de l'UB
-      const calculateFsdie = (count) => {
-        if (isWei) {
-          // WEI / Séjours intégratifs : Plafond de 15€ par étudiant (quelle que soit la durée)
+    // Fonction de calcul du plafond selon le règlement de l'UB
+    const calculateFsdie = (count) => {
+      if (isWei) {
+        // WEI / Séjours intégratifs : Plafond de 15€ par étudiant (quelle que soit la durée)
+        return 15 * count;
+      } else if (isGala) {
+        // Gala : 15€ par étudiant jusqu'à 250, puis 7.50€ par étudiant supplémentaire
+        if (count <= 250) {
           return 15 * count;
-        } else if (isGala) {
-          // Gala : 15€ par étudiant jusqu'à 250, puis 7.50€ par étudiant supplémentaire
-          if (count <= 250) {
-            return 15 * count;
-          } else {
-            return (15 * 250) + (7.5 * (count - 250));
-          }
+        } else {
+          return (15 * 250) + (7.5 * (count - 250));
         }
-        return 0;
-      };
+      } else if (isSport) {
+        // Séjours / Événements sportifs : 15€ par étudiant et par jour (max 3 jours)
+        const sportDays = Math.min(days, 3);
+        return 15 * count * sportDays;
+      }
+      // Si n'entre dans aucun critère, pas de financement FSDIE
+      return 0;
+    };
 
-      fsdieForecast = calculateFsdie(forecastCount);
-      fsdieActual = calculateFsdie(actualCount);
-
-    } else {
-      // Pour les autres événements, calcul aux frais réels (somme des dépenses éligibles)
-      const [fsdieRows] = await db.execute(`
-        SELECT
-          SUM(forecast_amount)                                      AS total_forecast,
-          SUM(actual_amount)                                        AS total_actual,
-          COUNT(CASE WHEN actual_amount IS NOT NULL THEN 1 END)     AS has_actual_count
-        FROM budget_lines
-        WHERE event_id = ? AND type = 'EXPENSE' AND is_fsdie_eligible = 1
-          AND validation_status != 'REFUSE'
-      `, [eventId]);
-
-      fsdieForecast = Number(fsdieRows[0]?.total_forecast) || 0;
-      const fsdieHasActual = Number(fsdieRows[0]?.has_actual_count) > 0;
-      fsdieActual = fsdieHasActual ? (Number(fsdieRows[0]?.total_actual) || 0) : null;
-    }
+    fsdieForecast = calculateFsdie(forecastCount);
+    // On calcule le réel seulement s'il y a des inscrits ou s'il y a eu au moins une dépense réelle (pour déclencher la logique de clôture)
+    fsdieActual = (actualCount > 0) ? calculateFsdie(actualCount) : null;
 
     const [existingFsdie] = await db.execute(`
       SELECT id FROM budget_lines
@@ -170,12 +168,16 @@ class BudgetLine {
     `, [eventId]);
 
     if (existingFsdie.length > 0) {
-      await db.execute(`
-        UPDATE budget_lines
-        SET forecast_amount = ?, actual_amount = ?, updated_at = NOW()
-        WHERE id = ?
-      `, [fsdieForecast, fsdieActual, existingFsdie[0].id]);
-    } else if (fsdieForecast > 0) {
+      if (fsdieForecast === 0 && (fsdieActual === 0 || fsdieActual === null)) {
+        await db.execute('DELETE FROM budget_lines WHERE id = ?', [existingFsdie[0].id]);
+      } else {
+        await db.execute(`
+          UPDATE budget_lines
+          SET forecast_amount = ?, actual_amount = ?, updated_at = NOW()
+          WHERE id = ?
+        `, [fsdieForecast, fsdieActual, existingFsdie[0].id]);
+      }
+    } else if (fsdieForecast > 0 || fsdieActual > 0) {
       await db.execute(`
         INSERT INTO budget_lines
           (event_id, type, category, label, forecast_amount, actual_amount, is_fsdie_eligible, validation_status, created_by)
