@@ -374,7 +374,7 @@ exports.exportFsdie = async (req, res) => {
 
     // Totaux budget complet
     const totalAllExpenses = allExpenses.reduce((s, l) => s + getAmt(l), 0);
-    const totalAllRevenues = totalRecettesPropres + subventionFsdie; // R14
+    const totalAllRevenues = totalRecettesPropres; // chiffres réels BDD uniquement
     const soldeGlobal = totalAllRevenues - totalAllExpenses;
 
     // R7 — Numérotation annexes
@@ -515,8 +515,7 @@ exports.exportFsdie = async (req, res) => {
     const revGroups = groupBy(allRevenues, 'category');
 
     const endExpY = drawBudgetCol(LX, half, 'DÉPENSES', RED_HEADER, expGroups, totalAllExpenses);
-    const endRevY = drawBudgetCol(RX, half, 'RECETTES', GREEN, revGroups, totalAllRevenues,
-      [{ label: 'Subvention FSDIE attendue (R14)', val: subventionFsdie }]);
+    const endRevY = drawBudgetCol(RX, half, 'RECETTES', GREEN, revGroups, totalAllRevenues);
 
     // Solde global
     const soldeY = Math.max(endExpY, endRevY) + 10;
