@@ -2,7 +2,8 @@
 -- init.sql — Création du schéma complet
 -- Usage : source ./database/init.sql
 -- =============================================================================
-CREATE DATABASE IF NOT EXISTS gestion_assos;
+DROP DATABASE IF EXISTS gestion_assos;
+CREATE DATABASE gestion_assos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE gestion_assos;
 
 -- ==========================================
